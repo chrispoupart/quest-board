@@ -1,0 +1,19 @@
+---
+name: Semantic Release
+
+on:
+  push:
+    branches:
+      - main
+      - alpha
+      - beta
+  workflow_dispatch:
+
+jobs:
+  semantic-release:
+    name: Create Release
+    uses: circleeh/workflows-semantic-release/.github/workflows/semantic-release.yaml@v1
+    with:
+      extra-plugins: "conventional-changelog-conventionalcommits semantic-release-major-tag"
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}

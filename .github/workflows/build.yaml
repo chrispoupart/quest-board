@@ -1,0 +1,39 @@
+---
+name: Build
+
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+  release:
+    types: [created]
+
+permissions:
+  packages: write
+  issues: read
+  contents: write
+
+jobs:
+  build-backend:
+    uses: circleeh/workflows-build-containers/.github/workflows/buildah-ci.yaml@v1
+    with:
+      image_description: "Quest Board - Backend"
+      image_authors: "Chris Poupart <chris.poupart@gmail.com>"
+      image_title: ${{ github.event.repository.name }}-backend
+      image_suffix: "-backend"
+      build_context: ./backend
+      containerfiles: ./backend/Dockerfile
+    secrets:
+      CALLING_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-frontend:
+    uses: circleeh/workflows-build-containers/.github/workflows/buildah-ci.yaml@v1
+    with:
+      image_description: "Quest Board - Frontend"
+      image_authors: "Chris Poupart <chris.poupart@gmail.com>"
+      image_title: ${{ github.event.repository.name }}-frontend
+      image_suffix: "-frontend"
+      build_context: ./frontend
+      containerfiles: ./frontend/Dockerfile
+    secrets:
+      CALLING_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
