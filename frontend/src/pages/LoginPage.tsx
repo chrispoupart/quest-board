@@ -8,8 +8,11 @@ const LoginPage: React.FC = () => {
     const [searchParams] = useSearchParams();
 
     useEffect(() => {
+        console.log('LoginPage useEffect - isAuthenticated:', isAuthenticated, 'loading:', loading);
+
         // If user is already authenticated, redirect to dashboard
         if (isAuthenticated) {
+            console.log('User is authenticated, redirecting to dashboard');
             navigate('/dashboard');
             return;
         }
@@ -18,6 +21,8 @@ const LoginPage: React.FC = () => {
         const code = searchParams.get('code');
         const error = searchParams.get('error');
 
+        console.log('URL params - code:', code ? 'present' : 'not present', 'error:', error);
+
         if (error) {
             console.error('OAuth error:', error);
             // Handle OAuth error (could show a toast notification)
@@ -25,14 +30,19 @@ const LoginPage: React.FC = () => {
         }
 
         if (code) {
+            console.log('Found OAuth code, attempting login...');
             handleGoogleCallback(code);
         }
     }, [isAuthenticated, navigate, searchParams]);
 
     const handleGoogleCallback = async (code: string) => {
         try {
-            const redirectUri = `${window.location.origin}/login`;
+            console.log('Starting Google callback with code length:', code.length);
+            const redirectUri = `${window.location.origin}/auth/callback`;
+            console.log('Redirect URI:', redirectUri);
+
             await login(code, redirectUri);
+            console.log('Login successful, redirecting to dashboard');
             navigate('/dashboard');
         } catch (error) {
             console.error('Login failed:', error);
@@ -42,9 +52,12 @@ const LoginPage: React.FC = () => {
 
     const handleGoogleLogin = () => {
         const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-        const redirectUri = `${window.location.origin}/login`;
+        const redirectUri = `${window.location.origin}/auth/callback`;
         const scope = 'email profile';
         const responseType = 'code';
+
+        console.log('Starting Google login with client ID:', googleClientId);
+        console.log('Redirect URI:', redirectUri);
 
         const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
             `client_id=${googleClientId}&` +
@@ -54,6 +67,7 @@ const LoginPage: React.FC = () => {
             `access_type=offline&` +
             `prompt=consent`;
 
+        console.log('Google Auth URL:', googleAuthUrl);
         window.location.href = googleAuthUrl;
     };
 

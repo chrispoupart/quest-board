@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Header from './components/Header';
@@ -34,6 +34,39 @@ const ProfilePage = () => (
   </div>
 );
 
+// Auth callback component that redirects to login with the code
+const AuthCallback: React.FC = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  React.useEffect(() => {
+    const code = searchParams.get('code');
+    const error = searchParams.get('error');
+
+    if (error) {
+      console.error('OAuth error:', error);
+      navigate('/login?error=' + encodeURIComponent(error));
+      return;
+    }
+
+    if (code) {
+      // Redirect to login page with the code
+      navigate(`/login?code=${encodeURIComponent(code)}`);
+    } else {
+      navigate('/login');
+    }
+  }, [navigate, searchParams]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <p className="mt-4 text-gray-600">Processing authentication...</p>
+      </div>
+    </div>
+  );
+};
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -42,6 +75,7 @@ const App: React.FC = () => {
           <Routes>
             {/* Public routes */}
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
 
             {/* Protected routes */}
             <Route

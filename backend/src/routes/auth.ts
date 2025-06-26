@@ -1,18 +1,15 @@
 import { Router } from 'express';
+import { authController } from '../controllers/authController';
 
 const router = Router();
 
-// TODO: Implement authentication routes
-router.post('/google', (req, res) => {
-  res.json({ message: 'Google OAuth2 login endpoint' });
-});
+// Google OAuth2 login
+router.post('/google', authController.googleLogin);
 
-router.post('/refresh', (req, res) => {
-  res.json({ message: 'Token refresh endpoint' });
-});
+// Refresh access token
+router.post('/refresh', authController.refreshToken);
 
-router.post('/logout', (req, res) => {
-  res.json({ message: 'Logout endpoint' });
-});
+// Logout
+router.post('/logout', authController.logout);
 
 export default router;

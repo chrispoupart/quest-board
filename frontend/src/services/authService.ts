@@ -65,16 +65,30 @@ export const authService = {
      * Login with Google OAuth2 code
      */
     async login(code: string, redirectUri: string): Promise<{ user: User; accessToken: string; refreshToken: string }> {
-        const response = await api.post<ApiResponse<{ user: User; accessToken: string; refreshToken: string }>>('/auth/google', {
-            code,
-            redirectUri,
-        });
+        console.log('authService.login called with code length:', code.length, 'redirectUri:', redirectUri);
+        console.log('API_BASE_URL:', API_BASE_URL);
 
-        if (!response.data.success) {
-            throw new Error(response.data.error?.message || 'Login failed');
+        try {
+            const response = await api.post<ApiResponse<{ user: User; accessToken: string; refreshToken: string }>>('/auth/google', {
+                code,
+                redirectUri,
+            });
+
+            console.log('Login API response:', response.data);
+
+            if (!response.data.success) {
+                throw new Error(response.data.error?.message || 'Login failed');
+            }
+
+            return response.data.data!;
+        } catch (error) {
+            console.error('Login API error:', error);
+            if (axios.isAxiosError(error)) {
+                console.error('Response data:', error.response?.data);
+                console.error('Response status:', error.response?.status);
+            }
+            throw error;
         }
-
-        return response.data.data!;
     },
 
     /**
