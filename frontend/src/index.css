@@ -1,3 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 45 39% 95%;
+        --foreground: 20 14% 8%;
+        --card: 45 39% 98%;
+        --card-foreground: 20 14% 8%;
+        --popover: 45 39% 98%;
+        --popover-foreground: 20 14% 8%;
+        --primary: 43 74% 49%;
+        --primary-foreground: 45 39% 98%;
+        --secondary: 120 25% 35%;
+        --secondary-foreground: 45 39% 98%;
+        --muted: 45 39% 90%;
+        --muted-foreground: 20 14% 45%;
+        --accent: 217 91% 60%;
+        --accent-foreground: 45 39% 98%;
+        --destructive: 0 84% 60%;
+        --destructive-foreground: 45 39% 98%;
+        --border: 45 39% 85%;
+        --input: 45 39% 85%;
+        --ring: 43 74% 49%;
+        --radius: 0.5rem;
+    }
+
+    .dark {
+        --background: 20 14% 4%;
+        --foreground: 45 39% 95%;
+        --card: 20 14% 6%;
+        --card-foreground: 45 39% 95%;
+        --popover: 20 14% 6%;
+        --popover-foreground: 45 39% 95%;
+        --primary: 43 74% 49%;
+        --primary-foreground: 20 14% 4%;
+        --secondary: 120 25% 15%;
+        --secondary-foreground: 45 39% 95%;
+        --muted: 20 14% 15%;
+        --muted-foreground: 45 39% 60%;
+        --accent: 217 91% 60%;
+        --accent-foreground: 20 14% 4%;
+        --destructive: 0 62% 30%;
+        --destructive-foreground: 45 39% 95%;
+        --border: 20 14% 18%;
+        --input: 20 14% 18%;
+        --ring: 43 74% 49%;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 text-foreground;
+        font-family: 'Crimson Text', serif;
+        font-feature-settings: "rlig" 1, "calt" 1;
+        min-height: 100vh;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: 'Cinzel', serif;
+        @apply text-amber-900;
+    }
+
+    h1 {
+        @apply text-3xl font-bold;
+    }
+
+    h2 {
+        @apply text-2xl font-semibold;
+    }
+
+    h3 {
+        @apply text-xl font-medium;
+    }
+
+    .fantasy-card {
+        @apply bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 shadow-lg relative overflow-hidden;
+    }
+
+    .fantasy-card::before {
+        content: '';
+        @apply absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-amber-400 opacity-60;
+    }
+
+    .fantasy-card::after {
+        content: '';
+        @apply absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-amber-400 opacity-60;
+    }
+
+    .fantasy-button {
+        @apply bg-amber-600 hover:bg-amber-700 text-white font-medium border-2 border-amber-700 shadow-md transition-all duration-200;
+    }
+
+    .fantasy-button:hover {
+        @apply shadow-lg transform translate-y-[-1px];
+    }
+
+    .fantasy-input {
+        @apply border-amber-300 focus:border-amber-500 focus:ring-amber-500 bg-amber-50;
+    }
+
+    .parchment {
+        background-image:
+            radial-gradient(circle at 100% 50%, transparent 20%, rgba(245, 245, 220, 0.3) 21%, rgba(245, 245, 220, 0.3) 34%, transparent 35%, transparent),
+            linear-gradient(0deg, rgba(245, 245, 220, 0.1) 50%, transparent 50%);
+    }
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-amber-100;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-amber-400 rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    @apply bg-amber-600;
+}

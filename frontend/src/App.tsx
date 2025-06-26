@@ -4,33 +4,69 @@ import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Header from './components/Header';
 import LoginPage from './pages/LoginPage';
+import QuestBoard from './components/quest-board';
 
-// Placeholder components for other pages
+// Placeholder components for other pages with fantasy theme
 const DashboardPage = () => (
-  <div className="p-6">
-    <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-    <p>Dashboard content coming soon...</p>
+  <div className="p-6 min-h-screen">
+    <div className="fantasy-card rounded-lg p-8 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6 text-amber-900 font-serif">Adventurer's Dashboard</h1>
+      <p className="text-amber-700 text-lg">Your personal command center is being prepared...</p>
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-amber-100 p-4 rounded-lg border border-amber-200">
+          <h3 className="font-semibold text-amber-900">Active Quests</h3>
+          <p className="text-amber-600">Coming soon</p>
+        </div>
+        <div className="bg-amber-100 p-4 rounded-lg border border-amber-200">
+          <h3 className="font-semibold text-amber-900">Total Bounty</h3>
+          <p className="text-amber-600">Coming soon</p>
+        </div>
+        <div className="bg-amber-100 p-4 rounded-lg border border-amber-200">
+          <h3 className="font-semibold text-amber-900">Achievements</h3>
+          <p className="text-amber-600">Coming soon</p>
+        </div>
+      </div>
+    </div>
   </div>
 );
 
-const QuestsPage = () => (
-  <div className="p-6">
-    <h1 className="text-2xl font-bold mb-4">Quests</h1>
-    <p>Quest board coming soon...</p>
-  </div>
-);
+const QuestsPage = () => <QuestBoard />;
 
 const AdminPage = () => (
-  <div className="p-6">
-    <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
-    <p>Admin interface coming soon...</p>
+  <div className="p-6 min-h-screen">
+    <div className="fantasy-card rounded-lg p-8 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6 text-amber-900 font-serif">Guild Hall</h1>
+      <p className="text-amber-700 text-lg">Administrative tools and guild management are being forged...</p>
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-amber-100 p-4 rounded-lg border border-amber-200">
+          <h3 className="font-semibold text-amber-900">Quest Management</h3>
+          <p className="text-amber-600">Coming soon</p>
+        </div>
+        <div className="bg-amber-100 p-4 rounded-lg border border-amber-200">
+          <h3 className="font-semibold text-amber-900">User Permissions</h3>
+          <p className="text-amber-600">Coming soon</p>
+        </div>
+      </div>
+    </div>
   </div>
 );
 
 const ProfilePage = () => (
-  <div className="p-6">
-    <h1 className="text-2xl font-bold mb-4">Profile Settings</h1>
-    <p>Profile settings coming soon...</p>
+  <div className="p-6 min-h-screen">
+    <div className="fantasy-card rounded-lg p-8 max-w-2xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6 text-amber-900 font-serif">Character Sheet</h1>
+      <p className="text-amber-700 text-lg">Your personal profile and settings scroll is being inscribed...</p>
+      <div className="mt-6 space-y-4">
+        <div className="bg-amber-100 p-4 rounded-lg border border-amber-200">
+          <h3 className="font-semibold text-amber-900">Personal Information</h3>
+          <p className="text-amber-600">Coming soon</p>
+        </div>
+        <div className="bg-amber-100 p-4 rounded-lg border border-amber-200">
+          <h3 className="font-semibold text-amber-900">Preferences</h3>
+          <p className="text-amber-600">Coming soon</p>
+        </div>
+      </div>
+    </div>
   </div>
 );
 
@@ -71,7 +107,7 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen">
           <Routes>
             {/* Public routes */}
             <Route path="/login" element={<LoginPage />} />
@@ -98,7 +134,7 @@ const App: React.FC = () => {
                 <ProtectedRoute>
                   <div>
                     <Header />
-                    <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                    <main>
                       <QuestsPage />
                     </main>
                   </div>
