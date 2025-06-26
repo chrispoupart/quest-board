@@ -1,16 +1,23 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { Toaster } from 'sonner';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Header from './components/Header';
 import LoginPage from './pages/LoginPage';
 import QuestBoard from './components/quest-board';
 import Dashboard from './components/dashboard/Dashboard';
 import AdminPanel from './components/admin/AdminPanel';
+import { Store } from './components/Store';
 
 // Placeholder components for other pages with fantasy theme
 
 const QuestsPage = () => <QuestBoard />;
+
+const StorePage = () => {
+  const { user } = useAuth();
+  return user ? <Store user={user} /> : null;
+};
 
 const ProfilePage = () => (
   <div className="p-6 min-h-screen">
@@ -69,6 +76,7 @@ const App: React.FC = () => {
     <AuthProvider>
       <Router>
         <div className="min-h-screen">
+          <Toaster position="top-right" richColors />
           <Routes>
             {/* Public routes */}
             <Route path="/login" element={<LoginPage />} />
@@ -97,6 +105,20 @@ const App: React.FC = () => {
                     <Header />
                     <main>
                       <QuestsPage />
+                    </main>
+                  </div>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/store"
+              element={
+                <ProtectedRoute>
+                  <div>
+                    <Header />
+                    <main>
+                      <StorePage />
                     </main>
                   </div>
                 </ProtectedRoute>

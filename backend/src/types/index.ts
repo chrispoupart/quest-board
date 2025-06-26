@@ -145,3 +145,50 @@ export interface GoogleAuthRequest {
     code: string;
     redirectUri: string;
 }
+
+// Store types
+export interface StoreItem {
+    id: number;
+    name: string;
+    description?: string;
+    cost: number;
+    isActive: boolean;
+    createdBy: number;
+    createdAt: Date;
+    updatedAt: Date;
+    creator?: User;
+}
+
+export interface CreateStoreItemRequest {
+    name: string;
+    description?: string;
+    cost: number;
+}
+
+export interface UpdateStoreItemRequest {
+    name?: string;
+    description?: string;
+    cost?: number;
+    isActive?: boolean;
+}
+
+export interface StoreTransaction {
+    id: number;
+    itemId: number;
+    buyerId: number;
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    notes?: string;
+    createdAt: Date;
+    updatedAt: Date;
+    item?: StoreItem;
+    buyer?: User;
+}
+
+export interface CreateStoreTransactionRequest {
+    itemId: number;
+}
+
+export interface UpdateStoreTransactionRequest {
+    status: 'APPROVED' | 'REJECTED';
+    notes?: string;
+}

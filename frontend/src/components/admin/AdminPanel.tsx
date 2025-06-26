@@ -9,11 +9,13 @@ import {
     CheckCircle,
     Shield,
     Star,
-    Trophy
+    Trophy,
+    Store
 } from 'lucide-react';
 import QuestManagement from './QuestManagement';
 import UserManagement from './UserManagement';
 import ApprovalWorkflow from './ApprovalWorkflow';
+import { StoreManagement } from './StoreManagement';
 
 interface AdminPanelProps { }
 
@@ -59,7 +61,7 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
 
                 {/* Admin Tabs */}
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                    <TabsList className="grid w-full grid-cols-3 bg-amber-100 border border-amber-300 max-w-2xl mx-auto">
+                    <TabsList className="grid w-full grid-cols-4 bg-amber-100 border border-amber-300 max-w-3xl mx-auto">
                         <TabsTrigger
                             value="quests"
                             className="data-[state=active]:bg-amber-600 data-[state=active]:text-white font-medium flex items-center gap-2"
@@ -73,6 +75,13 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                         >
                             <CheckCircle className="w-4 h-4" />
                             Approvals
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="store"
+                            className="data-[state=active]:bg-amber-600 data-[state=active]:text-white font-medium flex items-center gap-2"
+                        >
+                            <Store className="w-4 h-4" />
+                            Store Management
                         </TabsTrigger>
                         {isAdmin && (
                             <TabsTrigger
@@ -101,6 +110,15 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                             <p className="text-amber-700">Review and approve completed quests</p>
                         </div>
                         <ApprovalWorkflow />
+                    </TabsContent>
+
+                    {/* Store Management Tab */}
+                    <TabsContent value="store" className="space-y-6">
+                        <div className="text-center mb-6">
+                            <h2 className="text-2xl font-bold text-amber-900 mb-2">Store Management</h2>
+                            <p className="text-amber-700">Manage the guild store</p>
+                        </div>
+                        <StoreManagement />
                     </TabsContent>
 
                     {/* User Management Tab (Admin Only) */}

@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, Transition } from '@headlessui/react';
-import { Scroll, Shield, Crown, Settings, LogOut, Coins } from 'lucide-react';
+import { Scroll, Shield, Crown, Settings, LogOut, Coins, Store } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const Header: React.FC = () => {
@@ -69,6 +69,13 @@ const Header: React.FC = () => {
                                 className="text-amber-700 hover:text-amber-900 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-amber-100 border border-transparent hover:border-amber-300"
                             >
                                 Quest Board
+                            </Link>
+                            <Link
+                                to="/store"
+                                className="text-amber-700 hover:text-amber-900 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-amber-100 border border-transparent hover:border-amber-300 flex items-center gap-1"
+                            >
+                                <Store className="w-4 h-4" />
+                                Guild Store
                             </Link>
                             {isEditorOrAdmin && (
                                 <Link

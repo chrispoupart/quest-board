@@ -10,6 +10,7 @@ import userRoutes from './routes/users';
 import questRoutes from './routes/quests';
 import dashboardRoutes from './routes/dashboard';
 import jobRoutes from './routes/jobs';
+import storeRoutes from './routes/store';
 
 // Load environment variables
 dotenv.config();
@@ -33,6 +34,7 @@ app.use('/users', userRoutes);
 app.use('/quests', questRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/jobs', jobRoutes);
+app.use('/store', storeRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

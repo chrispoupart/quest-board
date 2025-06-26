@@ -112,3 +112,70 @@ export interface AdminDashboardData {
     recentQuests: Quest[];
     pendingApproval: Quest[];
 }
+
+// Store types
+export interface StoreItem {
+    id: number;
+    name: string;
+    description?: string;
+    cost: number;
+    isActive: boolean;
+    createdBy: number;
+    createdAt: string;
+    updatedAt: string;
+    creator?: User;
+}
+
+export interface CreateStoreItemRequest {
+    name: string;
+    description?: string;
+    cost: number;
+}
+
+export interface UpdateStoreItemRequest {
+    name?: string;
+    description?: string;
+    cost?: number;
+    isActive?: boolean;
+}
+
+export interface StoreTransaction {
+    id: number;
+    itemId: number;
+    buyerId: number;
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    notes?: string;
+    createdAt: string;
+    updatedAt: string;
+    item?: StoreItem;
+    buyer?: User;
+}
+
+export interface CreateStoreTransactionRequest {
+    itemId: number;
+}
+
+export interface UpdateStoreTransactionRequest {
+    status: 'APPROVED' | 'REJECTED';
+    notes?: string;
+}
+
+export interface StoreItemsResponse {
+    items: StoreItem[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    };
+}
+
+export interface StoreTransactionsResponse {
+    transactions: StoreTransaction[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    };
+}

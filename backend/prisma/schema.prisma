@@ -25,6 +25,10 @@ model User {
   claimedQuests Quest[]    @relation("QuestClaimer")
   approvals     Approval[]
 
+  // Store relations
+  createdStoreItems StoreItem[]        @relation("StoreItemCreator")
+  storeTransactions StoreTransaction[] @relation("StoreTransactionBuyer")
+
   @@map("users")
 }
 
@@ -67,4 +71,37 @@ model Approval {
   approver User  @relation(fields: [approvedBy], references: [id])
 
   @@map("approvals")
+}
+
+model StoreItem {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  cost        Float
+  isActive    Boolean  @default(true) @map("is_active")
+  createdBy   Int      @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  creator      User               @relation("StoreItemCreator", fields: [createdBy], references: [id])
+  transactions StoreTransaction[]
+
+  @@map("store_items")
+}
+
+model StoreTransaction {
+  id        Int      @id @default(autoincrement())
+  itemId    Int      @map("item_id")
+  buyerId   Int      @map("buyer_id")
+  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  item  StoreItem @relation(fields: [itemId], references: [id])
+  buyer User      @relation("StoreTransactionBuyer", fields: [buyerId], references: [id])
+
+  @@map("store_transactions")
 }
