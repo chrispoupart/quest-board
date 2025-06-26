@@ -222,7 +222,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                                             <p className="text-sm text-amber-800 mb-3 line-clamp-2">{quest.description}</p>
                                             <div className="flex items-center justify-between">
                                                 <Badge className={`text-xs font-medium border ${getStatusColor(quest.status)}`}>
-                                                    {quest.status.replace('_', ' ')}
+                                                    {quest.status === 'COMPLETED' ? 'Pending Approval' : quest.status.replace('_', ' ')}
                                                 </Badge>
                                                 <div className="flex items-center gap-2 text-xs text-amber-600">
                                                     <Clock className="w-3 h-3" />
@@ -290,7 +290,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                                             <p className="text-sm text-amber-800 mb-3 line-clamp-2">{quest.description}</p>
                                             <div className="flex items-center justify-between">
                                                 <Badge className={`text-xs font-medium border ${getStatusColor(quest.status)}`}>
-                                                    {quest.status.replace('_', ' ')}
+                                                    {quest.status === 'COMPLETED' ? 'Pending Approval' : quest.status.replace('_', ' ')}
                                                 </Badge>
                                                 <div className="flex items-center gap-2 text-xs text-amber-600">
                                                     <Calendar className="w-3 h-3" />

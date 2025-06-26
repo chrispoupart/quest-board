@@ -133,7 +133,7 @@ const QuestCard: React.FC<{
             {difficulty}
           </Badge>
           <Badge className={`text-xs font-medium border ${getStatusColor(quest.status)}`}>
-            {quest.status.replace("_", " ")}
+            {quest.status === "COMPLETED" ? "Pending Approval" : quest.status.replace("_", " ")}
           </Badge>
         </div>
       </CardHeader>
@@ -299,11 +299,13 @@ const QuestBoard: React.FC = () => {
           questData = await questService.getQuests({ status: "AVAILABLE" })
           break
         case "claimed":
-          questData = await questService.getMyClaimedQuests()
+          // Get claimed quests AND completed quests (pending approval) for current user
+          questData = await questService.getMyClaimedQuests({ status: "CLAIMED,COMPLETED" })
           break
         case "completed":
+          // Only show approved/rejected quests (final states)
           questData = await questService.getQuests({
-            status: "COMPLETED,APPROVED,REJECTED"
+            status: "APPROVED,REJECTED"
           })
           break
         default:
