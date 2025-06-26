@@ -379,9 +379,7 @@ const UserDashboard: React.FC<{ user: UserStats }> = ({ user }) => {
 const QuestBoard: React.FC = () => {
   const { user } = useAuth()
   const [quests, setQuests] = useState<QuestWithExtras[]>([])
-  const [repeatableQuests, setRepeatableQuests] = useState<QuestWithExtras[]>([])
   const [loading, setLoading] = useState(true)
-  const [repeatableLoading, setRepeatableLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("available")
   const [error, setError] = useState<string | null>(null)
@@ -412,7 +410,8 @@ const QuestBoard: React.FC = () => {
 
       switch (activeTab) {
         case "available":
-          questData = await questService.getQuests({ status: "AVAILABLE" })
+          // Get all available quests including repeatable ones
+          questData = await questService.getQuests({ status: "AVAILABLE,COOLDOWN" })
           break
         case "claimed":
           // Get claimed quests AND completed quests (pending approval) for current user
@@ -470,34 +469,6 @@ const QuestBoard: React.FC = () => {
     fetchQuests()
   }, [activeTab])
 
-  const fetchRepeatableQuests = async () => {
-    try {
-      setRepeatableLoading(true)
-      const response = await questService.getRepeatableQuests()
-
-      // Transform API data to include extra fields
-      const transformedQuests: QuestWithExtras[] = response.quests.map(quest => ({
-        ...quest,
-        difficulty: getDifficultyFromBounty(quest.bounty),
-        timeLimit: 48, // Default 48 hours
-        creatorName: quest.creator?.name,
-        claimerName: quest.claimer?.name
-      }))
-
-      setRepeatableQuests(transformedQuests)
-    } catch (err) {
-      console.error('Failed to fetch repeatable quests:', err)
-      // Don't set error for repeatable quests to avoid blocking main quest display
-    } finally {
-      setRepeatableLoading(false)
-    }
-  }
-
-  // Fetch repeatable quests on component mount
-  useEffect(() => {
-    fetchRepeatableQuests()
-  }, [])
-
   const filteredQuests = useMemo(() => {
     return quests.filter(
       (quest) =>
@@ -525,7 +496,7 @@ const QuestBoard: React.FC = () => {
           break
         case "view":
           // Open quest details modal
-          const questToView = quests.find(q => q.id === questId) || repeatableQuests.find(q => q.id === questId)
+          const questToView = quests.find(q => q.id === questId)
           if (questToView) {
             setSelectedQuest(questToView)
             setIsModalOpen(true)
@@ -537,7 +508,6 @@ const QuestBoard: React.FC = () => {
 
       // Refresh quests after action
       await fetchQuests()
-      await fetchRepeatableQuests()
     } catch (err) {
       console.error(`Failed to ${action} quest:`, err)
       setError(err instanceof Error ? err.message : `Failed to ${action} quest`)
@@ -684,41 +654,6 @@ const QuestBoard: React.FC = () => {
                 )}
               </TabsContent>
             </Tabs>
-
-            {/* Repeatable Quests Section */}
-            {repeatableQuests.length > 0 && (
-              <div className="mt-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
-                    <Scroll className="w-5 h-5 text-white" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-purple-900 font-serif">Repeatable Quests</h2>
-                  <Badge className="text-xs font-medium border text-purple-600 bg-purple-50 border-purple-200">
-                    🔄 {repeatableQuests.length} total
-                  </Badge>
-                </div>
-
-                {repeatableLoading ? (
-                  <Card className="border-2 border-purple-200 bg-white shadow-md">
-                    <CardContent className="p-8 text-center">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-3"></div>
-                      <p className="text-purple-700">Loading repeatable quests...</p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {repeatableQuests.map((quest) => (
-                      <QuestCard
-                        key={`repeatable-${quest.id}`}
-                        quest={quest}
-                        onAction={handleQuestAction}
-                        currentUser={currentUser}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
 
