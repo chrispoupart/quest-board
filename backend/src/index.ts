@@ -4,10 +4,12 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { errorHandler } from './middleware/errorHandler';
+import { JobService } from './services/jobService';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import questRoutes from './routes/quests';
 import dashboardRoutes from './routes/dashboard';
+import jobRoutes from './routes/jobs';
 
 // Load environment variables
 dotenv.config();
@@ -30,6 +32,7 @@ app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/quests', questRoutes);
 app.use('/dashboard', dashboardRoutes);
+app.use('/jobs', jobRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -38,6 +41,22 @@ app.get('/health', (req, res) => {
 
 // Error handling
 app.use(errorHandler);
+
+// Initialize scheduled jobs
+JobService.initializeJobs();
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully...');
+  JobService.stopAllJobs();
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down gracefully...');
+  JobService.stopAllJobs();
+  process.exit(0);
+});
 
 // Start server
 app.listen(PORT, () => {
