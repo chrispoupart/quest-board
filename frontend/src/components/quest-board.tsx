@@ -58,6 +58,8 @@ const getStatusColor = (status: Quest["status"]) => {
       return "text-green-700 bg-green-100 border-green-300"
     case "REJECTED":
       return "text-red-700 bg-red-100 border-red-300"
+    case "COOLDOWN":
+      return "text-purple-700 bg-purple-100 border-purple-300"
   }
 }
 
@@ -85,6 +87,37 @@ const formatTimeRemaining = (claimedAt: string, timeLimit: number = 48) => {
 
   if (hours > 0) return `${hours}h ${minutes}m`
   return `${minutes}m`
+}
+
+// Cooldown utility functions
+const getCooldownTimeRemaining = (quest: Quest): string | null => {
+  if (quest.status !== 'COOLDOWN' || !quest.lastCompletedAt || !quest.cooldownDays) {
+    return null
+  }
+
+  const lastCompleted = new Date(quest.lastCompletedAt)
+  const cooldownEnd = new Date(lastCompleted.getTime() + quest.cooldownDays * 24 * 60 * 60 * 1000)
+  const now = new Date()
+  const remaining = cooldownEnd.getTime() - now.getTime()
+
+  if (remaining <= 0) return null
+
+  const days = Math.floor(remaining / (1000 * 60 * 60 * 24))
+  const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+
+  if (days > 0) return `${days}d ${hours}h`
+  return `${hours}h`
+}
+
+const formatCooldownPeriod = (cooldownDays: number): string => {
+  if (cooldownDays === 1) return "1 day"
+  if (cooldownDays < 7) return `${cooldownDays} days`
+  if (cooldownDays === 7) return "1 week"
+  if (cooldownDays < 14) return `${cooldownDays} days`
+  if (cooldownDays === 14) return "2 weeks"
+  if (cooldownDays < 30) return `${cooldownDays} days`
+  if (cooldownDays === 30) return "1 month"
+  return `${cooldownDays} days`
 }
 
 // Components
@@ -133,8 +166,15 @@ const QuestCard: React.FC<{
             {difficulty}
           </Badge>
           <Badge className={`text-xs font-medium border ${getStatusColor(quest.status)}`}>
-            {quest.status === "COMPLETED" ? "Pending Approval" : quest.status.replace("_", " ")}
+            {quest.status === "COMPLETED" ? "Pending Approval" :
+              quest.status === "COOLDOWN" ? "On Cooldown" :
+                quest.status.replace("_", " ")}
           </Badge>
+          {quest.isRepeatable && (
+            <Badge className="text-xs font-medium border text-purple-600 bg-purple-50 border-purple-200">
+              🔄 Repeatable
+            </Badge>
+          )}
         </div>
       </CardHeader>
 
@@ -162,6 +202,51 @@ const QuestCard: React.FC<{
               </span>
             </div>
           )}
+
+          {quest.completedAt && (quest.status === "COMPLETED" || quest.status === "APPROVED" || quest.status === "REJECTED") && (
+            <div className="flex items-center gap-2 text-green-600">
+              <Trophy className="w-3 h-3" />
+              <span>Completed: {new Date(quest.completedAt).toLocaleDateString()}</span>
+            </div>
+          )}
+
+          {quest.status === "APPROVED" && (
+            <div className="flex items-center gap-2 text-green-600 font-medium">
+              <Check className="w-3 h-3" />
+              <span>Approved - Bounty awarded!</span>
+            </div>
+          )}
+
+          {quest.status === "REJECTED" && (
+            <div className="flex items-center gap-2 text-red-600 font-medium">
+              <X className="w-3 h-3" />
+              <span>Rejected</span>
+            </div>
+          )}
+
+          {/* Repeat functionality information */}
+          {quest.isRepeatable && (
+            <>
+              {quest.cooldownDays && (
+                <div className="flex items-center gap-2">
+                  <Clock className="w-3 h-3" />
+                  <span>Cooldown: {formatCooldownPeriod(quest.cooldownDays)}</span>
+                </div>
+              )}
+              {quest.status === 'COOLDOWN' && (
+                <div className="flex items-center gap-2 text-red-600 font-medium">
+                  <Clock className="w-3 h-3" />
+                  <span>Available in: {getCooldownTimeRemaining(quest)}</span>
+                </div>
+              )}
+              {quest.status === 'AVAILABLE' && quest.lastCompletedAt && (
+                <div className="flex items-center gap-2 text-green-600 font-medium">
+                  <Check className="w-3 h-3" />
+                  <span>Ready to repeat!</span>
+                </div>
+              )}
+            </>
+          )}
         </div>
 
         <div className="flex gap-2 pt-2">
@@ -174,6 +259,17 @@ const QuestCard: React.FC<{
             >
               <Sword className="w-4 h-4 mr-1" />
               {actionLoading === "claim" ? "Claiming..." : "Accept Quest"}
+            </Button>
+          )}
+
+          {quest.status === "COOLDOWN" && (
+            <Button
+              disabled={true}
+              className="flex-1 bg-gray-400 text-white font-medium cursor-not-allowed"
+              size="sm"
+            >
+              <Clock className="w-4 h-4 mr-1" />
+              On Cooldown
             </Button>
           )}
 
@@ -207,6 +303,18 @@ const QuestCard: React.FC<{
               >
                 <X className="w-4 h-4" />
               </Button>
+            </div>
+          )}
+
+          {/* Show completion status for approved/rejected quests */}
+          {(quest.status === "APPROVED" || quest.status === "REJECTED") && (
+            <div className="flex-1 flex items-center justify-center">
+              <Badge className={`text-xs font-medium border ${quest.status === "APPROVED"
+                  ? "text-green-600 bg-green-50 border-green-200"
+                  : "text-red-600 bg-red-50 border-red-200"
+                }`}>
+                {quest.status === "APPROVED" ? "✓ Completed" : "✗ Rejected"}
+              </Badge>
             </div>
           )}
 
@@ -269,7 +377,9 @@ const UserDashboard: React.FC<{ user: UserStats }> = ({ user }) => {
 const QuestBoard: React.FC = () => {
   const { user } = useAuth()
   const [quests, setQuests] = useState<QuestWithExtras[]>([])
+  const [repeatableQuests, setRepeatableQuests] = useState<QuestWithExtras[]>([])
   const [loading, setLoading] = useState(true)
+  const [repeatableLoading, setRepeatableLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("available")
   const [error, setError] = useState<string | null>(null)
@@ -303,10 +413,8 @@ const QuestBoard: React.FC = () => {
           questData = await questService.getMyClaimedQuests({ status: "CLAIMED,COMPLETED" })
           break
         case "completed":
-          // Only show approved/rejected quests (final states)
-          questData = await questService.getQuests({
-            status: "APPROVED,REJECTED"
-          })
+          // Show user's own completed quests (approved/rejected)
+          questData = await questService.getMyClaimedQuests({ status: "APPROVED,REJECTED" })
           break
         default:
           questData = await questService.getQuests()
@@ -356,6 +464,34 @@ const QuestBoard: React.FC = () => {
     fetchQuests()
   }, [activeTab])
 
+  const fetchRepeatableQuests = async () => {
+    try {
+      setRepeatableLoading(true)
+      const response = await questService.getRepeatableQuests()
+
+      // Transform API data to include extra fields
+      const transformedQuests: QuestWithExtras[] = response.quests.map(quest => ({
+        ...quest,
+        difficulty: getDifficultyFromBounty(quest.bounty),
+        timeLimit: 48, // Default 48 hours
+        creatorName: quest.creator?.name,
+        claimerName: quest.claimer?.name
+      }))
+
+      setRepeatableQuests(transformedQuests)
+    } catch (err) {
+      console.error('Failed to fetch repeatable quests:', err)
+      // Don't set error for repeatable quests to avoid blocking main quest display
+    } finally {
+      setRepeatableLoading(false)
+    }
+  }
+
+  // Fetch repeatable quests on component mount
+  useEffect(() => {
+    fetchRepeatableQuests()
+  }, [])
+
   const filteredQuests = useMemo(() => {
     return quests.filter(
       (quest) =>
@@ -391,6 +527,7 @@ const QuestBoard: React.FC = () => {
 
       // Refresh quests after action
       await fetchQuests()
+      await fetchRepeatableQuests()
     } catch (err) {
       console.error(`Failed to ${action} quest:`, err)
       setError(err instanceof Error ? err.message : `Failed to ${action} quest`)
@@ -521,6 +658,41 @@ const QuestBoard: React.FC = () => {
                 )}
               </TabsContent>
             </Tabs>
+
+            {/* Repeatable Quests Section */}
+            {repeatableQuests.length > 0 && (
+              <div className="mt-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                    <Scroll className="w-5 h-5 text-white" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-purple-900 font-serif">Repeatable Quests</h2>
+                  <Badge className="text-xs font-medium border text-purple-600 bg-purple-50 border-purple-200">
+                    🔄 {repeatableQuests.length} total
+                  </Badge>
+                </div>
+
+                {repeatableLoading ? (
+                  <Card className="border-2 border-purple-200 bg-white shadow-md">
+                    <CardContent className="p-8 text-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-3"></div>
+                      <p className="text-purple-700">Loading repeatable quests...</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {repeatableQuests.map((quest) => (
+                      <QuestCard
+                        key={`repeatable-${quest.id}`}
+                        quest={quest}
+                        onAction={handleQuestAction}
+                        currentUser={currentUser}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

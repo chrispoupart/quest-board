@@ -2,7 +2,7 @@
 
 export type UserRole = 'ADMIN' | 'EDITOR' | 'PLAYER';
 
-export type QuestStatus = 'AVAILABLE' | 'CLAIMED' | 'COMPLETED' | 'APPROVED' | 'REJECTED';
+export type QuestStatus = 'AVAILABLE' | 'CLAIMED' | 'COMPLETED' | 'APPROVED' | 'REJECTED' | 'COOLDOWN';
 
 export type ApprovalStatus = 'APPROVED' | 'REJECTED';
 
@@ -44,12 +44,17 @@ export interface Quest {
     completedAt?: Date;
     createdAt: Date;
     updatedAt: Date;
+    isRepeatable: boolean;
+    cooldownDays?: number;
+    lastCompletedAt?: Date;
 }
 
 export interface CreateQuestRequest {
     title: string;
     description?: string;
     bounty: number;
+    isRepeatable?: boolean;
+    cooldownDays?: number;
 }
 
 export interface UpdateQuestRequest {
@@ -57,6 +62,8 @@ export interface UpdateQuestRequest {
     description?: string;
     bounty?: number;
     status?: QuestStatus;
+    isRepeatable?: boolean;
+    cooldownDays?: number;
 }
 
 // Approval types

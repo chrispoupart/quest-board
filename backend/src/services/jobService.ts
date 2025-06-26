@@ -31,6 +31,9 @@ export class JobService {
         // Quest claim expiry job (runs every hour)
         this.scheduleJob('quest-claim-expiry', '0 * * * *', this.handleQuestClaimExpiry);
 
+        // Quest cooldown expiry job (runs every hour)
+        this.scheduleJob('quest-cooldown-expiry', '0 * * * *', this.handleQuestCooldownExpiry);
+
         // Cleanup old data job (runs daily at 2 AM)
         this.scheduleJob('cleanup-old-data', '0 2 * * *', this.handleCleanupOldData);
 
@@ -155,6 +158,56 @@ export class JobService {
             console.log(`Successfully processed ${expiredQuests.length} expired quest claims`);
         } catch (error) {
             console.error('Error processing quest claim expiry:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Handle quest cooldown expiry
+     */
+    private static async handleQuestCooldownExpiry(): Promise<void> {
+        console.log('Processing quest cooldown expiry...');
+
+        try {
+            // Find all quests that are in cooldown status
+            const cooldownQuests = await prisma.quest.findMany({
+                where: {
+                    status: 'COOLDOWN',
+                    isRepeatable: true,
+                    lastCompletedAt: { not: null },
+                    cooldownDays: { not: null }
+                }
+            });
+
+            console.log(`Found ${cooldownQuests.length} quests in cooldown`);
+
+            const now = new Date();
+            let expiredCount = 0;
+
+            // Check each quest to see if cooldown has expired
+            for (const quest of cooldownQuests) {
+                if (!quest.lastCompletedAt || !quest.cooldownDays) continue;
+
+                const cooldownEnd = new Date(quest.lastCompletedAt);
+                cooldownEnd.setDate(cooldownEnd.getDate() + quest.cooldownDays);
+
+                // If cooldown has expired, move to available
+                if (now >= cooldownEnd) {
+                    await prisma.quest.update({
+                        where: { id: quest.id },
+                        data: {
+                            status: 'AVAILABLE'
+                        }
+                    });
+
+                    console.log(`Reset quest ${quest.id} (${quest.title}) to available status`);
+                    expiredCount++;
+                }
+            }
+
+            console.log(`Successfully processed ${expiredCount} expired cooldowns`);
+        } catch (error) {
+            console.error('Error processing quest cooldown expiry:', error);
             throw error;
         }
     }
@@ -321,6 +374,9 @@ export class JobService {
         switch (name) {
             case 'quest-claim-expiry':
                 await this.handleQuestClaimExpiry();
+                break;
+            case 'quest-cooldown-expiry':
+                await this.handleQuestCooldownExpiry();
                 break;
             case 'cleanup-old-data':
                 await this.handleCleanupOldData();

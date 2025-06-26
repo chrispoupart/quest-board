@@ -41,6 +41,11 @@ model Quest {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
+  // Repeat functionality
+  isRepeatable    Boolean   @default(false) @map("is_repeatable")
+  cooldownDays    Int?      @map("cooldown_days") // Number of days before quest can be repeated
+  lastCompletedAt DateTime? @map("last_completed_at") // When the quest was last completed for repeat tracking
+
   // Relations
   creator  User      @relation("QuestCreator", fields: [createdBy], references: [id])
   claimer  User?     @relation("QuestClaimer", fields: [claimedBy], references: [id])

@@ -181,4 +181,20 @@ export const questService = {
 
         return response.data.data!;
     },
+
+    /**
+     * Get repeatable quests available for claiming (respecting cooldown)
+     */
+    async getRepeatableQuests(params?: {
+        page?: number;
+        limit?: number;
+    }): Promise<QuestListingResponse> {
+        const response = await api.get<ApiResponse<QuestListingResponse>>('/quests/repeatable', { params });
+
+        if (!response.data.success) {
+            throw new Error(response.data.error?.message || 'Failed to fetch repeatable quests');
+        }
+
+        return response.data.data!;
+    },
 };

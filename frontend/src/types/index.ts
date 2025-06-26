@@ -25,9 +25,12 @@ export interface Quest {
     updatedAt: string;
     creator?: User;
     claimer?: User;
+    isRepeatable: boolean;
+    cooldownDays?: number;
+    lastCompletedAt?: string;
 }
 
-export type QuestStatus = 'AVAILABLE' | 'CLAIMED' | 'COMPLETED' | 'APPROVED' | 'REJECTED';
+export type QuestStatus = 'AVAILABLE' | 'CLAIMED' | 'COMPLETED' | 'APPROVED' | 'REJECTED' | 'COOLDOWN';
 
 export interface ApiResponse<T = any> {
     success: boolean;
@@ -53,6 +56,8 @@ export interface CreateQuestRequest {
     title: string;
     description?: string;
     bounty: number;
+    isRepeatable?: boolean;
+    cooldownDays?: number;
 }
 
 export interface UpdateQuestRequest {
@@ -60,6 +65,8 @@ export interface UpdateQuestRequest {
     description?: string;
     bounty?: number;
     status?: QuestStatus;
+    isRepeatable?: boolean;
+    cooldownDays?: number;
 }
 
 export interface UserStats {

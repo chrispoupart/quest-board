@@ -109,7 +109,7 @@ export class QuestController {
      */
     static async createQuest(req: Request, res: Response): Promise<void> {
         try {
-            const { title, description, bounty } = req.body;
+            const { title, description, bounty, isRepeatable, cooldownDays } = req.body;
             const userId = (req as any).user?.userId;
             if (!userId) {
                 res.status(401).json({ success: false, error: { message: 'User not authenticated' } });
@@ -123,6 +123,10 @@ export class QuestController {
                 res.status(400).json({ success: false, error: { message: 'Bounty must be a positive number' } });
                 return;
             }
+            if (isRepeatable && (typeof cooldownDays !== 'number' || cooldownDays <= 0)) {
+                res.status(400).json({ success: false, error: { message: 'Cooldown days must be a positive number for repeatable quests' } });
+                return;
+            }
             const quest = await prisma.quest.create({
                 data: {
                     title,
@@ -130,6 +134,8 @@ export class QuestController {
                     bounty,
                     status: 'AVAILABLE',
                     createdBy: userId,
+                    isRepeatable: isRepeatable || false,
+                    cooldownDays: isRepeatable ? cooldownDays : null,
                 },
             });
             res.status(201).json({ success: true, data: quest } as ApiResponse);
@@ -154,12 +160,20 @@ export class QuestController {
                 res.status(400).json({ success: false, error: { message: 'Invalid quest ID' } });
                 return;
             }
-            const { title, description, bounty, status } = req.body;
+            const { title, description, bounty, status, isRepeatable, cooldownDays } = req.body;
             const updateFields: any = {};
             if (title !== undefined) updateFields.title = title;
             if (description !== undefined) updateFields.description = description;
             if (bounty !== undefined) updateFields.bounty = bounty;
             if (status !== undefined) updateFields.status = status;
+            if (isRepeatable !== undefined) updateFields.isRepeatable = isRepeatable;
+            if (cooldownDays !== undefined) {
+                if (isRepeatable && (typeof cooldownDays !== 'number' || cooldownDays <= 0)) {
+                    res.status(400).json({ success: false, error: { message: 'Cooldown days must be a positive number for repeatable quests' } });
+                    return;
+                }
+                updateFields.cooldownDays = isRepeatable ? cooldownDays : null;
+            }
             const quest = await prisma.quest.update({
                 where: { id: questId },
                 data: updateFields,
@@ -314,13 +328,27 @@ export class QuestController {
                 res.status(400).json({ success: false, error: { message: 'Quest has no claimant' } });
                 return;
             }
+
+            // Prepare update data
+            const updateData: any = {
+                status: 'APPROVED',
+                lastCompletedAt: new Date(), // Track when quest was last completed
+            };
+
+            // If quest is repeatable, set it to cooldown status instead of available
+            if (quest.isRepeatable) {
+                updateData.status = 'COOLDOWN';
+                updateData.claimedBy = null;
+                updateData.claimedAt = null;
+                updateData.completedAt = null;
+            }
+
             const updatedQuest = await prisma.quest.update({
                 where: { id: questId },
-                data: {
-                    status: 'APPROVED',
-                },
+                data: updateData,
             });
-            // Update user's bounty balance
+
+            // Update user's bounty balance (always give bounty regardless of repeatable status)
             await prisma.user.update({
                 where: { id: quest.claimedBy },
                 data: {
@@ -329,6 +357,7 @@ export class QuestController {
                     },
                 },
             });
+
             res.json({ success: true, data: updatedQuest } as ApiResponse);
         } catch (error) {
             console.error('Error approving quest:', error);
@@ -494,7 +523,12 @@ export class QuestController {
                             }
                         }
                     },
-                    orderBy: { createdAt: 'desc' },
+                    orderBy: [
+                        // For completed/approved quests, order by completion date (newest first)
+                        { completedAt: 'desc' },
+                        // For other quests, order by creation date
+                        { createdAt: 'desc' }
+                    ],
                     skip,
                     take: limit,
                 }),
@@ -514,6 +548,61 @@ export class QuestController {
             res.json({ success: true, data: response } as ApiResponse);
         } catch (error) {
             console.error('Error getting my claimed quests:', error);
+            res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+        }
+    }
+
+    /**
+     * Get repeatable quests available for claiming (respecting cooldown)
+     */
+    static async getRepeatableQuests(req: Request, res: Response): Promise<void> {
+        try {
+            const userId = (req as any).user?.userId;
+            if (!userId) {
+                res.status(401).json({ success: false, error: { message: 'User not authenticated' } });
+                return;
+            }
+
+            const page = parseInt(req.query['page'] as string) || 1;
+            const limit = parseInt(req.query['limit'] as string) || 10;
+            const skip = (page - 1) * limit;
+
+            // Get ALL repeatable quests (both available and on cooldown)
+            const repeatableQuests = await prisma.quest.findMany({
+                where: {
+                    isRepeatable: true,
+                    status: { in: ['AVAILABLE', 'COOLDOWN'] },
+                },
+                include: {
+                    creator: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            role: true,
+                        }
+                    }
+                },
+                orderBy: { createdAt: 'desc' },
+            });
+
+            // Apply pagination
+            const total = repeatableQuests.length;
+            const paginatedQuests = repeatableQuests.slice(skip, skip + limit);
+
+            const response = {
+                quests: paginatedQuests,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit)
+                }
+            };
+
+            res.json({ success: true, data: response } as ApiResponse);
+        } catch (error) {
+            console.error('Error getting repeatable quests:', error);
             res.status(500).json({ success: false, error: { message: 'Internal server error' } });
         }
     }

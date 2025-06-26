@@ -28,7 +28,9 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
     const [formData, setFormData] = useState<CreateQuestRequest>({
         title: '',
         description: '',
-        bounty: 0
+        bounty: 0,
+        isRepeatable: false,
+        cooldownDays: undefined
     });
     const [submitting, setSubmitting] = useState(false);
 
@@ -62,7 +64,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             setSubmitting(true);
             setError(null);
             await questService.createQuest(formData);
-            setFormData({ title: '', description: '', bounty: 0 });
+            setFormData({ title: '', description: '', bounty: 0, isRepeatable: false, cooldownDays: undefined });
             setShowCreateForm(false);
             await fetchQuests();
         } catch (err) {
@@ -85,7 +87,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             setError(null);
             await questService.updateQuest(editingQuest.id, formData);
             setEditingQuest(null);
-            setFormData({ title: '', description: '', bounty: 0 });
+            setFormData({ title: '', description: '', bounty: 0, isRepeatable: false, cooldownDays: undefined });
             await fetchQuests();
         } catch (err) {
             console.error('Failed to update quest:', err);
@@ -115,14 +117,16 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
         setFormData({
             title: quest.title,
             description: quest.description || '',
-            bounty: quest.bounty
+            bounty: quest.bounty,
+            isRepeatable: quest.isRepeatable,
+            cooldownDays: quest.cooldownDays
         });
         setShowCreateForm(true);
     };
 
     const handleCancelEdit = () => {
         setEditingQuest(null);
-        setFormData({ title: '', description: '', bounty: 0 });
+        setFormData({ title: '', description: '', bounty: 0, isRepeatable: false, cooldownDays: undefined });
         setShowCreateForm(false);
     };
 
@@ -138,6 +142,8 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                 return 'text-green-700 bg-green-100 border-green-300';
             case 'REJECTED':
                 return 'text-red-700 bg-red-100 border-red-300';
+            case 'COOLDOWN':
+                return 'text-purple-700 bg-purple-100 border-purple-300';
             default:
                 return 'text-gray-700 bg-gray-100 border-gray-300';
         }
@@ -241,6 +247,43 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                                 />
                             </div>
 
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    id="isRepeatable"
+                                    checked={formData.isRepeatable}
+                                    onChange={(e) => setFormData({
+                                        ...formData,
+                                        isRepeatable: e.target.checked,
+                                        cooldownDays: e.target.checked ? formData.cooldownDays : undefined
+                                    })}
+                                    className="w-4 h-4 text-amber-600 border-amber-300 rounded focus:ring-amber-500"
+                                />
+                                <label htmlFor="isRepeatable" className="text-sm font-medium text-amber-900">
+                                    Repeatable Quest
+                                </label>
+                            </div>
+
+                            {formData.isRepeatable && (
+                                <div>
+                                    <label className="block text-sm font-medium text-amber-900 mb-2">
+                                        Cooldown Period (days) *
+                                    </label>
+                                    <Input
+                                        type="number"
+                                        value={formData.cooldownDays || ''}
+                                        onChange={(e) => setFormData({ ...formData, cooldownDays: parseInt(e.target.value) || undefined })}
+                                        placeholder="Enter cooldown days (e.g., 14 for 2 weeks)..."
+                                        className="border-amber-300 focus:border-amber-500 focus:ring-amber-500"
+                                        min="1"
+                                        required
+                                    />
+                                    <p className="text-xs text-amber-600 mt-1">
+                                        Number of days before this quest can be repeated
+                                    </p>
+                                </div>
+                            )}
+
                             <div className="flex gap-3 pt-4">
                                 <Button
                                     type="submit"
@@ -308,11 +351,28 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                                                 {quest.status}
                                             </Badge>
 
+                                            {quest.isRepeatable && (
+                                                <Badge className="text-xs font-medium border text-purple-600 bg-purple-50 border-purple-200">
+                                                    🔄 Repeatable
+                                                </Badge>
+                                            )}
+
                                             <div className="flex items-center gap-1 text-amber-600 text-sm">
                                                 <Calendar className="w-4 h-4" />
                                                 <span>Created {formatDate(quest.createdAt)}</span>
                                             </div>
                                         </div>
+
+                                        {quest.isRepeatable && quest.cooldownDays && (
+                                            <div className="text-sm text-purple-600 bg-purple-50 p-2 rounded mb-3">
+                                                <strong>Cooldown:</strong> {quest.cooldownDays} days
+                                                {quest.lastCompletedAt && (
+                                                    <span className="ml-2">
+                                                        • Last completed: {formatDate(quest.lastCompletedAt)}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="flex items-center gap-2 ml-4">
