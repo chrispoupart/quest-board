@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import QuestDetailsModal from "./QuestDetailsModal"
 
 import { useAuth } from "../contexts/AuthContext"
 import { questService } from "../services/questService"
@@ -310,8 +311,8 @@ const QuestCard: React.FC<{
           {(quest.status === "APPROVED" || quest.status === "REJECTED") && (
             <div className="flex-1 flex items-center justify-center">
               <Badge className={`text-xs font-medium border ${quest.status === "APPROVED"
-                  ? "text-green-600 bg-green-50 border-green-200"
-                  : "text-red-600 bg-red-50 border-red-200"
+                ? "text-green-600 bg-green-50 border-green-200"
+                : "text-red-600 bg-red-50 border-red-200"
                 }`}>
                 {quest.status === "APPROVED" ? "✓ Completed" : "✗ Rejected"}
               </Badge>
@@ -323,6 +324,7 @@ const QuestCard: React.FC<{
             variant="outline"
             className="bg-white border-amber-300 text-amber-700 hover:bg-amber-50"
             size="sm"
+            title="View Quest Details"
           >
             <Eye className="w-4 h-4" />
           </Button>
@@ -383,6 +385,10 @@ const QuestBoard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("available")
   const [error, setError] = useState<string | null>(null)
+
+  // Modal state
+  const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   // Convert user to UserStats format
   const currentUser: UserStats = useMemo(() => ({
@@ -518,8 +524,12 @@ const QuestBoard: React.FC = () => {
           await questService.rejectQuest(questId)
           break
         case "view":
-          // Handle view action (could open modal)
-          console.log("Viewing quest:", questId)
+          // Open quest details modal
+          const questToView = quests.find(q => q.id === questId) || repeatableQuests.find(q => q.id === questId)
+          if (questToView) {
+            setSelectedQuest(questToView)
+            setIsModalOpen(true)
+          }
           return
         default:
           return
@@ -531,6 +541,22 @@ const QuestBoard: React.FC = () => {
     } catch (err) {
       console.error(`Failed to ${action} quest:`, err)
       setError(err instanceof Error ? err.message : `Failed to ${action} quest`)
+    }
+  }
+
+  const handleModalClose = () => {
+    setIsModalOpen(false)
+    setSelectedQuest(null)
+  }
+
+  const handleModalAction = async (questId: number, action: string) => {
+    try {
+      await handleQuestAction(questId, action)
+      // Close modal after successful action
+      handleModalClose()
+    } catch (err) {
+      // Keep modal open if action fails
+      console.error('Modal action failed:', err)
     }
   }
 
@@ -695,6 +721,15 @@ const QuestBoard: React.FC = () => {
             )}
           </div>
         </div>
+
+        {/* Quest Details Modal */}
+        <QuestDetailsModal
+          quest={selectedQuest}
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          onAction={handleModalAction}
+          currentUser={currentUser}
+        />
       </div>
     </div>
   )
