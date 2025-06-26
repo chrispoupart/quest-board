@@ -10,6 +10,8 @@ router.use(authenticateToken);
 
 // Public quest routes (authenticated users)
 router.get('/', QuestController.getAllQuests);
+router.get('/my-created', QuestController.getMyCreatedQuests);
+router.get('/my-claimed', QuestController.getMyClaimedQuests);
 router.get('/:id', validateQuestId, QuestController.getQuestById);
 
 // Quest workflow routes (authenticated users)

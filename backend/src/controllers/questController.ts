@@ -10,10 +10,67 @@ export class QuestController {
      */
     static async getAllQuests(req: Request, res: Response): Promise<void> {
         try {
-            const quests = await prisma.quest.findMany({
-                orderBy: { createdAt: 'desc' },
-            });
-            res.json({ success: true, data: quests } as ApiResponse);
+            const page = parseInt(req.query['page'] as string) || 1;
+            const limit = parseInt(req.query['limit'] as string) || 10;
+            const status = req.query['status'] as string;
+            const search = req.query['search'] as string;
+            const skip = (page - 1) * limit;
+
+            const where: any = {};
+            if (status) {
+                if (status.includes(',')) {
+                    where.status = { in: status.split(',') };
+                } else {
+                    where.status = status;
+                }
+            }
+
+            if (search) {
+                where.OR = [
+                    { title: { contains: search, mode: 'insensitive' } },
+                    { description: { contains: search, mode: 'insensitive' } }
+                ];
+            }
+
+            const [quests, total] = await Promise.all([
+                prisma.quest.findMany({
+                    where,
+                    include: {
+                        creator: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                role: true,
+                            }
+                        },
+                        claimer: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                role: true,
+                            }
+                        }
+                    },
+                    orderBy: { createdAt: 'desc' },
+                    skip,
+                    take: limit,
+                }),
+                prisma.quest.count({ where })
+            ]);
+
+            const response = {
+                quests,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit)
+                }
+            };
+
+            res.json({ success: true, data: response } as ApiResponse);
         } catch (error) {
             console.error('Error getting quests:', error);
             res.status(500).json({ success: false, error: { message: 'Internal server error' } });
@@ -317,6 +374,146 @@ export class QuestController {
             res.json({ success: true, data: updatedQuest } as ApiResponse);
         } catch (error) {
             console.error('Error rejecting quest:', error);
+            res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+        }
+    }
+
+    /**
+     * Get quests created by current user
+     */
+    static async getMyCreatedQuests(req: Request, res: Response): Promise<void> {
+        try {
+            const userId = (req as any).user?.userId;
+            if (!userId) {
+                res.status(401).json({ success: false, error: { message: 'User not authenticated' } });
+                return;
+            }
+
+            const page = parseInt(req.query['page'] as string) || 1;
+            const limit = parseInt(req.query['limit'] as string) || 10;
+            const status = req.query['status'] as string;
+            const skip = (page - 1) * limit;
+
+            const where: any = { createdBy: userId };
+            if (status) {
+                if (status.includes(',')) {
+                    where.status = { in: status.split(',') };
+                } else {
+                    where.status = status;
+                }
+            }
+
+            const [quests, total] = await Promise.all([
+                prisma.quest.findMany({
+                    where,
+                    include: {
+                        creator: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                role: true,
+                            }
+                        },
+                        claimer: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                role: true,
+                            }
+                        }
+                    },
+                    orderBy: { createdAt: 'desc' },
+                    skip,
+                    take: limit,
+                }),
+                prisma.quest.count({ where })
+            ]);
+
+            const response = {
+                quests,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit)
+                }
+            };
+
+            res.json({ success: true, data: response } as ApiResponse);
+        } catch (error) {
+            console.error('Error getting my created quests:', error);
+            res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+        }
+    }
+
+    /**
+     * Get quests claimed by current user
+     */
+    static async getMyClaimedQuests(req: Request, res: Response): Promise<void> {
+        try {
+            const userId = (req as any).user?.userId;
+            if (!userId) {
+                res.status(401).json({ success: false, error: { message: 'User not authenticated' } });
+                return;
+            }
+
+            const page = parseInt(req.query['page'] as string) || 1;
+            const limit = parseInt(req.query['limit'] as string) || 10;
+            const status = req.query['status'] as string;
+            const skip = (page - 1) * limit;
+
+            const where: any = { claimedBy: userId };
+            if (status) {
+                if (status.includes(',')) {
+                    where.status = { in: status.split(',') };
+                } else {
+                    where.status = status;
+                }
+            }
+
+            const [quests, total] = await Promise.all([
+                prisma.quest.findMany({
+                    where,
+                    include: {
+                        creator: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                role: true,
+                            }
+                        },
+                        claimer: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                role: true,
+                            }
+                        }
+                    },
+                    orderBy: { createdAt: 'desc' },
+                    skip,
+                    take: limit,
+                }),
+                prisma.quest.count({ where })
+            ]);
+
+            const response = {
+                quests,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit)
+                }
+            };
+
+            res.json({ success: true, data: response } as ApiResponse);
+        } catch (error) {
+            console.error('Error getting my claimed quests:', error);
             res.status(500).json({ success: false, error: { message: 'Internal server error' } });
         }
     }
