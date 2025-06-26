@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  googleId      String   @unique @map("google_id")
+  name          String
+  email         String   @unique
+  role          String   @default("PLAYER") // ADMIN, EDITOR, PLAYER
+  bountyBalance Float    @default(0) @map("bounty_balance")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  createdQuests Quest[]    @relation("QuestCreator")
+  claimedQuests Quest[]    @relation("QuestClaimer")
+  approvals     Approval[]
+
+  @@map("users")
+}
+
+model Quest {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  bounty      Float
+  status      String    @default("AVAILABLE") // AVAILABLE, CLAIMED, COMPLETED, APPROVED, REJECTED
+  createdBy   Int       @map("created_by")
+  claimedBy   Int?      @map("claimed_by")
+  claimedAt   DateTime? @map("claimed_at")
+  completedAt DateTime? @map("completed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  creator  User      @relation("QuestCreator", fields: [createdBy], references: [id])
+  claimer  User?     @relation("QuestClaimer", fields: [claimedBy], references: [id])
+  approval Approval?
+
+  @@map("quests")
+}
+
+model Approval {
+  id         Int      @id @default(autoincrement())
+  questId    Int      @unique @map("quest_id")
+  approvedBy Int      @map("approved_by")
+  status     String // APPROVED, REJECTED
+  notes      String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  quest    Quest @relation(fields: [questId], references: [id])
+  approver User  @relation(fields: [approvedBy], references: [id])
+
+  @@map("approvals")
+}
