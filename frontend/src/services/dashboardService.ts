@@ -30,7 +30,7 @@ export const dashboardService = {
      * Get user dashboard data
      */
     async getUserDashboard(): Promise<DashboardData> {
-        const response = await api.get<ApiResponse<DashboardData>>('/dashboard/user');
+        const response = await api.get<ApiResponse<DashboardData>>('/dashboard');
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch dashboard data');
@@ -63,7 +63,7 @@ export const dashboardService = {
         totalBounty: number;
         averageBounty: number;
     }> {
-        const response = await api.get<ApiResponse>('/users/me/stats');
+        const response = await api.get<ApiResponse>('/dashboard/stats');
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch user stats');
