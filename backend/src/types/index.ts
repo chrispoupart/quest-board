@@ -131,7 +131,7 @@ export interface GoogleUserInfo {
     id: string;
     email: string;
     name: string;
-    picture?: string;
+    picture?: string | undefined;
 }
 
 export interface GoogleAuthRequest {
