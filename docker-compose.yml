@@ -12,18 +12,21 @@ services:
       - DATABASE_URL=file:./dev.db
       - NODE_ENV=development
       - JWT_SECRET=dev-secret-key
-      - ALLOWED_ORIGINS=http://localhost:3000
+      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8080
     command: npm run dev
 
   frontend:
     build: ./frontend
     ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - "8080:8080"
     environment:
-      - VITE_API_URL=http://localhost:8000
+      - BACKEND_HOST=backend
+      - BACKEND_PORT=8000
     depends_on:
       - backend
-    command: npm run dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
