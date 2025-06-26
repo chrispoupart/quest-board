@@ -1,42 +1,28 @@
 import { Router } from 'express';
+import { QuestController } from '../controllers/questController';
+import { authenticateToken, requireAdminOrEditor, requireAdmin } from '../middleware/authMiddleware';
+import { validateQuestId } from '../middleware/validationMiddleware';
 
 const router = Router();
 
-// TODO: Implement quest routes
-router.get('/', (req, res) => {
-  res.json({ message: 'List quests endpoint' });
-});
+// Apply authentication middleware to all quest routes
+router.use(authenticateToken);
 
-router.get('/:id', (req, res) => {
-  res.json({ message: 'Get quest endpoint', id: req.params.id });
-});
+// Public quest routes (authenticated users)
+router.get('/', QuestController.getAllQuests);
+router.get('/:id', validateQuestId, QuestController.getQuestById);
 
-router.post('/', (req, res) => {
-  res.json({ message: 'Create quest endpoint' });
-});
+// Quest workflow routes (authenticated users)
+router.post('/:id/claim', validateQuestId, QuestController.claimQuest);
+router.post('/:id/complete', validateQuestId, QuestController.completeQuest);
 
-router.put('/:id', (req, res) => {
-  res.json({ message: 'Update quest endpoint', id: req.params.id });
-});
+// Admin/Editor only routes
+router.post('/', requireAdminOrEditor, QuestController.createQuest);
+router.put('/:id', requireAdminOrEditor, validateQuestId, QuestController.updateQuest);
+router.post('/:id/approve', requireAdminOrEditor, validateQuestId, QuestController.approveQuest);
+router.post('/:id/reject', requireAdminOrEditor, validateQuestId, QuestController.rejectQuest);
 
-router.delete('/:id', (req, res) => {
-  res.json({ message: 'Delete quest endpoint', id: req.params.id });
-});
-
-router.post('/:id/claim', (req, res) => {
-  res.json({ message: 'Claim quest endpoint', id: req.params.id });
-});
-
-router.post('/:id/complete', (req, res) => {
-  res.json({ message: 'Complete quest endpoint', id: req.params.id });
-});
-
-router.post('/:id/approve', (req, res) => {
-  res.json({ message: 'Approve quest endpoint', id: req.params.id });
-});
-
-router.post('/:id/reject', (req, res) => {
-  res.json({ message: 'Reject quest endpoint', id: req.params.id });
-});
+// Admin only routes
+router.delete('/:id', requireAdmin, validateQuestId, QuestController.deleteQuest);
 
 export default router;

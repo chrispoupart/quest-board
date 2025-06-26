@@ -77,6 +77,33 @@ export const validateUserId = (req: Request, res: Response, next: NextFunction):
 };
 
 /**
+ * Validate quest ID parameter
+ */
+export const validateQuestId = (req: Request, res: Response, next: NextFunction): void => {
+    const questIdParam = req.params['id'];
+
+    if (!questIdParam) {
+        res.status(400).json({
+            success: false,
+            error: { message: 'Quest ID is required' }
+        });
+        return;
+    }
+
+    const questId = parseInt(questIdParam);
+
+    if (isNaN(questId) || questId <= 0) {
+        res.status(400).json({
+            success: false,
+            error: { message: 'Invalid quest ID' }
+        });
+        return;
+    }
+
+    next();
+};
+
+/**
  * Validate role update request
  */
 export const validateRoleUpdate = (req: Request, res: Response, next: NextFunction): void => {
