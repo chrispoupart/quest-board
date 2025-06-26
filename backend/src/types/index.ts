@@ -16,6 +16,14 @@ export interface User {
     bountyBalance: number;
     createdAt: Date;
     updatedAt: Date;
+    // Character customization fields
+    characterName?: string;
+    avatarUrl?: string;
+    characterClass?: string;
+    characterBio?: string;
+    preferredPronouns?: string;
+    favoriteColor?: string;
+    experience: number;
 }
 
 export interface CreateUserRequest {
@@ -29,6 +37,14 @@ export interface UpdateUserRequest {
     name?: string;
     email?: string;
     role?: UserRole;
+    // Character customization fields
+    characterName?: string;
+    avatarUrl?: string;
+    characterClass?: string;
+    characterBio?: string;
+    preferredPronouns?: string;
+    favoriteColor?: string;
+    experience?: number;
 }
 
 // Quest types
@@ -123,6 +139,18 @@ export interface AuthUser {
     name: string;
     email: string;
     role: UserRole;
+    bountyBalance: number;
+    createdAt: Date;
+    updatedAt: Date;
+    // Character customization fields
+    characterName?: string;
+    avatarUrl?: string;
+    characterClass?: string;
+    characterBio?: string;
+    preferredPronouns?: string;
+    favoriteColor?: string;
+    experience: number;
+    level: number;
 }
 
 export interface JwtPayload {

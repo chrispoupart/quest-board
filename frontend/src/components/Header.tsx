@@ -97,16 +97,26 @@ const Header: React.FC = () => {
                                     <Menu.Button className="flex items-center bg-white border-2 border-amber-300 rounded-lg px-3 py-2 hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200">
                                         <div className="flex items-center space-x-3">
                                             <div className="text-right">
-                                                <div className="text-amber-900 font-medium text-sm">{user.name}</div>
+                                                <div className="text-amber-900 font-medium text-sm">
+                                                    {user.characterName || user.name}
+                                                </div>
                                                 <div className="text-amber-700 text-xs flex items-center gap-1">
                                                     {getRoleIcon(user.role)}
                                                     {getRoleTitle(user.role)}
                                                 </div>
                                             </div>
-                                            <div className="w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center">
-                                                <span className="text-white font-bold text-sm">
-                                                    {user.name.split(' ').map(n => n[0]).join('')}
-                                                </span>
+                                            <div className="w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center overflow-hidden">
+                                                {user.avatarUrl ? (
+                                                    <img
+                                                        src={user.avatarUrl}
+                                                        alt="Avatar"
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <span className="text-white font-bold text-sm">
+                                                        {(user.characterName || user.name).split(' ').map(n => n[0]).join('')}
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     </Menu.Button>
@@ -124,7 +134,9 @@ const Header: React.FC = () => {
                                         <Menu.Item>
                                             {() => (
                                                 <div className="px-4 py-3 border-b border-amber-200">
-                                                    <div className="font-medium text-amber-900 font-serif">{user.name}</div>
+                                                    <div className="font-medium text-amber-900 font-serif">
+                                                        {user.characterName || user.name}
+                                                    </div>
                                                     <div className="text-amber-700 text-sm">{user.email}</div>
                                                     <div className="flex items-center gap-2 mt-2">
                                                         <div className="flex items-center text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded border border-amber-300">

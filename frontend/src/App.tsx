@@ -9,6 +9,7 @@ import QuestBoard from './components/quest-board';
 import Dashboard from './components/dashboard/Dashboard';
 import AdminPanel from './components/admin/AdminPanel';
 import { Store } from './components/Store';
+import CharacterSheet from './components/CharacterSheet';
 
 // Placeholder components for other pages with fantasy theme
 
@@ -19,24 +20,7 @@ const StorePage = () => {
   return user ? <Store user={user} /> : null;
 };
 
-const ProfilePage = () => (
-  <div className="p-6 min-h-screen">
-    <div className="fantasy-card rounded-lg p-8 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-amber-900 font-serif">Character Sheet</h1>
-      <p className="text-amber-700 text-lg">Your personal profile and settings scroll is being inscribed...</p>
-      <div className="mt-6 space-y-4">
-        <div className="bg-amber-100 p-4 rounded-lg border border-amber-200">
-          <h3 className="font-semibold text-amber-900">Personal Information</h3>
-          <p className="text-amber-600">Coming soon</p>
-        </div>
-        <div className="bg-amber-100 p-4 rounded-lg border border-amber-200">
-          <h3 className="font-semibold text-amber-900">Preferences</h3>
-          <p className="text-amber-600">Coming soon</p>
-        </div>
-      </div>
-    </div>
-  </div>
-);
+const ProfilePage = () => <CharacterSheet />;
 
 // Auth callback component that redirects to login with the code
 const AuthCallback: React.FC = () => {

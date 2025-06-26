@@ -142,7 +142,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                         <h1 className="text-4xl font-bold text-amber-900 font-serif">Adventurer's Chronicle</h1>
                     </div>
                     <p className="text-amber-700 text-lg">
-                        Welcome back, <span className="font-semibold">{getRoleTitle(user.role)} {user.name}</span>
+                        Welcome back, <span className="font-semibold">{getRoleTitle(user.role)} {user.characterName || user.name}</span>
                     </p>
                 </div>
 

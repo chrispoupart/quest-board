@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import QuestDetailsModal from "./QuestDetailsModal"
+import { getLevelInfo } from "../utils/leveling"
 
 import { useAuth } from "../contexts/AuthContext"
 import { questService } from "../services/questService"
@@ -27,6 +28,7 @@ interface UserStats {
   role: "ADMIN" | "EDITOR" | "PLAYER"
   name: string
   avatar?: string
+  experience?: number
 }
 
 // Utility Functions
@@ -335,6 +337,8 @@ const QuestCard: React.FC<{
 }
 
 const UserDashboard: React.FC<{ user: UserStats }> = ({ user }) => {
+  const levelInfo = getLevelInfo(user.experience || 0)
+
   return (
     <Card className="border-2 border-amber-300 bg-gradient-to-r from-amber-100 to-yellow-100 shadow-lg">
       <CardContent className="p-6">
@@ -371,6 +375,19 @@ const UserDashboard: React.FC<{ user: UserStats }> = ({ user }) => {
             <div className="text-xs text-amber-700">Active Quests</div>
           </div>
         </div>
+
+        <div className="mt-4 p-3 bg-white rounded-lg border border-amber-200">
+          <h3 className="text-sm font-bold text-amber-900 mb-2">Level {levelInfo.level}</h3>
+          <div className="w-full bg-amber-200 rounded-full h-2 mb-2">
+            <div
+              className="bg-amber-600 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${(levelInfo.progressToNext * 100)}%` }}
+            ></div>
+          </div>
+          <p className="text-xs text-amber-700">
+            {levelInfo.experience} / {levelInfo.experience + levelInfo.experienceToNext} XP
+          </p>
+        </div>
       </CardContent>
     </Card>
   )
@@ -394,8 +411,9 @@ const QuestBoard: React.FC = () => {
     totalBounty: user?.bountyBalance || 0,
     currentClaimed: 0, // Will be calculated from quests
     role: user?.role || "PLAYER",
-    name: user?.name || "",
-    avatar: undefined
+    name: user?.characterName || user?.name || "",
+    avatar: user?.avatarUrl,
+    experience: user?.experience
   }), [user])
 
   // Fetch quests from API
@@ -450,8 +468,8 @@ const QuestBoard: React.FC = () => {
         ...quest,
         difficulty: getDifficultyFromBounty(quest.bounty),
         timeLimit: 48, // Default 48 hours
-        creatorName: quest.creator?.name,
-        claimerName: quest.claimer?.name
+        creatorName: quest.creator?.characterName || quest.creator?.name,
+        claimerName: quest.claimer?.characterName || quest.claimer?.name
       }))
 
       console.log('Transformed quests:', transformedQuests)

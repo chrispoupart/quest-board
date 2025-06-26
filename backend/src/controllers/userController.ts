@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { UserRole, UpdateUserRequest, ApiResponse, AuthUser } from '../types';
 import { validateUserRole } from '../utils/validation';
+import { getLevelInfo } from '../utils/leveling';
 
 const prisma = new PrismaClient();
 
@@ -33,6 +34,14 @@ export class UserController {
                     bountyBalance: true,
                     createdAt: true,
                     updatedAt: true,
+                    // Character customization fields
+                    characterName: true,
+                    avatarUrl: true,
+                    characterClass: true,
+                    characterBio: true,
+                    preferredPronouns: true,
+                    favoriteColor: true,
+                    experience: true,
                 }
             });
 
@@ -43,6 +52,8 @@ export class UserController {
                 } as ApiResponse);
                 return;
             }
+
+            const levelInfo = getLevelInfo(user.experience);
 
             res.json({
                 success: true,
@@ -55,6 +66,15 @@ export class UserController {
                     bountyBalance: user.bountyBalance,
                     createdAt: user.createdAt,
                     updatedAt: user.updatedAt,
+                    // Character customization fields
+                    characterName: user.characterName,
+                    avatarUrl: user.avatarUrl,
+                    characterClass: user.characterClass,
+                    characterBio: user.characterBio,
+                    preferredPronouns: user.preferredPronouns,
+                    favoriteColor: user.favoriteColor,
+                    experience: user.experience,
+                    level: levelInfo.level,
                 }
             } as ApiResponse<AuthUser>);
         } catch (error) {
@@ -114,6 +134,14 @@ export class UserController {
             if (updateData.name !== undefined) updateFields.name = updateData.name;
             if (updateData.email !== undefined) updateFields.email = updateData.email;
             if (updateData.role !== undefined) updateFields.role = updateData.role;
+            // Character customization fields
+            if (updateData.characterName !== undefined) updateFields.characterName = updateData.characterName;
+            if (updateData.avatarUrl !== undefined) updateFields.avatarUrl = updateData.avatarUrl;
+            if (updateData.characterClass !== undefined) updateFields.characterClass = updateData.characterClass;
+            if (updateData.characterBio !== undefined) updateFields.characterBio = updateData.characterBio;
+            if (updateData.preferredPronouns !== undefined) updateFields.preferredPronouns = updateData.preferredPronouns;
+            if (updateData.favoriteColor !== undefined) updateFields.favoriteColor = updateData.favoriteColor;
+            if (updateData.experience !== undefined) updateFields.experience = updateData.experience;
 
             // Update user
             const updatedUser = await prisma.user.update({
@@ -128,8 +156,18 @@ export class UserController {
                     bountyBalance: true,
                     createdAt: true,
                     updatedAt: true,
+                    // Character customization fields
+                    characterName: true,
+                    avatarUrl: true,
+                    characterClass: true,
+                    characterBio: true,
+                    preferredPronouns: true,
+                    favoriteColor: true,
+                    experience: true,
                 }
             });
+
+            const levelInfo = getLevelInfo(updatedUser.experience);
 
             res.json({
                 success: true,
@@ -142,6 +180,15 @@ export class UserController {
                     bountyBalance: updatedUser.bountyBalance,
                     createdAt: updatedUser.createdAt,
                     updatedAt: updatedUser.updatedAt,
+                    // Character customization fields
+                    characterName: updatedUser.characterName,
+                    avatarUrl: updatedUser.avatarUrl,
+                    characterClass: updatedUser.characterClass,
+                    characterBio: updatedUser.characterBio,
+                    preferredPronouns: updatedUser.preferredPronouns,
+                    favoriteColor: updatedUser.favoriteColor,
+                    experience: updatedUser.experience,
+                    level: levelInfo.level,
                 }
             } as ApiResponse<AuthUser>);
         } catch (error) {

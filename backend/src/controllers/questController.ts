@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { ApiResponse, UserRole } from '../types';
+import { calculateQuestExperience, checkLevelUp, getLevelInfo } from '../utils/leveling';
 
 const prisma = new PrismaClient();
 
@@ -349,16 +350,41 @@ export class QuestController {
             });
 
             // Update user's bounty balance (always give bounty regardless of repeatable status)
-            await prisma.user.update({
+            const userUpdate = await prisma.user.update({
                 where: { id: quest.claimedBy },
                 data: {
                     bountyBalance: {
                         increment: quest.bounty,
                     },
                 },
+                select: {
+                    experience: true,
+                }
             });
 
-            res.json({ success: true, data: updatedQuest } as ApiResponse);
+            // Calculate and award experience
+            const experienceGained = calculateQuestExperience(quest.bounty);
+            const oldExperience = userUpdate.experience;
+            const newExperience = oldExperience + experienceGained;
+            const leveledUp = checkLevelUp(oldExperience, newExperience);
+
+            // Update user's experience
+            await prisma.user.update({
+                where: { id: quest.claimedBy },
+                data: {
+                    experience: newExperience,
+                },
+            });
+
+            // Prepare response with level up information
+            const response = {
+                quest: updatedQuest,
+                experienceGained,
+                leveledUp,
+                newLevel: leveledUp ? getLevelInfo(newExperience).level : null,
+            };
+
+            res.json({ success: true, data: response } as ApiResponse);
         } catch (error) {
             console.error('Error approving quest:', error);
             res.status(500).json({ success: false, error: { message: 'Internal server error' } });

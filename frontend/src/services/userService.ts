@@ -81,7 +81,17 @@ export const userService = {
     /**
      * Update current user profile
      */
-    async updateCurrentUser(userData: { name?: string; email?: string }): Promise<User> {
+    async updateCurrentUser(userData: {
+        name?: string;
+        email?: string;
+        characterName?: string;
+        avatarUrl?: string;
+        characterClass?: string;
+        characterBio?: string;
+        preferredPronouns?: string;
+        favoriteColor?: string;
+        experience?: number;
+    }): Promise<User> {
         const response = await api.put<ApiResponse<User>>('/users/me', userData);
 
         if (!response.data.success) {

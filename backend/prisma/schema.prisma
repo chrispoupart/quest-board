@@ -20,6 +20,16 @@ model User {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
+  // Character customization fields
+  characterName     String? @map("character_name") // Character name (not real name)
+  avatarUrl         String? @map("avatar_url") // URL to uploaded avatar image
+  characterClass    String? @map("character_class") // Character class/archetype
+  characterBio      String? @map("character_bio") // Character backstory/description
+  preferredPronouns String? @map("preferred_pronouns") // Character pronouns
+  favoriteColor     String? @map("favorite_color") // Character's favorite color
+  experience        Int     @default(0) // Total experience points earned
+  // characterLevel is now calculated from experience, not stored
+
   // Relations
   createdQuests Quest[]    @relation("QuestCreator")
   claimedQuests Quest[]    @relation("QuestClaimer")

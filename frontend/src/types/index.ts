@@ -7,6 +7,14 @@ export interface User {
     bountyBalance?: number;
     createdAt?: string;
     updatedAt?: string;
+    characterName?: string;
+    avatarUrl?: string;
+    characterClass?: string;
+    characterBio?: string;
+    preferredPronouns?: string;
+    favoriteColor?: string;
+    experience?: number;
+    level?: number;
 }
 
 export type UserRole = 'ADMIN' | 'EDITOR' | 'PLAYER';
@@ -50,6 +58,13 @@ export interface UpdateUserRequest {
     name?: string;
     email?: string;
     role?: UserRole;
+    characterName?: string;
+    avatarUrl?: string;
+    characterClass?: string;
+    characterBio?: string;
+    preferredPronouns?: string;
+    favoriteColor?: string;
+    experience?: number;
 }
 
 export interface CreateQuestRequest {

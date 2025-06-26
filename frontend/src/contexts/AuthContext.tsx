@@ -8,6 +8,7 @@ interface AuthContextType {
     login: (code: string, redirectUri: string) => Promise<void>;
     logout: () => Promise<void>;
     refreshUser: () => Promise<void>;
+    updateUser: (userData: User) => void;
     isAuthenticated: boolean;
     isAdmin: boolean;
     isEditorOrAdmin: boolean;
@@ -88,6 +89,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
+    const updateUser = (userData: User) => {
+        setUser(userData);
+    };
+
     const isAuthenticated = !!user;
     const isAdmin = user?.role === 'ADMIN';
     const isEditorOrAdmin = user?.role === 'ADMIN' || user?.role === 'EDITOR';
@@ -98,6 +103,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         login,
         logout,
         refreshUser,
+        updateUser,
         isAuthenticated,
         isAdmin,
         isEditorOrAdmin,
