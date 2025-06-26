@@ -24,7 +24,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '../contexts/AuthContext';
 import { userService } from '../services/userService';
-import { User as UserType } from '../types';
 
 interface CharacterSheetProps {
   onBack?: () => void;
@@ -32,7 +31,6 @@ interface CharacterSheetProps {
 
 const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
   const { user, updateUser } = useAuth();
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
