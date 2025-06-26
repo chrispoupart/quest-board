@@ -6,29 +6,11 @@ import Header from './components/Header';
 import LoginPage from './pages/LoginPage';
 import QuestBoard from './components/quest-board';
 import Dashboard from './components/dashboard/Dashboard';
+import AdminPanel from './components/admin/AdminPanel';
 
 // Placeholder components for other pages with fantasy theme
 
 const QuestsPage = () => <QuestBoard />;
-
-const AdminPage = () => (
-  <div className="p-6 min-h-screen">
-    <div className="fantasy-card rounded-lg p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-amber-900 font-serif">Guild Hall</h1>
-      <p className="text-amber-700 text-lg">Administrative tools and guild management are being forged...</p>
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-amber-100 p-4 rounded-lg border border-amber-200">
-          <h3 className="font-semibold text-amber-900">Quest Management</h3>
-          <p className="text-amber-600">Coming soon</p>
-        </div>
-        <div className="bg-amber-100 p-4 rounded-lg border border-amber-200">
-          <h3 className="font-semibold text-amber-900">User Permissions</h3>
-          <p className="text-amber-600">Coming soon</p>
-        </div>
-      </div>
-    </div>
-  </div>
-);
 
 const ProfilePage = () => (
   <div className="p-6 min-h-screen">
@@ -127,8 +109,8 @@ const App: React.FC = () => {
                 <ProtectedRoute requireEditorOrAdmin>
                   <div>
                     <Header />
-                    <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                      <AdminPage />
+                    <main>
+                      <AdminPanel />
                     </main>
                   </div>
                 </ProtectedRoute>
