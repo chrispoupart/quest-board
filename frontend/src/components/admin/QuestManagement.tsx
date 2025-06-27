@@ -43,18 +43,10 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
     // Fetch all quests and skills for management
     const fetchData = async () => {
         if (!isAuthenticated || !user) {
-            console.log('QuestManagement: Not authenticated or no user');
-            console.log('QuestManagement: isAuthenticated:', isAuthenticated);
-            console.log('QuestManagement: user:', user);
             setError('Authentication required');
             setLoading(false);
             return;
         }
-
-        console.log('QuestManagement: Fetching data for user:', user.id, user.role);
-        console.log('QuestManagement: Token exists:', !!localStorage.getItem('accessToken'));
-        console.log('QuestManagement: Token value:', localStorage.getItem('accessToken')?.substring(0, 20) + '...');
-        console.log('QuestManagement: Refresh token exists:', !!localStorage.getItem('refreshToken'));
 
         try {
             setLoading(true);
@@ -63,7 +55,6 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                 questService.getQuests(),
                 skillService.getAllSkills()
             ]);
-            console.log('QuestManagement: Data fetched successfully');
             setQuests(questsResponse.quests);
             setSkills(skillsResponse);
         } catch (err) {
