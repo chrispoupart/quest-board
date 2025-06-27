@@ -101,6 +101,11 @@ class SkillService {
         return response.data!;
     }
 
+    async getQuestSkillRequirements(questId: number): Promise<QuestRequiredSkill[]> {
+        const response = await this.request<ApiResponse<QuestRequiredSkill[]>>(`/quests/${questId}/skill-requirements`);
+        return response.data!;
+    }
+
     async addQuestRequiredSkill(questId: number, data: CreateQuestRequiredSkillRequest): Promise<QuestRequiredSkill> {
         const response = await this.request<ApiResponse<QuestRequiredSkill>>(`/quests/${questId}/required-skills`, {
             method: 'POST',
@@ -125,7 +130,7 @@ class SkillService {
 
     // Utility methods
     async getAllSkills(): Promise<Skill[]> {
-        const response = await this.request<ApiResponse<Skill[]>>('/skills/quest-creation');
+        const response = await this.request<ApiResponse<Skill[]>>('/skills/available');
         return response.data!;
     }
 

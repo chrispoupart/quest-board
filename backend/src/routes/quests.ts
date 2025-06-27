@@ -19,6 +19,9 @@ router.get('/:id', validateQuestId, QuestController.getQuestById);
 router.post('/:id/claim', validateQuestId, QuestController.claimQuest);
 router.post('/:id/complete', validateQuestId, QuestController.completeQuest);
 
+// Quest skill requirements (all authenticated users can view for eligibility)
+router.get('/:id/skill-requirements', validateQuestId, QuestController.getQuestRequiredSkills);
+
 // Admin/Editor only routes
 router.post('/', requireAdminOrEditor, QuestController.createQuest);
 router.put('/:id', requireAdminOrEditor, validateQuestId, QuestController.updateQuest);

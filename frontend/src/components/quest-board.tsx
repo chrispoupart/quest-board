@@ -149,7 +149,7 @@ const QuestCard: React.FC<{
     const loadSkillData = async () => {
       try {
         // Load skill requirements for this quest
-        const skills = await skillService.getQuestRequiredSkills(quest.id);
+        const skills = await skillService.getQuestSkillRequirements(quest.id);
         setRequiredSkills(skills);
         setSkillRequirementsLoaded(true);
 

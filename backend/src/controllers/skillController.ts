@@ -93,6 +93,37 @@ export class SkillController {
     }
 
     /**
+     * Get all available skills (all authenticated users)
+     */
+    static async getAvailableSkills(req: Request, res: Response): Promise<void> {
+        try {
+            const skills = await prisma.skill.findMany({
+                where: { isActive: true },
+                select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    isActive: true
+                },
+                orderBy: {
+                    name: 'asc'
+                }
+            });
+
+            res.json({
+                success: true,
+                data: skills
+            } as ApiResponse);
+        } catch (error) {
+            console.error('Error getting available skills:', error);
+            res.status(500).json({
+                success: false,
+                error: { message: 'Internal server error' }
+            } as ApiResponse);
+        }
+    }
+
+    /**
      * Create a new skill (admin only)
      */
     static async createSkill(req: Request, res: Response): Promise<void> {

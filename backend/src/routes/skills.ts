@@ -10,6 +10,7 @@ router.use(authenticateToken);
 // Skill management routes (admin only)
 router.get('/', SkillController.getAllSkills);
 router.get('/quest-creation', SkillController.getSkillsForQuestCreation);
+router.get('/available', SkillController.getAvailableSkills);
 router.post('/', SkillController.createSkill);
 router.put('/:id', SkillController.updateSkill);
 router.delete('/:id', SkillController.deleteSkill);
