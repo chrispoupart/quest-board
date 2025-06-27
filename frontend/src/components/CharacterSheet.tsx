@@ -195,6 +195,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
         setError('Please select a valid image file (JPEG, PNG, or WebP)');
+        setUploadingAvatar(false);
         return;
       }
 
@@ -202,6 +203,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
       const maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
         setError('Image file size must be less than 5MB');
+        setUploadingAvatar(false);
         return;
       }
 
@@ -210,6 +212,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
       const ctx = canvas.getContext('2d');
       if (!ctx) {
         setError('Failed to process image');
+        setUploadingAvatar(false);
         return;
       }
 
