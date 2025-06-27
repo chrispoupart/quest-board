@@ -229,15 +229,89 @@ export class QuestController {
                 res.status(401).json({ success: false, error: { message: 'User not authenticated' } });
                 return;
             }
-            const quest = await prisma.quest.findUnique({ where: { id: questId } });
+
+            // Get quest with skill requirements
+            const quest = await prisma.quest.findUnique({
+                where: { id: questId },
+                include: {
+                    requiredSkills: {
+                        include: {
+                            skill: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
             if (!quest) {
                 res.status(404).json({ success: false, error: { message: 'Quest not found' } });
                 return;
             }
+
             if (quest.status !== 'AVAILABLE') {
                 res.status(400).json({ success: false, error: { message: 'Quest is not available for claiming' } });
                 return;
             }
+
+            // Validate skill requirements if the quest has any
+            if (quest.requiredSkills.length > 0) {
+                // Get user's skills
+                const userSkills = await prisma.userSkill.findMany({
+                    where: { userId },
+                    include: {
+                        skill: {
+                            select: {
+                                id: true,
+                                name: true,
+                            }
+                        }
+                    }
+                });
+
+                // Check each required skill
+                const missingSkills: string[] = [];
+                const insufficientSkills: string[] = [];
+
+                for (const requirement of quest.requiredSkills) {
+                    const userSkill = userSkills.find(us => us.skillId === requirement.skillId);
+
+                    if (!userSkill) {
+                        // User doesn't have this skill at all
+                        missingSkills.push(requirement.skill.name);
+                    } else if (userSkill.level < requirement.minLevel) {
+                        // User has the skill but level is too low
+                        insufficientSkills.push(`${requirement.skill.name} (required: ${requirement.minLevel}, current: ${userSkill.level})`);
+                    }
+                }
+
+                // If user doesn't meet requirements, return error
+                if (missingSkills.length > 0 || insufficientSkills.length > 0) {
+                    let errorMessage = 'You do not meet the skill requirements for this quest:';
+
+                    if (missingSkills.length > 0) {
+                        errorMessage += `\nMissing skills: ${missingSkills.join(', ')}`;
+                    }
+
+                    if (insufficientSkills.length > 0) {
+                        errorMessage += `\nInsufficient skill levels: ${insufficientSkills.join(', ')}`;
+                    }
+
+                    res.status(403).json({
+                        success: false,
+                        error: {
+                            message: errorMessage,
+                            missingSkills,
+                            insufficientSkills
+                        }
+                    });
+                    return;
+                }
+            }
+
             const updatedQuest = await prisma.quest.update({
                 where: { id: questId },
                 data: {
