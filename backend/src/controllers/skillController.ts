@@ -498,6 +498,48 @@ export class SkillController {
     }
 
     /**
+     * Get current user's skill level for a specific skill (for quest eligibility)
+     */
+    static async getMySkillLevel(req: Request, res: Response): Promise<void> {
+        try {
+            const currentUserId = (req as any).user?.userId;
+            if (!currentUserId) {
+                res.status(401).json({
+                    success: false,
+                    error: { message: 'User not authenticated' }
+                } as ApiResponse);
+                return;
+            }
+
+            const skillId = parseInt(req.params['skillId'] || '');
+
+            if (isNaN(skillId)) {
+                res.status(400).json({
+                    success: false,
+                    error: { message: 'Invalid skill ID' }
+                } as ApiResponse);
+                return;
+            }
+
+            const userSkill = await prisma.userSkill.findUnique({
+                where: { userId_skillId: { userId: currentUserId, skillId } },
+                select: { level: true }
+            });
+
+            res.json({
+                success: true,
+                data: { level: userSkill?.level || 0 }
+            } as ApiResponse);
+        } catch (error) {
+            console.error('Error getting my skill level:', error);
+            res.status(500).json({
+                success: false,
+                error: { message: 'Internal server error' }
+            } as ApiResponse);
+        }
+    }
+
+    /**
      * Update user skill (admin only)
      */
     static async updateUserSkill(req: Request, res: Response): Promise<void> {

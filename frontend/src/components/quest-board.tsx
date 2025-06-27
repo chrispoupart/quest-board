@@ -157,7 +157,7 @@ const QuestCard: React.FC<{
         if (skills.length > 0) {
           const skillLevels: {[skillId: number]: number} = {};
           for (const requiredSkill of skills) {
-            const level = await skillService.getUserSkillLevel(currentUser.id, requiredSkill.skillId);
+            const level = await skillService.getMySkillLevel(requiredSkill.skillId);
             skillLevels[requiredSkill.skillId] = level;
           }
           setUserSkillLevels(skillLevels);

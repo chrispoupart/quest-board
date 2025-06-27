@@ -16,6 +16,7 @@ router.delete('/:id', SkillController.deleteSkill);
 
 // User skill management routes
 router.get('/my-skills', SkillController.getMySkills);
+router.get('/my-skill/:skillId/level', SkillController.getMySkillLevel);
 router.get('/user/:userId', SkillController.getUserSkills);
 router.get('/user/:userId/:skillId/level', SkillController.getUserSkillLevel);
 router.post('/user/:userId', SkillController.updateUserSkill);

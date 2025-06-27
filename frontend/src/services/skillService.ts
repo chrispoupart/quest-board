@@ -139,6 +139,16 @@ class SkillService {
         }
     }
 
+    async getMySkillLevel(skillId: number): Promise<number> {
+        try {
+            const response = await this.request<ApiResponse<{ level: number }>>(`/skills/my-skill/${skillId}/level`);
+            return response.data!.level;
+        } catch (error) {
+            console.error('Failed to get my skill level:', error);
+            return 0; // Return 0 if user doesn't have this skill or if there's an error
+        }
+    }
+
     async checkQuestEligibility(userId: number, questId: number): Promise<{ eligible: boolean; missingSkills: string[] }> {
         const response = await this.request<ApiResponse<{ eligible: boolean; missingSkills: string[] }>>(`/quests/${questId}/check-eligibility/${userId}`);
         return response.data!;
