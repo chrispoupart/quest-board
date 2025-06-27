@@ -80,15 +80,12 @@ class SkillService {
     }
 
     async updateUserSkill(userId: number, skillId: number, data: UpdateUserSkillRequest): Promise<UserSkill> {
-        console.log('SkillService: Updating user skill:', { userId, skillId, data });
         const requestBody = { skillId, ...data };
-        console.log('SkillService: Request body:', requestBody);
 
         const response = await this.request<ApiResponse<UserSkill>>(`/skills/user/${userId}`, {
             method: 'POST',
             body: JSON.stringify(requestBody),
         });
-        console.log('SkillService: Response:', response);
         return response.data!;
     }
 
@@ -128,21 +125,17 @@ class SkillService {
 
     // Utility methods
     async getAllSkills(): Promise<Skill[]> {
-        console.log('SkillService: Getting all skills');
-        console.log('SkillService: API_BASE_URL:', API_BASE_URL);
-        console.log('SkillService: Token exists:', !!localStorage.getItem('accessToken'));
-
         const response = await this.request<ApiResponse<Skill[]>>('/skills/quest-creation');
-        console.log('SkillService: All skills response received:', response.data?.length || 0);
         return response.data!;
     }
 
     async getUserSkillLevel(userId: number, skillId: number): Promise<number> {
         try {
-            const response = await this.request<ApiResponse<{ level: number }>>(`/users/${userId}/skills/${skillId}/level`);
+            const response = await this.request<ApiResponse<{ level: number }>>(`/skills/user/${userId}/${skillId}/level`);
             return response.data!.level;
         } catch (error) {
-            return 0; // Return 0 if user doesn't have this skill
+            console.error('Failed to get user skill level:', error);
+            return 0; // Return 0 if user doesn't have this skill or if there's an error
         }
     }
 

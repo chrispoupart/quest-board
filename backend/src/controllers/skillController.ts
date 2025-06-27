@@ -454,6 +454,50 @@ export class SkillController {
     }
 
     /**
+     * Get a specific user skill level (admin only)
+     */
+    static async getUserSkillLevel(req: Request, res: Response): Promise<void> {
+        try {
+            const userRole = (req as any).user?.role;
+
+            if (userRole !== 'ADMIN') {
+                res.status(403).json({
+                    success: false,
+                    error: { message: 'Access denied. Admin role required.' }
+                } as ApiResponse);
+                return;
+            }
+
+            const userId = parseInt(req.params['userId'] || '');
+            const skillId = parseInt(req.params['skillId'] || '');
+
+            if (isNaN(userId) || isNaN(skillId)) {
+                res.status(400).json({
+                    success: false,
+                    error: { message: 'Invalid user ID or skill ID' }
+                } as ApiResponse);
+                return;
+            }
+
+            const userSkill = await prisma.userSkill.findUnique({
+                where: { userId_skillId: { userId, skillId } },
+                select: { level: true }
+            });
+
+            res.json({
+                success: true,
+                data: { level: userSkill?.level || 0 }
+            } as ApiResponse);
+        } catch (error) {
+            console.error('Error getting user skill level:', error);
+            res.status(500).json({
+                success: false,
+                error: { message: 'Internal server error' }
+            } as ApiResponse);
+        }
+    }
+
+    /**
      * Update user skill (admin only)
      */
     static async updateUserSkill(req: Request, res: Response): Promise<void> {
