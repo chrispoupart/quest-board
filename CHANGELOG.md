@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/chrispoupart/quest-board/compare/v1.0.0...v1.1.0) (2025-06-27)
+
+### Features
+
+* **backend:** 🏗️ implement multi-stage Docker build for production ([b0f4bd1](https://github.com/chrispoupart/quest-board/commit/b0f4bd189df6beec61dc7451969b85b25bf6ec40))
+
 ## 1.0.0 (2025-06-27)
 
 ### Features
