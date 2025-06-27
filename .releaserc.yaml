@@ -1,0 +1,30 @@
+---
+branches:
+  - main
+  - name: alpha
+    prerelease: true
+  - name: beta
+    prerelease: true
+plugins:
+  - '@semantic-release/commit-analyzer'  # Plugin documentation: https://github.com/semantic-release/commit-analyzer
+  - '@semantic-release/release-notes-generator'  # Plugin documentation: https://github.com/semantic-release/release-notes-generator
+  - '@semantic-release/changelog'  # Plugin documentation: https://github.com/semantic-release/changelog
+  - '@semantic-release/github'  # Plugin documentation: https://github.com/semantic-release/github
+  - '@semantic-release/git'  # Plugin documentation: https://github.com/semantic-release/git
+analyzeCommits:
+  - path: '@semantic-release/commit-analyzer'
+    preset: conventionalcommits
+    presetConfig: true
+generateNotes:
+  - path: '@semantic-release/release-notes-generator'
+    preset: conventionalcommits
+    presetConfig: true
+changelog:
+  - path: '@semantic-release/changelog'
+    changelogFile: 'CHANGELOG.md'
+    changelogTitle: '# Changelog'
+git:
+  - path: '@semantic-release/git'
+    assets:
+      - CHANGELOG.md
+    message: 'chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}'
