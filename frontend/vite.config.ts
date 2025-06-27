@@ -7,6 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      '@radix-ui/react-tabs': path.resolve(__dirname, 'node_modules/@radix-ui/react-tabs'),
     },
     dedupe: ['react', 'react-dom'],
   },
