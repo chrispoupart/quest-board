@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/chrispoupart/quest-board/compare/v1.1.0...v1.2.0) (2025-06-27)
+
+### Features
+
+* **frontend:** ➕ add build dependencies to Dockerfile ([854b828](https://github.com/chrispoupart/quest-board/commit/854b828b5a17a2ec14fe7dd0a0d239ace16ea2d6))
+
 ## [1.1.0](https://github.com/chrispoupart/quest-board/compare/v1.0.0...v1.1.0) (2025-06-27)
 
 ### Features
