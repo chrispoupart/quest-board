@@ -8,6 +8,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@radix-ui/react-tabs": path.resolve(__dirname, "node_modules/@radix-ui/react-tabs"),
+      "@radix-ui/react-avatar": path.resolve(__dirname, "node_modules/@radix-ui/react-avatar"),
     },
     dedupe: ['react', 'react-dom'],
   },
@@ -32,7 +34,7 @@ export default defineConfig({
     exclude: [],
   },
   css: {
-    postcss: './postcss.config.js',
+    postcss: './postcss.config.cjs',
   },
   server: {
     port: 3000,
