@@ -94,7 +94,7 @@ const Header: React.FC = () => {
                         {user && (
                             <Menu as="div" className="ml-3 relative">
                                 <div>
-                                    <Menu.Button className="flex items-center bg-white border-2 border-amber-300 rounded-lg px-3 py-2 hover:bg-amber-50 focus:outline-hidden focus:ring-2 focus:ring-amber-500 transition-all duration-200">
+                                    <Menu.Button className="flex items-center bg-white border-2 border-amber-300 rounded-lg px-3 py-2 hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200">
                                         <div className="flex items-center space-x-3">
                                             <div className="text-right">
                                                 <div className="text-amber-900 font-medium text-sm">
@@ -130,7 +130,7 @@ const Header: React.FC = () => {
                                     leaveFrom="transform opacity-100 scale-100"
                                     leaveTo="transform opacity-0 scale-95"
                                 >
-                                    <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-lg shadow-lg py-2 bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 focus:outline-hidden z-50">
+                                    <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-lg shadow-lg py-2 bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 focus:outline-none z-50">
                                         <Menu.Item>
                                             {() => (
                                                 <div className="px-4 py-3 border-b border-amber-200">
