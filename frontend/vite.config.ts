@@ -7,22 +7,13 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      '@radix-ui/react-tabs': path.resolve(__dirname, 'node_modules/@radix-ui/react-tabs'),
     },
     dedupe: ['react', 'react-dom'],
   },
   build: {
     rollupOptions: {
       external: [],
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          radix: [
-            'axios',
-            '@radix-ui/react-avatar',
-            '@radix-ui/react-tabs'],
-        },
-      },
+      output: {},
     },
     sourcemap: false,
     minify: 'terser',
