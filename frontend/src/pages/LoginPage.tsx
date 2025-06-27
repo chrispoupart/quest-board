@@ -134,7 +134,7 @@ const LoginPage: React.FC = () => {
                             <div>
                                 <button
                                     onClick={handleGoogleLogin}
-                                    className="group relative w-full flex justify-center py-4 px-6 border-2 border-amber-600 text-lg font-medium rounded-lg text-white bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg font-medium rounded-lg text-white bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-all duration-200 shadow-lg hover:shadow-xl"
                                 >
                                     <svg
                                         className="w-6 h-6 mr-3"

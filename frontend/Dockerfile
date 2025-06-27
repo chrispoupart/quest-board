@@ -5,13 +5,14 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Install necessary packages for building
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache openssl
 
 # Copy package files first for better caching
 COPY package*.json ./
 
-# Install all dependencies (including dev dependencies for building)
-RUN npm ci --legacy-peer-deps && npm cache clean --force
+# Install dependencies with explicit registry and better error handling
+RUN npm ci --no-audit --no-fund && \
+    npm cache clean --force
 
 # Copy source code
 COPY . .
