@@ -17,6 +17,7 @@ export default defineConfig({
     rollupOptions: {
       external: [],
       output: {},
+      maxParallelFileOps: 100,
     },
     sourcemap: false,
     minify: 'terser',
@@ -34,7 +35,7 @@ export default defineConfig({
     exclude: [],
   },
   css: {
-    postcss: './postcss.config.cjs',
+    postcss: './postcss.config.js',
   },
   server: {
     port: 3000,
