@@ -24,6 +24,8 @@ export interface User {
     preferredPronouns?: string;
     favoriteColor?: string;
     experience: number;
+    // Skills
+    userSkills?: UserSkill[];
 }
 
 export interface CreateUserRequest {
@@ -63,6 +65,8 @@ export interface Quest {
     isRepeatable: boolean;
     cooldownDays?: number;
     lastCompletedAt?: Date;
+    // Required skills
+    requiredSkills?: QuestRequiredSkill[];
 }
 
 export interface CreateQuestRequest {
@@ -71,6 +75,7 @@ export interface CreateQuestRequest {
     bounty: number;
     isRepeatable?: boolean;
     cooldownDays?: number;
+    requiredSkills?: CreateQuestRequiredSkillRequest[];
 }
 
 export interface UpdateQuestRequest {
@@ -80,6 +85,7 @@ export interface UpdateQuestRequest {
     status?: QuestStatus;
     isRepeatable?: boolean;
     cooldownDays?: number;
+    requiredSkills?: CreateQuestRequiredSkillRequest[];
 }
 
 // Approval types
@@ -151,6 +157,8 @@ export interface AuthUser {
     favoriteColor?: string | undefined;
     experience: number;
     level: number;
+    // Skills
+    userSkills?: UserSkill[];
 }
 
 export interface JwtPayload {
@@ -219,4 +227,61 @@ export interface CreateStoreTransactionRequest {
 export interface UpdateStoreTransactionRequest {
     status: 'APPROVED' | 'REJECTED';
     notes?: string;
+}
+
+// Skills types
+export interface Skill {
+    id: number;
+    name: string;
+    description?: string;
+    isActive: boolean;
+    createdBy: number;
+    createdAt: Date;
+    updatedAt: Date;
+    creator?: User;
+}
+
+export interface CreateSkillRequest {
+    name: string;
+    description?: string;
+}
+
+export interface UpdateSkillRequest {
+    name?: string;
+    description?: string;
+    isActive?: boolean;
+}
+
+export interface UserSkill {
+    id: number;
+    userId: number;
+    skillId: number;
+    level: number; // 1-5
+    createdAt: Date;
+    updatedAt: Date;
+    skill?: Skill;
+    user?: User;
+}
+
+export interface CreateUserSkillRequest {
+    skillId: number;
+    level: number;
+}
+
+export interface UpdateUserSkillRequest {
+    level: number;
+}
+
+export interface QuestRequiredSkill {
+    id: number;
+    questId: number;
+    skillId: number;
+    minLevel: number;
+    createdAt: Date;
+    skill?: Skill;
+}
+
+export interface CreateQuestRequiredSkillRequest {
+    skillId: number;
+    minLevel: number;
 }

@@ -11,6 +11,7 @@ import questRoutes from './routes/quests';
 import dashboardRoutes from './routes/dashboard';
 import jobRoutes from './routes/jobs';
 import storeRoutes from './routes/store';
+import skillRoutes from './routes/skills';
 
 // Load environment variables
 dotenv.config();
@@ -35,6 +36,7 @@ app.use('/quests', questRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/jobs', jobRoutes);
 app.use('/store', storeRoutes);
+app.use('/skills', skillRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

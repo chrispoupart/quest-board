@@ -194,3 +194,89 @@ export interface StoreTransactionsResponse {
         totalPages: number;
     };
 }
+
+// Skill types
+export interface Skill {
+    id: number;
+    name: string;
+    description?: string;
+    createdBy: number;
+    createdAt: string;
+    updatedAt: string;
+    creator?: User;
+}
+
+export interface UserSkill {
+    id: number;
+    userId: number;
+    skillId: number;
+    level: number;
+    createdAt: string;
+    updatedAt: string;
+    skill?: Skill;
+    user?: User;
+}
+
+export interface QuestRequiredSkill {
+    id: number;
+    questId: number;
+    skillId: number;
+    minLevel: number;
+    createdAt: string;
+    updatedAt: string;
+    skill?: Skill;
+    quest?: Quest;
+}
+
+export interface CreateSkillRequest {
+    name: string;
+    description?: string;
+}
+
+export interface UpdateSkillRequest {
+    name?: string;
+    description?: string;
+}
+
+export interface UpdateUserSkillRequest {
+    level: number;
+}
+
+export interface CreateQuestRequiredSkillRequest {
+    skillId: number;
+    minLevel: number;
+}
+
+export interface UpdateQuestRequiredSkillRequest {
+    minLevel: number;
+}
+
+export interface SkillsResponse {
+    skills: Skill[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    };
+}
+
+export interface UserSkillsResponse {
+    userSkills: UserSkill[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    };
+}
+
+export interface QuestRequiredSkillsResponse {
+    requiredSkills: QuestRequiredSkill[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    };
+}

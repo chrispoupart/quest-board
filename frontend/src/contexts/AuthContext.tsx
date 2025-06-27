@@ -30,13 +30,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             try {
                 const token = localStorage.getItem('accessToken');
                 if (token) {
-                    const userData = await authService.getCurrentUser();
-                    setUser(userData);
+                    try {
+                        const userData = await authService.getCurrentUser();
+                        setUser(userData);
+                    } catch (authError) {
+                        console.error('AuthContext: Current user check failed:', authError);
+                        // Try to refresh the token
+                        try {
+                            const refreshResult = await authService.refreshToken();
+                            localStorage.setItem('accessToken', refreshResult.accessToken);
+                            setUser(refreshResult.user);
+                        } catch (refreshError) {
+                            console.error('AuthContext: Token refresh failed:', refreshError);
+                            // Clear tokens and redirect to login
+                            localStorage.removeItem('accessToken');
+                            localStorage.removeItem('refreshToken');
+                            setUser(null);
+                        }
+                    }
                 }
             } catch (error) {
-                console.error('Auth check failed:', error);
+                console.error('AuthContext: Auth check failed:', error);
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('refreshToken');
+                setUser(null);
             } finally {
                 setLoading(false);
             }

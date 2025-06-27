@@ -42,6 +42,17 @@ export class UserController {
                     preferredPronouns: true,
                     favoriteColor: true,
                     experience: true,
+                    // Skills
+                    userSkills: {
+                        include: {
+                            skill: true
+                        },
+                        orderBy: {
+                            skill: {
+                                name: 'asc'
+                            }
+                        }
+                    }
                 }
             });
 
@@ -73,7 +84,8 @@ export class UserController {
                     preferredPronouns: user.preferredPronouns || undefined,
                     favoriteColor: user.favoriteColor || undefined,
                     experience: user.experience,
-                    level: levelInfo
+                    level: levelInfo,
+                    userSkills: user.userSkills
                 }
             } as ApiResponse<AuthUser>);
         } catch (error) {
