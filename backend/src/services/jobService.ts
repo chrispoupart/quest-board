@@ -69,6 +69,9 @@ export class JobService {
             timezone: 'UTC'
         });
 
+        // Start the scheduled task (required in node-cron v4)
+        scheduledTask.start();
+
         this.jobs.set(name, scheduledTask);
 
         // Calculate next run time
