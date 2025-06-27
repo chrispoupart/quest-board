@@ -393,7 +393,7 @@ const SkillManagement: React.FC = () => {
                               <Button
                                 key={skillLevel}
                                 size="sm"
-                                variant={level === skillLevel ? "default" : "outline"}
+                                variant={level === skillLevel ? "default" : "outline-solid"}
                                 onClick={() => handleUpdateUserSkill(selectedUser, skill.id, skillLevel)}
                                 className={`w-8 h-8 p-0 ${
                                   level === skillLevel

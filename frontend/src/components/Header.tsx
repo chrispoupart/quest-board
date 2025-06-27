@@ -40,13 +40,13 @@ const Header: React.FC = () => {
     };
 
     return (
-        <header className="border-b-4 border-amber-300 bg-gradient-to-r from-amber-200 to-yellow-200 shadow-lg">
+        <header className="border-b-4 border-amber-300 bg-linear-to-r from-amber-200 to-yellow-200 shadow-lg">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo and Navigation */}
                     <div className="flex items-center">
                         <Link to="/dashboard" className="flex items-center group">
-                            <div className="flex-shrink-0">
+                            <div className="shrink-0">
                                 <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center group-hover:bg-amber-700 transition-colors">
                                     <Scroll className="w-6 h-6 text-white" />
                                 </div>
@@ -94,7 +94,7 @@ const Header: React.FC = () => {
                         {user && (
                             <Menu as="div" className="ml-3 relative">
                                 <div>
-                                    <Menu.Button className="flex items-center bg-white border-2 border-amber-300 rounded-lg px-3 py-2 hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200">
+                                    <Menu.Button className="flex items-center bg-white border-2 border-amber-300 rounded-lg px-3 py-2 hover:bg-amber-50 focus:outline-hidden focus:ring-2 focus:ring-amber-500 transition-all duration-200">
                                         <div className="flex items-center space-x-3">
                                             <div className="text-right">
                                                 <div className="text-amber-900 font-medium text-sm">
@@ -130,7 +130,7 @@ const Header: React.FC = () => {
                                     leaveFrom="transform opacity-100 scale-100"
                                     leaveTo="transform opacity-0 scale-95"
                                 >
-                                    <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-lg shadow-lg py-2 bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 focus:outline-none z-50">
+                                    <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-lg shadow-lg py-2 bg-linear-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 focus:outline-hidden z-50">
                                         <Menu.Item>
                                             {() => (
                                                 <div className="px-4 py-3 border-b border-amber-200">

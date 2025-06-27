@@ -94,7 +94,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
+            <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-amber-50 via-yellow-50 to-orange-50">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-amber-600 mx-auto mb-4"></div>
                     <h3 className="text-xl font-bold text-amber-900 mb-2">Loading Your Chronicles</h3>
@@ -106,7 +106,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
+            <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-amber-50 via-yellow-50 to-orange-50">
                 <Card className="border-2 border-red-200 bg-red-50 shadow-lg max-w-md">
                     <CardContent className="p-6 text-center">
                         <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
@@ -131,7 +131,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
     const { stats, currentQuests, recentCreatedQuests } = dashboardData;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
+        <div className="min-h-screen bg-linear-to-br from-amber-50 via-yellow-50 to-orange-50">
             <div className="container mx-auto px-4 py-8">
                 {/* Header Section */}
                 <div className="text-center mb-8">
@@ -148,7 +148,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
                 {/* Stats Overview */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <Card className="border-2 border-amber-200 bg-linear-to-br from-amber-50 to-yellow-50 shadow-lg hover:shadow-xl transition-all duration-300">
                         <CardContent className="p-6 text-center">
                             <Trophy className="w-12 h-12 mx-auto mb-3 text-amber-600" />
                             <div className="text-3xl font-bold text-amber-900">{stats.completedQuests}</div>
@@ -157,7 +157,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <Card className="border-2 border-amber-200 bg-linear-to-br from-amber-50 to-yellow-50 shadow-lg hover:shadow-xl transition-all duration-300">
                         <CardContent className="p-6 text-center">
                             <Coins className="w-12 h-12 mx-auto mb-3 text-amber-600" />
                             <div className="text-3xl font-bold text-amber-900">{stats.totalBounty}</div>
@@ -166,7 +166,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <Card className="border-2 border-amber-200 bg-linear-to-br from-amber-50 to-yellow-50 shadow-lg hover:shadow-xl transition-all duration-300">
                         <CardContent className="p-6 text-center">
                             <Shield className="w-12 h-12 mx-auto mb-3 text-amber-600" />
                             <div className="text-3xl font-bold text-amber-900">{stats.currentQuests}</div>
@@ -175,7 +175,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <Card className="border-2 border-amber-200 bg-linear-to-br from-amber-50 to-yellow-50 shadow-lg hover:shadow-xl transition-all duration-300">
                         <CardContent className="p-6 text-center">
                             <Scroll className="w-12 h-12 mx-auto mb-3 text-amber-600" />
                             <div className="text-3xl font-bold text-amber-900">{stats.totalQuests}</div>
@@ -188,7 +188,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                 <div className="grid lg:grid-cols-2 gap-8">
                     {/* Current Active Quests */}
                     <Card className="border-2 border-amber-200 bg-white shadow-lg">
-                        <CardHeader className="border-b border-amber-200 bg-gradient-to-r from-amber-100 to-yellow-100">
+                        <CardHeader className="border-b border-amber-200 bg-linear-to-r from-amber-100 to-yellow-100">
                             <CardTitle className="flex items-center gap-2 text-amber-900 font-serif">
                                 <Sword className="w-6 h-6" />
                                 Active Adventures
@@ -211,7 +211,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                             ) : (
                                 <div className="space-y-4">
                                     {currentQuests.map((quest) => (
-                                        <div key={quest.id} className="border border-amber-200 rounded-lg p-4 bg-gradient-to-r from-amber-50 to-yellow-50">
+                                        <div key={quest.id} className="border border-amber-200 rounded-lg p-4 bg-linear-to-r from-amber-50 to-yellow-50">
                                             <div className="flex items-start justify-between mb-2">
                                                 <h3 className="font-semibold text-amber-900 leading-tight">{quest.title}</h3>
                                                 <div className="flex items-center gap-1 text-amber-700 font-bold">
@@ -248,7 +248,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
                     {/* Recent Created Quests */}
                     <Card className="border-2 border-amber-200 bg-white shadow-lg">
-                        <CardHeader className="border-b border-amber-200 bg-gradient-to-r from-amber-100 to-yellow-100">
+                        <CardHeader className="border-b border-amber-200 bg-linear-to-r from-amber-100 to-yellow-100">
                             <CardTitle className="flex items-center gap-2 text-amber-900 font-serif">
                                 <Star className="w-6 h-6" />
                                 {user.role === 'PLAYER' ? 'Quest History' : 'Recent Creations'}
@@ -279,7 +279,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                             ) : (
                                 <div className="space-y-4">
                                     {recentCreatedQuests.map((quest) => (
-                                        <div key={quest.id} className="border border-amber-200 rounded-lg p-4 bg-gradient-to-r from-amber-50 to-yellow-50">
+                                        <div key={quest.id} className="border border-amber-200 rounded-lg p-4 bg-linear-to-r from-amber-50 to-yellow-50">
                                             <div className="flex items-start justify-between mb-2">
                                                 <h3 className="font-semibold text-amber-900 leading-tight">{quest.title}</h3>
                                                 <div className="flex items-center gap-1 text-amber-700 font-bold">
@@ -315,7 +315,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
                 {/* Quick Actions */}
                 <div className="mt-8">
-                    <Card className="border-2 border-amber-200 bg-gradient-to-r from-amber-100 to-yellow-100 shadow-lg">
+                    <Card className="border-2 border-amber-200 bg-linear-to-r from-amber-100 to-yellow-100 shadow-lg">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-amber-900 font-serif">
                                 <TrendingUp className="w-6 h-6" />

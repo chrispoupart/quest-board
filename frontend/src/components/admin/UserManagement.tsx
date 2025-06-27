@@ -112,7 +112,7 @@ const UserManagement: React.FC<UserManagementProps> = () => {
 
             {/* User Statistics */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
+                <Card className="border-2 border-amber-200 bg-linear-to-br from-amber-50 to-yellow-50 shadow-lg">
                     <CardContent className="p-6 text-center">
                         <Crown className="w-12 h-12 mx-auto mb-3 text-yellow-600" />
                         <div className="text-2xl font-bold text-amber-900">
@@ -122,7 +122,7 @@ const UserManagement: React.FC<UserManagementProps> = () => {
                     </CardContent>
                 </Card>
 
-                <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
+                <Card className="border-2 border-amber-200 bg-linear-to-br from-amber-50 to-yellow-50 shadow-lg">
                     <CardContent className="p-6 text-center">
                         <Shield className="w-12 h-12 mx-auto mb-3 text-blue-600" />
                         <div className="text-2xl font-bold text-amber-900">
@@ -132,7 +132,7 @@ const UserManagement: React.FC<UserManagementProps> = () => {
                     </CardContent>
                 </Card>
 
-                <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
+                <Card className="border-2 border-amber-200 bg-linear-to-br from-amber-50 to-yellow-50 shadow-lg">
                     <CardContent className="p-6 text-center">
                         <Users className="w-12 h-12 mx-auto mb-3 text-green-600" />
                         <div className="text-2xl font-bold text-amber-900">
@@ -162,7 +162,7 @@ const UserManagement: React.FC<UserManagementProps> = () => {
                 </Card>
             ) : (
                 <Card className="border-2 border-amber-200 bg-white shadow-lg">
-                    <CardHeader className="border-b border-amber-200 bg-gradient-to-r from-amber-100 to-yellow-100">
+                    <CardHeader className="border-b border-amber-200 bg-linear-to-r from-amber-100 to-yellow-100">
                         <CardTitle className="flex items-center gap-2 text-amber-900 font-serif">
                             <Users className="w-6 h-6" />
                             Guild Members ({users.length})
@@ -171,7 +171,7 @@ const UserManagement: React.FC<UserManagementProps> = () => {
                     <CardContent className="p-6">
                         <div className="space-y-4">
                             {users.map((user) => (
-                                <div key={user.id} className="border border-amber-200 rounded-lg p-4 bg-gradient-to-r from-amber-50 to-yellow-50">
+                                <div key={user.id} className="border border-amber-200 rounded-lg p-4 bg-linear-to-r from-amber-50 to-yellow-50">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-4">
                                             <div className="w-12 h-12 bg-amber-600 rounded-full flex items-center justify-center">

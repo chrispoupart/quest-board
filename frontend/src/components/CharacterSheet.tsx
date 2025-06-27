@@ -345,7 +345,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-amber-50 via-yellow-50 to-orange-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto"></div>
           <p className="mt-4 text-amber-600">Loading character sheet...</p>
@@ -355,7 +355,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
+    <div className="min-h-screen bg-linear-to-br from-amber-50 via-yellow-50 to-orange-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
@@ -406,7 +406,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Character Preview */}
           <div className="lg:col-span-1">
-            <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
+            <Card className="border-2 border-amber-200 bg-linear-to-br from-amber-50 to-yellow-50 shadow-lg">
               <CardHeader>
                 <CardTitle className="text-amber-900 font-serif">Character Preview</CardTitle>
               </CardHeader>
@@ -558,7 +558,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
                     {characterClasses.map((charClass) => (
                       <Button
                         key={charClass.value}
-                        variant={formData.characterClass === charClass.value ? "default" : "outline"}
+                        variant={formData.characterClass === charClass.value ? "default" : "outline-solid"}
                         onClick={() => handleInputChange('characterClass', charClass.value)}
                         className={`h-auto p-3 flex flex-col items-center gap-2 ${
                           formData.characterClass === charClass.value
@@ -580,7 +580,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
                     {pronounOptions.map((pronoun) => (
                       <Button
                         key={pronoun.value}
-                        variant={formData.preferredPronouns === pronoun.value ? "default" : "outline"}
+                        variant={formData.preferredPronouns === pronoun.value ? "default" : "outline-solid"}
                         onClick={() => handleInputChange('preferredPronouns', pronoun.value)}
                         className={`h-auto p-2 ${
                           formData.preferredPronouns === pronoun.value
@@ -601,7 +601,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
                     {colorOptions.map((color) => (
                       <Button
                         key={color.value}
-                        variant={formData.favoriteColor === color.value ? "default" : "outline"}
+                        variant={formData.favoriteColor === color.value ? "default" : "outline-solid"}
                         onClick={() => handleInputChange('favoriteColor', color.value)}
                         className={`h-12 p-0 relative ${
                           formData.favoriteColor === color.value
