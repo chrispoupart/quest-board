@@ -9,6 +9,11 @@ on:
       - beta
   workflow_dispatch:
 
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
 jobs:
   semantic-release:
     name: Create Release
