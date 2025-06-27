@@ -8,10 +8,14 @@ WORKDIR /app
 RUN apk add --no-cache python3 make g++
 
 # Copy package files first for better caching
-COPY package*.json ./
+COPY package*.json .npmrc ./
 
-# Install all dependencies (including dev dependencies for building)
-RUN npm ci --legacy-peer-deps && npm cache clean --force
+# Install dependencies with explicit registry and better error handling
+RUN npm ci --legacy-peer-deps --no-audit --no-fund && \
+    npm cache clean --force
+
+# Debug: Check if dependencies are properly installed
+RUN npm list @radix-ui/react-tabs @radix-ui/react-avatar
 
 # Copy source code
 COPY . .

@@ -8,6 +8,32 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    dedupe: ['react', 'react-dom'],
+  },
+  build: {
+    rollupOptions: {
+      external: [],
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          radix: ['@radix-ui/react-avatar', '@radix-ui/react-tabs'],
+        },
+      },
+    },
+    sourcemap: false,
+    minify: 'terser',
+    target: 'es2015',
+  },
+  optimizeDeps: {
+    include: [
+      '@radix-ui/react-avatar',
+      '@radix-ui/react-tabs',
+      'react',
+      'react-dom',
+      'clsx',
+      'tailwind-merge',
+    ],
+    exclude: [],
   },
   css: {
     postcss: './postcss.config.js',
