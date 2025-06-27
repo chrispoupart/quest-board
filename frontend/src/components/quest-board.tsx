@@ -135,6 +135,7 @@ const QuestCard: React.FC<{
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [userSkillLevels, setUserSkillLevels] = useState<{[skillId: number]: number}>({})
   const [skillRequirementsLoaded, setSkillRequirementsLoaded] = useState(false)
+  const [requiredSkills, setRequiredSkills] = useState<QuestRequiredSkill[]>([])
 
   const difficulty = quest.difficulty || getDifficultyFromBounty(quest.bounty)
   const timeLimit = quest.timeLimit || 48
@@ -148,14 +149,14 @@ const QuestCard: React.FC<{
     const loadSkillData = async () => {
       try {
         // Load skill requirements for this quest
-        const requiredSkills = await skillService.getQuestRequiredSkills(quest.id);
-        quest.requiredSkills = requiredSkills;
+        const skills = await skillService.getQuestRequiredSkills(quest.id);
+        setRequiredSkills(skills);
         setSkillRequirementsLoaded(true);
 
         // Load user skill levels for required skills
-        if (requiredSkills.length > 0) {
+        if (skills.length > 0) {
           const skillLevels: {[skillId: number]: number} = {};
-          for (const requiredSkill of requiredSkills) {
+          for (const requiredSkill of skills) {
             const level = await skillService.getUserSkillLevel(currentUser.id, requiredSkill.skillId);
             skillLevels[requiredSkill.skillId] = level;
           }
@@ -193,9 +194,9 @@ const QuestCard: React.FC<{
 
   const canClaimQuest = () => {
     if (quest.status !== 'AVAILABLE') return false;
-    if (!skillRequirementsLoaded || !quest.requiredSkills || quest.requiredSkills.length === 0) return true;
+    if (!skillRequirementsLoaded || requiredSkills.length === 0) return true;
 
-    return quest.requiredSkills.every(requiredSkill => {
+    return requiredSkills.every(requiredSkill => {
       const userLevel = userSkillLevels[requiredSkill.skillId] || 0;
       return userLevel >= requiredSkill.minLevel;
     });
@@ -239,14 +240,14 @@ const QuestCard: React.FC<{
         <p className="text-sm text-amber-800 leading-relaxed">{quest.description}</p>
 
         {/* Skill Requirements */}
-        {quest.requiredSkills && quest.requiredSkills.length > 0 && (
+        {requiredSkills.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm font-medium text-amber-900">
               <Target className="w-4 h-4" />
               <span>Required Skills:</span>
             </div>
             <div className="space-y-1">
-              {quest.requiredSkills.map((requiredSkill) => {
+              {requiredSkills.map((requiredSkill) => {
                 const status = getSkillRequirementStatus(requiredSkill);
                 return (
                   <div key={requiredSkill.skillId} className="flex items-center justify-between text-xs">
