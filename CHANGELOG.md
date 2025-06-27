@@ -1,3 +1,16 @@
+## [1.4.0](https://github.com/chrispoupart/quest-board/compare/v1.3.0...v1.4.0) (2025-06-27)
+
+### Features
+
+* **frontend:** ⚡️ optimize build with manual chunks ([969faeb](https://github.com/chrispoupart/quest-board/commit/969faeb47eba189d02e00c742d437f00c3271589))
+* **frontend:** ➕ add alias for @radix-ui/react-tabs ([16e907c](https://github.com/chrispoupart/quest-board/commit/16e907caa3490915515276d3e513b0c7f444304f))
+* **frontend:** ➕ add Tailwind CSS Vite plugin ([03e05f8](https://github.com/chrispoupart/quest-board/commit/03e05f8988e04f7e02ef99208af44697caf3e219))
+* **frontend:** ➕ add terser dependency ([60a8c6e](https://github.com/chrispoupart/quest-board/commit/60a8c6ea0e563d14b179c6a05862586b8406cd29))
+
+### Bug Fixes
+
+* try vite build before tsc ([1db7129](https://github.com/chrispoupart/quest-board/commit/1db71296386894a5f2c53f24250e35db6f14c4ca))
+
 ## [1.3.0](https://github.com/chrispoupart/quest-board/compare/v1.2.0...v1.3.0) (2025-06-27)
 
 ### Features
