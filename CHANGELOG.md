@@ -1,3 +1,20 @@
+## [1.3.0](https://github.com/chrispoupart/quest-board/compare/v1.2.0...v1.3.0) (2025-06-27)
+
+### Features
+
+* **backend:** 🛂 add endpoint to get user skill level for admin ([8c665f7](https://github.com/chrispoupart/quest-board/commit/8c665f71eacf1814879bd0434538715900271885))
+* **CharacterSheet:** 🏷️ add previousAvatarUrl state for cleanup ([b8876ed](https://github.com/chrispoupart/quest-board/commit/b8876ed58fd1cc6eb494fd3e0ab157b327bce6cb))
+* **CharacterSheet:** 💄 add avatar upload with validation ([4720e5b](https://github.com/chrispoupart/quest-board/commit/4720e5b3a7653b3e7f12251ca629ab27cce884b3))
+* **questController:** 🧑‍💻 add atomic quest creation with skills ([8e996bf](https://github.com/chrispoupart/quest-board/commit/8e996bf5badeef9947faa840a3bab1592f64d851))
+* **skill:** ➕ add endpoint to get user's skill level ([2218b46](https://github.com/chrispoupart/quest-board/commit/2218b469d5648af216ce34c9f409de115f2fba30))
+* **skills:** ➕ add endpoint to get available skills ([5462790](https://github.com/chrispoupart/quest-board/commit/5462790ec7c431b780abfc9fca169849574518a8))
+* **skills:** 🗃️ add skills system with database and API integration ([f42efa9](https://github.com/chrispoupart/quest-board/commit/f42efa94976c231bcd913482304ab36b026af658))
+
+### Bug Fixes
+
+* **CharacterSheet:** 🩹 stop upload on invalid image selection ([b3625e5](https://github.com/chrispoupart/quest-board/commit/b3625e569a0903f5ef447a293661397d4634b88a))
+* **questController:** 🔒️ add skill validation for quest claims ([26fef4e](https://github.com/chrispoupart/quest-board/commit/26fef4eb4d0442d74ed1d77a0a2bc4a6943c5b92))
+
 ## [1.2.0](https://github.com/chrispoupart/quest-board/compare/v1.1.0...v1.2.0) (2025-06-27)
 
 ### Features
