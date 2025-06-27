@@ -274,7 +274,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
 
             {/* Create/Edit Quest Form */}
             {showCreateForm && (
-                <Card className="border-2 border-amber-200 bg-linear-to-r from-amber-50 to-yellow-50 shadow-lg">
+                <Card className="border-2 border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 shadow-lg">
                     <CardHeader className="border-b border-amber-200">
                         <CardTitle className="text-amber-900 font-serif">
                             {editingQuest ? 'Edit Quest' : 'Create New Quest'}

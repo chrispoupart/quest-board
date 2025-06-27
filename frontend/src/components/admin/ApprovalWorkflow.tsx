@@ -102,7 +102,7 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = () => {
 
             {/* Statistics */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="border-2 border-amber-200 bg-linear-to-br from-amber-50 to-yellow-50 shadow-lg">
+                <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
                     <CardContent className="p-6 text-center">
                         <Clock className="w-12 h-12 mx-auto mb-3 text-orange-600" />
                         <div className="text-2xl font-bold text-amber-900">
@@ -112,7 +112,7 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = () => {
                     </CardContent>
                 </Card>
 
-                <Card className="border-2 border-amber-200 bg-linear-to-br from-amber-50 to-yellow-50 shadow-lg">
+                <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
                     <CardContent className="p-6 text-center">
                         <Coins className="w-12 h-12 mx-auto mb-3 text-amber-600" />
                         <div className="text-2xl font-bold text-amber-900">
@@ -122,7 +122,7 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = () => {
                     </CardContent>
                 </Card>
 
-                <Card className="border-2 border-amber-200 bg-linear-to-br from-amber-50 to-yellow-50 shadow-lg">
+                <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
                     <CardContent className="p-6 text-center">
                         <CheckCircle className="w-12 h-12 mx-auto mb-3 text-green-600" />
                         <div className="text-2xl font-bold text-amber-900">Ready</div>
@@ -151,7 +151,7 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = () => {
             ) : (
                 <div className="space-y-6">
                     <Card className="border-2 border-amber-200 bg-white shadow-lg">
-                        <CardHeader className="border-b border-amber-200 bg-linear-to-r from-amber-100 to-yellow-100">
+                        <CardHeader className="border-b border-amber-200 bg-gradient-to-r from-amber-100 to-yellow-100">
                             <CardTitle className="flex items-center gap-2 text-amber-900 font-serif">
                                 <Clock className="w-6 h-6" />
                                 Quests Awaiting Approval ({completedQuests.length})
@@ -160,7 +160,7 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = () => {
                         <CardContent className="p-6">
                             <div className="space-y-6">
                                 {completedQuests.map((quest) => (
-                                    <div key={quest.id} className="border border-amber-200 rounded-lg p-6 bg-linear-to-r from-amber-50 to-yellow-50">
+                                    <div key={quest.id} className="border border-amber-200 rounded-lg p-6 bg-gradient-to-r from-amber-50 to-yellow-50">
                                         <div className="flex items-start justify-between mb-4">
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-3 mb-3">

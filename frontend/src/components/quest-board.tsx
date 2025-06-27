@@ -203,7 +203,7 @@ const QuestCard: React.FC<{
   };
 
   return (
-    <Card className="relative overflow-hidden border-2 border-amber-200 bg-linear-to-br from-amber-50 to-yellow-50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+    <Card className="relative overflow-hidden border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
       {/* Decorative corner elements */}
       <div className="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-amber-400 opacity-60"></div>
       <div className="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-amber-400 opacity-60"></div>
@@ -443,7 +443,7 @@ const UserDashboard: React.FC<{ user: UserStats }> = ({ user }) => {
   const levelInfo = getLevelInfo(user.experience || 0)
 
   return (
-    <Card className="border-2 border-amber-300 bg-linear-to-r from-amber-100 to-yellow-100 shadow-lg">
+    <Card className="border-2 border-amber-300 bg-gradient-to-r from-amber-100 to-yellow-100 shadow-lg">
       <CardContent className="p-6">
         <div className="flex items-center gap-4 mb-4">
           <Avatar className="w-16 h-16 border-2 border-amber-400">
@@ -655,7 +655,7 @@ const QuestBoard: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-amber-50 via-yellow-50 to-orange-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto"></div>
           <p className="mt-4 text-amber-600">Loading your adventure...</p>
@@ -665,7 +665,7 @@ const QuestBoard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-amber-50 via-yellow-50 to-orange-50">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
       <div className="container mx-auto px-4 py-8">
         {/* Page Title */}
         <div className="text-center mb-8">

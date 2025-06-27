@@ -43,7 +43,7 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
     const isAdmin = user.role === 'ADMIN';
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-amber-50 via-yellow-50 to-orange-50">
+        <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
             <div className="container mx-auto px-4 py-8">
                 {/* Header Section */}
                 <div className="text-center mb-8">
@@ -149,7 +149,7 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
 
                 {/* Admin Status Cards */}
                 <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Card className="border-2 border-amber-200 bg-linear-to-br from-amber-50 to-yellow-50 shadow-lg">
+                    <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
                         <CardContent className="p-6 text-center">
                             <Shield className="w-12 h-12 mx-auto mb-3 text-amber-600" />
                             <div className="text-lg font-bold text-amber-900">Administrative Access</div>
@@ -157,7 +157,7 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-2 border-amber-200 bg-linear-to-br from-amber-50 to-yellow-50 shadow-lg">
+                    <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
                         <CardContent className="p-6 text-center">
                             <Star className="w-12 h-12 mx-auto mb-3 text-amber-600" />
                             <div className="text-lg font-bold text-amber-900">Guild Management</div>
@@ -165,7 +165,7 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-2 border-amber-200 bg-linear-to-br from-amber-50 to-yellow-50 shadow-lg">
+                    <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
                         <CardContent className="p-6 text-center">
                             <Trophy className="w-12 h-12 mx-auto mb-3 text-amber-600" />
                             <div className="text-lg font-bold text-amber-900">System Status</div>

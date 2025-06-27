@@ -74,7 +74,7 @@ const LoginPage: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-amber-50 via-yellow-50 to-orange-50">
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
                 <div className="max-w-md w-full space-y-8">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-amber-600 mx-auto"></div>
@@ -86,7 +86,7 @@ const LoginPage: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-amber-50 via-yellow-50 to-orange-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
                 {/* Decorative background elements */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -97,7 +97,7 @@ const LoginPage: React.FC = () => {
                 <div className="relative">
                     {/* Header */}
                     <div className="text-center">
-                        <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-linear-to-br from-amber-400 to-amber-600 shadow-lg border-4 border-amber-200">
+                        <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-600 shadow-lg border-4 border-amber-200">
                             <Scroll className="h-10 w-10 text-white" />
                         </div>
                         <h1 className="mt-6 text-center text-4xl font-bold text-amber-900 font-serif">
@@ -134,7 +134,7 @@ const LoginPage: React.FC = () => {
                             <div>
                                 <button
                                     onClick={handleGoogleLogin}
-                                    className="group relative w-full flex justify-center py-4 px-6 border-2 border-amber-600 text-lg font-medium rounded-lg text-white bg-linear-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg font-medium rounded-lg text-white bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-all duration-200 shadow-lg hover:shadow-xl"
                                 >
                                     <svg
                                         className="w-6 h-6 mr-3"

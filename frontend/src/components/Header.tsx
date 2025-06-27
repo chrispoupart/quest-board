@@ -40,7 +40,7 @@ const Header: React.FC = () => {
     };
 
     return (
-        <header className="border-b-4 border-amber-300 bg-linear-to-r from-amber-200 to-yellow-200 shadow-lg">
+        <header className="border-b-4 border-amber-300 bg-gradient-to-r from-amber-200 to-yellow-200 shadow-lg">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo and Navigation */}
@@ -130,7 +130,7 @@ const Header: React.FC = () => {
                                     leaveFrom="transform opacity-100 scale-100"
                                     leaveTo="transform opacity-0 scale-95"
                                 >
-                                    <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-lg shadow-lg py-2 bg-linear-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 focus:outline-hidden z-50">
+                                    <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-lg shadow-lg py-2 bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 focus:outline-hidden z-50">
                                         <Menu.Item>
                                             {() => (
                                                 <div className="px-4 py-3 border-b border-amber-200">
