@@ -1,22 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import {
   User,
-  Upload,
-  Save,
-  Shield,
-  Sword,
-  Wand2,
-  ArrowLeft,
-  Crown,
-  Scroll,
-  Palette,
-  Heart,
   Star,
+  Crown,
+  Palette,
+  ArrowLeft,
+  Upload,
   CheckCircle,
   AlertCircle,
   Target,
-  Plus,
-  Minus
+  X,
+  Sword,
+  Wand2,
+  Shield,
+  Heart,
+  Scroll,
+  Save
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,13 +34,14 @@ interface CharacterSheetProps {
 }
 
 const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, isAuthenticated } = useAuth();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [userSkills, setUserSkills] = useState<UserSkill[]>([]);
   const [allSkills, setAllSkills] = useState<Skill[]>([]);
   const [loadingSkills, setLoadingSkills] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -103,6 +103,22 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
       loadSkills();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      loadSkills();
+    }
+  }, [isAuthenticated, user]);
+
+  // Cleanup blob URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      // Clean up any blob URLs when component unmounts
+      if (formData.avatarUrl && formData.avatarUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(formData.avatarUrl);
+      }
+    };
+  }, [formData.avatarUrl]);
 
   const loadSkills = async () => {
     if (!user) return;
@@ -170,10 +186,97 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // For now, we'll use a placeholder URL
-    // In a real implementation, you'd upload to a service like Cloudinary or AWS S3
-    const placeholderUrl = URL.createObjectURL(file);
-    handleInputChange('avatarUrl', placeholderUrl);
+    setUploadingAvatar(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      // File type validation
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setError('Please select a valid image file (JPEG, PNG, or WebP)');
+        return;
+      }
+
+      // File size validation (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        setError('Image file size must be less than 5MB');
+        return;
+      }
+
+      // Create a canvas to resize the image
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        setError('Failed to process image');
+        return;
+      }
+
+      // Create an image element to load the file
+      const img = new Image();
+      img.onload = () => {
+        // Set canvas size to 200x200
+        canvas.width = 200;
+        canvas.height = 200;
+
+        // Calculate scaling to maintain aspect ratio
+        const scale = Math.min(200 / img.width, 200 / img.height);
+        const scaledWidth = img.width * scale;
+        const scaledHeight = img.height * scale;
+        const x = (200 - scaledWidth) / 2;
+        const y = (200 - scaledHeight) / 2;
+
+        // Draw the resized image centered on the canvas
+        ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+
+        // Convert to blob
+        canvas.toBlob((blob) => {
+          if (blob) {
+            // Create a new blob URL
+            const resizedImageUrl = URL.createObjectURL(blob);
+
+            // Clean up any existing blob URL to prevent memory leaks
+            if (formData.avatarUrl && formData.avatarUrl.startsWith('blob:')) {
+              URL.revokeObjectURL(formData.avatarUrl);
+            }
+
+            handleInputChange('avatarUrl', resizedImageUrl);
+            setError(null);
+            setSuccess('Avatar processed successfully!');
+          } else {
+            setError('Failed to process image');
+          }
+          setUploadingAvatar(false);
+        }, 'image/jpeg', 0.8); // Convert to JPEG with 80% quality
+      };
+
+      img.onerror = () => {
+        setError('Failed to load image');
+        setUploadingAvatar(false);
+      };
+
+      // Load the image from the file
+      const fileUrl = URL.createObjectURL(file);
+      img.src = fileUrl;
+
+      // Clean up the temporary file URL
+      setTimeout(() => URL.revokeObjectURL(fileUrl), 1000);
+
+    } catch (error) {
+      console.error('Error processing avatar:', error);
+      setError('Failed to process image');
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleClearAvatar = () => {
+    // Clean up any existing blob URL
+    if (formData.avatarUrl && formData.avatarUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(formData.avatarUrl);
+    }
+    handleInputChange('avatarUrl', '');
+    setSuccess('Avatar removed');
   };
 
   const handleSave = async () => {
@@ -194,6 +297,11 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
       // Update the auth context
       if (updateUser) {
         updateUser(updatedUser);
+      }
+
+      // Clean up blob URL after successful save
+      if (formData.avatarUrl && formData.avatarUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(formData.avatarUrl);
       }
 
       setSuccess('Character sheet updated successfully!');
@@ -293,12 +401,20 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
                 {/* Avatar */}
                 <div className="text-center">
                   <Avatar className="w-24 h-24 mx-auto border-4 border-amber-300">
-                    <AvatarImage src={formData.avatarUrl || user.avatarUrl} alt="Character Avatar" />
+                    {uploadingAvatar ? (
+                      <div className="w-full h-full flex items-center justify-center bg-amber-100">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+                      </div>
+                    ) : (
+                      <AvatarImage src={formData.avatarUrl || user.avatarUrl} alt="Character Avatar" />
+                    )}
                     <AvatarFallback className="bg-amber-200 text-amber-800 font-bold text-2xl">
                       {formData.characterName ? formData.characterName.charAt(0).toUpperCase() : user.name.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <p className="text-sm text-amber-600 mt-2">Avatar Preview</p>
+                  <p className="text-sm text-amber-600 mt-2">
+                    {uploadingAvatar ? 'Processing...' : 'Avatar Preview'}
+                  </p>
                 </div>
 
                 {/* Character Info */}
@@ -382,20 +498,42 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
                     <Button
                       variant="outline"
                       onClick={() => document.getElementById('avatar-upload')?.click()}
-                      className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                      disabled={uploadingAvatar}
+                      className="border-amber-300 text-amber-700 hover:bg-amber-50 disabled:opacity-50"
                     >
-                      <Upload className="w-4 h-4 mr-2" />
-                      Upload Image
+                      {uploadingAvatar ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-amber-600 mr-2"></div>
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4 mr-2" />
+                          Upload Image
+                        </>
+                      )}
                     </Button>
+                    {(formData.avatarUrl || user.avatarUrl) && (
+                      <Button
+                        variant="outline"
+                        onClick={handleClearAvatar}
+                        disabled={uploadingAvatar}
+                        className="border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50"
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Remove
+                      </Button>
+                    )}
                     <input
                       id="avatar-upload"
                       type="file"
                       accept="image/*"
                       onChange={handleAvatarUpload}
                       className="hidden"
+                      disabled={uploadingAvatar}
                     />
                     <span className="text-sm text-amber-600">
-                      Recommended: Square image, 200x200px or larger
+                      {uploadingAvatar ? 'Processing image...' : 'Recommended: Square image, 200x200px or larger'}
                     </span>
                   </div>
                 </div>
