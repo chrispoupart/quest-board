@@ -42,9 +42,17 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
   const [allSkills, setAllSkills] = useState<Skill[]>([]);
   const [loadingSkills, setLoadingSkills] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [previousAvatarUrl, setPreviousAvatarUrl] = useState<string | null>(null);
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    characterName: string;
+    characterClass: string;
+    characterBio: string;
+    preferredPronouns: string;
+    favoriteColor: string;
+    avatarUrl: string;
+  }>({
     characterName: '',
     characterClass: '',
     characterBio: '',
@@ -90,6 +98,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
     { value: 'gray', label: 'Gray', color: 'bg-gray-500' },
   ];
 
+  // Load user data and skills when component mounts or user changes
   useEffect(() => {
     if (user) {
       setFormData({
@@ -100,25 +109,23 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
         favoriteColor: user.favoriteColor || '',
         avatarUrl: user.avatarUrl || ''
       });
-      loadSkills();
-    }
-  }, [user]);
 
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      loadSkills();
+      // Load skills only if authenticated
+      if (isAuthenticated) {
+        loadSkills();
+      }
     }
-  }, [isAuthenticated, user]);
+  }, [user, isAuthenticated]);
 
   // Cleanup blob URLs when component unmounts
   useEffect(() => {
     return () => {
-      // Clean up any blob URLs when component unmounts
-      if (formData.avatarUrl && formData.avatarUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(formData.avatarUrl);
+      // Clean up the previous avatar URL when component unmounts
+      if (previousAvatarUrl && previousAvatarUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(previousAvatarUrl);
       }
     };
-  }, [formData.avatarUrl]);
+  }, [previousAvatarUrl]);
 
   const loadSkills = async () => {
     if (!user) return;
@@ -174,7 +181,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
   };
 
   const handleInputChange = (field: string, value: string | number) => {
-    setFormData(prev => ({
+    setFormData((prev: any) => ({
       ...prev,
       [field]: value
     }));
@@ -239,14 +246,15 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
             // Create a new blob URL
             const resizedImageUrl = URL.createObjectURL(blob);
 
-            // Clean up any existing blob URL to prevent memory leaks
-            if (formData.avatarUrl && formData.avatarUrl.startsWith('blob:')) {
-              URL.revokeObjectURL(formData.avatarUrl);
+            // Clean up the previous avatar URL to prevent memory leaks
+            if (previousAvatarUrl && previousAvatarUrl.startsWith('blob:')) {
+              URL.revokeObjectURL(previousAvatarUrl);
             }
 
             handleInputChange('avatarUrl', resizedImageUrl);
             setError(null);
             setSuccess('Avatar processed successfully!');
+            setPreviousAvatarUrl(resizedImageUrl);
           } else {
             setError('Failed to process image');
           }
@@ -274,11 +282,12 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
   };
 
   const handleClearAvatar = () => {
-    // Clean up any existing blob URL
-    if (formData.avatarUrl && formData.avatarUrl.startsWith('blob:')) {
-      URL.revokeObjectURL(formData.avatarUrl);
+    // Clean up the previous avatar URL to prevent memory leaks
+    if (previousAvatarUrl && previousAvatarUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(previousAvatarUrl);
     }
     handleInputChange('avatarUrl', '');
+    setPreviousAvatarUrl(null);
     setSuccess('Avatar removed');
   };
 
@@ -302,9 +311,10 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
         updateUser(updatedUser);
       }
 
-      // Clean up blob URL after successful save
-      if (formData.avatarUrl && formData.avatarUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(formData.avatarUrl);
+      // Clean up the previous avatar URL after successful save
+      if (previousAvatarUrl && previousAvatarUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(previousAvatarUrl);
+        setPreviousAvatarUrl(null);
       }
 
       setSuccess('Character sheet updated successfully!');
