@@ -3,6 +3,7 @@ import jwt, { SignOptions } from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 import { UserRole, JwtPayload, GoogleUserInfo, AuthUser } from '../types';
+import { calculateLevel } from '../utils/leveling';
 
 const prisma = new PrismaClient();
 
@@ -60,6 +61,17 @@ export class AuthService {
                 name: user.name,
                 email: user.email,
                 role: user.role as UserRole,
+                bountyBalance: user.bountyBalance,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+                characterName: user.characterName ?? undefined,
+                avatarUrl: user.avatarUrl ?? undefined,
+                characterClass: user.characterClass ?? undefined,
+                characterBio: user.characterBio ?? undefined,
+                preferredPronouns: user.preferredPronouns ?? undefined,
+                favoriteColor: user.favoriteColor ?? undefined,
+                experience: user.experience,
+                level: calculateLevel(user.experience)
             };
         } catch (error) {
             console.error('Google authentication error:', error);
@@ -164,6 +176,17 @@ export class AuthService {
                 name: user.name,
                 email: user.email,
                 role: user.role as UserRole,
+                bountyBalance: user.bountyBalance,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+                characterName: user.characterName ?? undefined,
+                avatarUrl: user.avatarUrl ?? undefined,
+                characterClass: user.characterClass ?? undefined,
+                characterBio: user.characterBio ?? undefined,
+                preferredPronouns: user.preferredPronouns ?? undefined,
+                favoriteColor: user.favoriteColor ?? undefined,
+                experience: user.experience,
+                level: calculateLevel(user.experience)
             };
 
             return this.generateToken(authUser);
@@ -190,6 +213,17 @@ export class AuthService {
             name: user.name,
             email: user.email,
             role: user.role as UserRole,
+            bountyBalance: user.bountyBalance,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+            characterName: user.characterName ?? undefined,
+            avatarUrl: user.avatarUrl ?? undefined,
+            characterClass: user.characterClass ?? undefined,
+            characterBio: user.characterBio ?? undefined,
+            preferredPronouns: user.preferredPronouns ?? undefined,
+            favoriteColor: user.favoriteColor ?? undefined,
+            experience: user.experience,
+            level: calculateLevel(user.experience)
         };
     }
 
@@ -208,6 +242,17 @@ export class AuthService {
             name: user.name,
             email: user.email,
             role: user.role as UserRole,
+            bountyBalance: user.bountyBalance,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+            characterName: user.characterName ?? undefined,
+            avatarUrl: user.avatarUrl ?? undefined,
+            characterClass: user.characterClass ?? undefined,
+            characterBio: user.characterBio ?? undefined,
+            preferredPronouns: user.preferredPronouns ?? undefined,
+            favoriteColor: user.favoriteColor ?? undefined,
+            experience: user.experience,
+            level: calculateLevel(user.experience)
         };
     }
 

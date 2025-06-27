@@ -143,12 +143,12 @@ export interface AuthUser {
     createdAt: Date;
     updatedAt: Date;
     // Character customization fields
-    characterName?: string;
-    avatarUrl?: string;
-    characterClass?: string;
-    characterBio?: string;
-    preferredPronouns?: string;
-    favoriteColor?: string;
+    characterName?: string | undefined;
+    avatarUrl?: string | undefined;
+    characterClass?: string | undefined;
+    characterBio?: string | undefined;
+    preferredPronouns?: string | undefined;
+    favoriteColor?: string | undefined;
     experience: number;
     level: number;
 }

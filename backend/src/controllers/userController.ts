@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { UserRole, UpdateUserRequest, ApiResponse, AuthUser } from '../types';
+import { UserRole, AuthUser, ApiResponse, UpdateUserRequest } from '../types';
 import { validateUserRole } from '../utils/validation';
-import { getLevelInfo } from '../utils/leveling';
+import { calculateLevel } from '../utils/leveling';
 
 const prisma = new PrismaClient();
 
@@ -53,7 +53,7 @@ export class UserController {
                 return;
             }
 
-            const levelInfo = getLevelInfo(user.experience);
+            const levelInfo = calculateLevel(user.experience);
 
             res.json({
                 success: true,
@@ -66,15 +66,14 @@ export class UserController {
                     bountyBalance: user.bountyBalance,
                     createdAt: user.createdAt,
                     updatedAt: user.updatedAt,
-                    // Character customization fields
-                    characterName: user.characterName,
-                    avatarUrl: user.avatarUrl,
-                    characterClass: user.characterClass,
-                    characterBio: user.characterBio,
-                    preferredPronouns: user.preferredPronouns,
-                    favoriteColor: user.favoriteColor,
+                    characterName: user.characterName || undefined,
+                    avatarUrl: user.avatarUrl || undefined,
+                    characterClass: user.characterClass || undefined,
+                    characterBio: user.characterBio || undefined,
+                    preferredPronouns: user.preferredPronouns || undefined,
+                    favoriteColor: user.favoriteColor || undefined,
                     experience: user.experience,
-                    level: levelInfo.level,
+                    level: levelInfo
                 }
             } as ApiResponse<AuthUser>);
         } catch (error) {
@@ -167,7 +166,7 @@ export class UserController {
                 }
             });
 
-            const levelInfo = getLevelInfo(updatedUser.experience);
+            const levelInfo = calculateLevel(updatedUser.experience);
 
             res.json({
                 success: true,
@@ -180,15 +179,14 @@ export class UserController {
                     bountyBalance: updatedUser.bountyBalance,
                     createdAt: updatedUser.createdAt,
                     updatedAt: updatedUser.updatedAt,
-                    // Character customization fields
-                    characterName: updatedUser.characterName,
-                    avatarUrl: updatedUser.avatarUrl,
-                    characterClass: updatedUser.characterClass,
-                    characterBio: updatedUser.characterBio,
-                    preferredPronouns: updatedUser.preferredPronouns,
-                    favoriteColor: updatedUser.favoriteColor,
+                    characterName: updatedUser.characterName || undefined,
+                    avatarUrl: updatedUser.avatarUrl || undefined,
+                    characterClass: updatedUser.characterClass || undefined,
+                    characterBio: updatedUser.characterBio || undefined,
+                    preferredPronouns: updatedUser.preferredPronouns || undefined,
+                    favoriteColor: updatedUser.favoriteColor || undefined,
                     experience: updatedUser.experience,
-                    level: levelInfo.level,
+                    level: levelInfo
                 }
             } as ApiResponse<AuthUser>);
         } catch (error) {
@@ -225,6 +223,14 @@ export class UserController {
                     bountyBalance: true,
                     createdAt: true,
                     updatedAt: true,
+                    // Character customization fields
+                    characterName: true,
+                    avatarUrl: true,
+                    characterClass: true,
+                    characterBio: true,
+                    preferredPronouns: true,
+                    favoriteColor: true,
+                    experience: true,
                 },
                 orderBy: {
                     createdAt: 'desc'
@@ -237,6 +243,17 @@ export class UserController {
                 name: user.name,
                 email: user.email,
                 role: user.role as UserRole,
+                bountyBalance: user.bountyBalance,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+                characterName: user.characterName ?? undefined,
+                avatarUrl: user.avatarUrl ?? undefined,
+                characterClass: user.characterClass ?? undefined,
+                characterBio: user.characterBio ?? undefined,
+                preferredPronouns: user.preferredPronouns ?? undefined,
+                favoriteColor: user.favoriteColor ?? undefined,
+                experience: user.experience,
+                level: calculateLevel(user.experience)
             }));
 
             res.json({
