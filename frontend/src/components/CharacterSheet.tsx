@@ -558,7 +558,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
                     {characterClasses.map((charClass) => (
                       <Button
                         key={charClass.value}
-                        variant={formData.characterClass === charClass.value ? "default" : "outline-solid"}
+                        variant={formData.characterClass === charClass.value ? "default" : "outline"}
                         onClick={() => handleInputChange('characterClass', charClass.value)}
                         className={`h-auto p-3 flex flex-col items-center gap-2 ${
                           formData.characterClass === charClass.value
@@ -580,7 +580,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
                     {pronounOptions.map((pronoun) => (
                       <Button
                         key={pronoun.value}
-                        variant={formData.preferredPronouns === pronoun.value ? "default" : "outline-solid"}
+                        variant={formData.preferredPronouns === pronoun.value ? "default" : "outline"}
                         onClick={() => handleInputChange('preferredPronouns', pronoun.value)}
                         className={`h-auto p-2 ${
                           formData.preferredPronouns === pronoun.value
@@ -601,7 +601,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
                     {colorOptions.map((color) => (
                       <Button
                         key={color.value}
-                        variant={formData.favoriteColor === color.value ? "default" : "outline-solid"}
+                        variant={formData.favoriteColor === color.value ? "default" : "outline"}
                         onClick={() => handleInputChange('favoriteColor', color.value)}
                         className={`h-12 p-0 relative ${
                           formData.favoriteColor === color.value
