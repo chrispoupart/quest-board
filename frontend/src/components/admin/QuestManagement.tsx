@@ -86,14 +86,12 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
         try {
             setSubmitting(true);
             setError(null);
-            const newQuest = await questService.createQuest(formData);
 
-            // Add skill requirements if any
-            if (skillRequirements.length > 0) {
-                for (const skillReq of skillRequirements) {
-                    await skillService.addQuestRequiredSkill(newQuest.id, skillReq);
-                }
-            }
+            // Use atomic operation to create quest with skill requirements
+            await questService.createQuestWithSkills({
+                ...formData,
+                skillRequirements: skillRequirements.length > 0 ? skillRequirements : undefined
+            });
 
             setFormData({ title: '', description: '', bounty: 0, isRepeatable: false, cooldownDays: undefined });
             setSkillRequirements([]);
@@ -117,21 +115,12 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
         try {
             setSubmitting(true);
             setError(null);
-            await questService.updateQuest(editingQuest.id, formData);
 
-            // Update skill requirements
-            // First, remove all existing skill requirements
-            const existingSkills = await skillService.getQuestRequiredSkills(editingQuest.id);
-            for (const existingSkill of existingSkills) {
-                await skillService.removeQuestRequiredSkill(editingQuest.id, existingSkill.skillId);
-            }
-
-            // Then add new skill requirements
-            if (skillRequirements.length > 0) {
-                for (const skillReq of skillRequirements) {
-                    await skillService.addQuestRequiredSkill(editingQuest.id, skillReq);
-                }
-            }
+            // Use atomic operation to update quest with skill requirements
+            await questService.updateQuestWithSkills(editingQuest.id, {
+                ...formData,
+                skillRequirements: skillRequirements.length > 0 ? skillRequirements : undefined
+            });
 
             setEditingQuest(null);
             setFormData({ title: '', description: '', bounty: 0, isRepeatable: false, cooldownDays: undefined });

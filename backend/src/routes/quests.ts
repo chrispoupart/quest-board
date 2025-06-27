@@ -24,7 +24,9 @@ router.get('/:id/skill-requirements', validateQuestId, QuestController.getQuestR
 
 // Admin/Editor only routes
 router.post('/', requireAdminOrEditor, QuestController.createQuest);
+router.post('/with-skills', requireAdminOrEditor, QuestController.createQuestWithSkills);
 router.put('/:id', requireAdminOrEditor, validateQuestId, QuestController.updateQuest);
+router.put('/:id/with-skills', requireAdminOrEditor, validateQuestId, QuestController.updateQuestWithSkills);
 router.post('/:id/approve', requireAdminOrEditor, validateQuestId, QuestController.approveQuest);
 router.post('/:id/reject', requireAdminOrEditor, validateQuestId, QuestController.rejectQuest);
 

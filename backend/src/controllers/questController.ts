@@ -807,4 +807,170 @@ export class QuestController {
             }
         }
     }
+
+    /**
+     * Create a quest with skill requirements (atomic operation)
+     */
+    static async createQuestWithSkills(req: Request, res: Response): Promise<void> {
+        try {
+            const { title, description, bounty, isRepeatable, cooldownDays, skillRequirements } = req.body;
+            const userId = (req as any).user?.userId;
+
+            if (!userId) {
+                res.status(401).json({ success: false, error: { message: 'User not authenticated' } });
+                return;
+            }
+
+            if (!title || typeof title !== 'string' || title.trim().length === 0) {
+                res.status(400).json({ success: false, error: { message: 'Title is required' } });
+                return;
+            }
+
+            if (typeof bounty !== 'number' || bounty <= 0) {
+                res.status(400).json({ success: false, error: { message: 'Bounty must be a positive number' } });
+                return;
+            }
+
+            if (isRepeatable && (typeof cooldownDays !== 'number' || cooldownDays <= 0)) {
+                res.status(400).json({ success: false, error: { message: 'Cooldown days must be a positive number for repeatable quests' } });
+                return;
+            }
+
+            // Validate skill requirements if provided
+            if (skillRequirements && Array.isArray(skillRequirements)) {
+                for (const req of skillRequirements) {
+                    if (typeof req.skillId !== 'number' || req.skillId <= 0) {
+                        res.status(400).json({ success: false, error: { message: 'Invalid skill ID in requirements' } });
+                        return;
+                    }
+                    if (typeof req.minLevel !== 'number' || req.minLevel < 1 || req.minLevel > 5) {
+                        res.status(400).json({ success: false, error: { message: 'Skill level must be between 1 and 5' } });
+                        return;
+                    }
+                }
+            }
+
+            // Use a transaction to ensure atomicity
+            const result = await prisma.$transaction(async (tx) => {
+                // Create the quest
+                const quest = await tx.quest.create({
+                    data: {
+                        title,
+                        description,
+                        bounty,
+                        status: 'AVAILABLE',
+                        createdBy: userId,
+                        isRepeatable: isRepeatable || false,
+                        cooldownDays: isRepeatable ? cooldownDays : null,
+                    },
+                });
+
+                // Add skill requirements if provided
+                if (skillRequirements && skillRequirements.length > 0) {
+                    const skillReqs = skillRequirements.map((req: any) => ({
+                        questId: quest.id,
+                        skillId: req.skillId,
+                        minLevel: req.minLevel
+                    }));
+
+                    await tx.questRequiredSkill.createMany({
+                        data: skillReqs
+                    });
+                }
+
+                return quest;
+            });
+
+            res.status(201).json({ success: true, data: result } as ApiResponse);
+        } catch (error) {
+            console.error('Error creating quest with skills:', error);
+            res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+        }
+    }
+
+    /**
+     * Update a quest with skill requirements (atomic operation)
+     */
+    static async updateQuestWithSkills(req: Request, res: Response): Promise<void> {
+        try {
+            const questIdParam = req.params['id'];
+            if (!questIdParam) {
+                res.status(400).json({ success: false, error: { message: 'Quest ID is required' } });
+                return;
+            }
+
+            const questId = parseInt(questIdParam);
+            if (isNaN(questId)) {
+                res.status(400).json({ success: false, error: { message: 'Invalid quest ID' } });
+                return;
+            }
+
+            const { title, description, bounty, status, isRepeatable, cooldownDays, skillRequirements } = req.body;
+
+            // Validate skill requirements if provided
+            if (skillRequirements && Array.isArray(skillRequirements)) {
+                for (const req of skillRequirements) {
+                    if (typeof req.skillId !== 'number' || req.skillId <= 0) {
+                        res.status(400).json({ success: false, error: { message: 'Invalid skill ID in requirements' } });
+                        return;
+                    }
+                    if (typeof req.minLevel !== 'number' || req.minLevel < 1 || req.minLevel > 5) {
+                        res.status(400).json({ success: false, error: { message: 'Skill level must be between 1 and 5' } });
+                        return;
+                    }
+                }
+            }
+
+            // Use a transaction to ensure atomicity
+            const result = await prisma.$transaction(async (tx) => {
+                // Update the quest
+                const updateFields: any = {};
+                if (title !== undefined) updateFields.title = title;
+                if (description !== undefined) updateFields.description = description;
+                if (bounty !== undefined) updateFields.bounty = bounty;
+                if (status !== undefined) updateFields.status = status;
+                if (isRepeatable !== undefined) updateFields.isRepeatable = isRepeatable;
+                if (cooldownDays !== undefined) {
+                    if (isRepeatable && (typeof cooldownDays !== 'number' || cooldownDays <= 0)) {
+                        throw new Error('Cooldown days must be a positive number for repeatable quests');
+                    }
+                    updateFields.cooldownDays = isRepeatable ? cooldownDays : null;
+                }
+
+                const quest = await tx.quest.update({
+                    where: { id: questId },
+                    data: updateFields,
+                });
+
+                // Remove all existing skill requirements
+                await tx.questRequiredSkill.deleteMany({
+                    where: { questId }
+                });
+
+                // Add new skill requirements if provided
+                if (skillRequirements && skillRequirements.length > 0) {
+                    const skillReqs = skillRequirements.map((req: any) => ({
+                        questId: quest.id,
+                        skillId: req.skillId,
+                        minLevel: req.minLevel
+                    }));
+
+                    await tx.questRequiredSkill.createMany({
+                        data: skillReqs
+                    });
+                }
+
+                return quest;
+            });
+
+            res.json({ success: true, data: result } as ApiResponse);
+        } catch (error) {
+            console.error('Error updating quest with skills:', error);
+            if (error instanceof Error) {
+                res.status(400).json({ success: false, error: { message: error.message } });
+            } else {
+                res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+            }
+        }
+    }
 }
