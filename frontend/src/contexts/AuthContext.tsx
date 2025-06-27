@@ -29,18 +29,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const checkAuth = async () => {
             try {
                 const token = localStorage.getItem('accessToken');
-                console.log('AuthContext: Checking auth, token exists:', !!token);
                 if (token) {
                     try {
                         const userData = await authService.getCurrentUser();
-                        console.log('AuthContext: User authenticated:', userData.id, userData.role);
                         setUser(userData);
                     } catch (authError) {
                         console.error('AuthContext: Current user check failed:', authError);
                         // Try to refresh the token
                         try {
                             const refreshResult = await authService.refreshToken();
-                            console.log('AuthContext: Token refreshed successfully');
                             localStorage.setItem('accessToken', refreshResult.accessToken);
                             setUser(refreshResult.user);
                         } catch (refreshError) {
@@ -51,8 +48,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                             setUser(null);
                         }
                     }
-                } else {
-                    console.log('AuthContext: No token found');
                 }
             } catch (error) {
                 console.error('AuthContext: Auth check failed:', error);

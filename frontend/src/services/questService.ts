@@ -37,13 +37,7 @@ export const questService = {
         createdBy?: number;
         claimedBy?: number;
     }): Promise<QuestListingResponse> {
-        console.log('QuestService: Getting quests with params:', params);
-        console.log('QuestService: API_BASE_URL:', API_BASE_URL);
-        console.log('QuestService: Token exists:', !!localStorage.getItem('accessToken'));
-
         const response = await api.get<ApiResponse<QuestListingResponse>>('/quests', { params });
-
-        console.log('QuestService: Response received:', response.status, response.data.success);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch quests');
