@@ -1,4 +1,4 @@
-import cron from 'node-cron';
+import cron, { ScheduledTask } from 'node-cron';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -19,7 +19,7 @@ export interface JobStatus {
 }
 
 export class JobService {
-    private static jobs: Map<string, cron.ScheduledTask> = new Map();
+    private static jobs: Map<string, ScheduledTask> = new Map();
     private static jobStatus: Map<string, JobStatus> = new Map();
 
     /**
@@ -66,9 +66,11 @@ export class JobService {
         const scheduledTask = cron.schedule(schedule, async () => {
             await this.executeJob(name, task);
         }, {
-            scheduled: true,
             timezone: 'UTC'
         });
+
+        // Start the scheduled task (required in node-cron v4)
+        scheduledTask.start();
 
         this.jobs.set(name, scheduledTask);
 
@@ -355,7 +357,7 @@ export class JobService {
     /**
      * Calculate next run time from scheduled task
      */
-    private static calculateNextRunFromJob(job: cron.ScheduledTask): Date {
+    private static calculateNextRunFromJob(job: ScheduledTask): Date {
         // This is a simplified approach - in a real implementation,
         // you might want to store the cron expression and recalculate
         return new Date(Date.now() + 24 * 60 * 60 * 1000); // Default to 24 hours
