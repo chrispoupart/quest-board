@@ -73,6 +73,19 @@ export const questService = {
     },
 
     /**
+     * Create a new quest with skill requirements (atomic operation)
+     */
+    async createQuestWithSkills(questData: CreateQuestRequest & { skillRequirements?: Array<{ skillId: number; minLevel: number }> }): Promise<Quest> {
+        const response = await api.post<ApiResponse<Quest>>('/quests/with-skills', questData);
+
+        if (!response.data.success) {
+            throw new Error(response.data.error?.message || 'Failed to create quest with skills');
+        }
+
+        return response.data.data!;
+    },
+
+    /**
      * Update an existing quest
      */
     async updateQuest(id: number, questData: UpdateQuestRequest): Promise<Quest> {
@@ -80,6 +93,19 @@ export const questService = {
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to update quest');
+        }
+
+        return response.data.data!;
+    },
+
+    /**
+     * Update an existing quest with skill requirements (atomic operation)
+     */
+    async updateQuestWithSkills(id: number, questData: UpdateQuestRequest & { skillRequirements?: Array<{ skillId: number; minLevel: number }> }): Promise<Quest> {
+        const response = await api.put<ApiResponse<Quest>>(`/quests/${id}/with-skills`, questData);
+
+        if (!response.data.success) {
+            throw new Error(response.data.error?.message || 'Failed to update quest with skills');
         }
 
         return response.data.data!;

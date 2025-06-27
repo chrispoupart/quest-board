@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import {
   User,
+  Star,
+  Crown,
+  Palette,
+  ArrowLeft,
   Upload,
-  Save,
-  Shield,
+  CheckCircle,
+  AlertCircle,
+  Target,
+  X,
   Sword,
   Wand2,
-  ArrowLeft,
-  Crown,
-  Scroll,
-  Palette,
+  Shield,
   Heart,
-  Star,
-  CheckCircle,
-  AlertCircle
+  Scroll,
+  Save
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,19 +26,33 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '../contexts/AuthContext';
 import { userService } from '../services/userService';
+import { skillService } from '../services/skillService';
+import { Skill, UserSkill } from '../types';
 
 interface CharacterSheetProps {
   onBack?: () => void;
 }
 
 const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, isAuthenticated } = useAuth();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [userSkills, setUserSkills] = useState<UserSkill[]>([]);
+  const [allSkills, setAllSkills] = useState<Skill[]>([]);
+  const [loadingSkills, setLoadingSkills] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [previousAvatarUrl, setPreviousAvatarUrl] = useState<string | null>(null);
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    characterName: string;
+    characterClass: string;
+    characterBio: string;
+    preferredPronouns: string;
+    favoriteColor: string;
+    avatarUrl: string;
+  }>({
     characterName: '',
     characterClass: '',
     characterBio: '',
@@ -82,6 +98,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
     { value: 'gray', label: 'Gray', color: 'bg-gray-500' },
   ];
 
+  // Load user data and skills when component mounts or user changes
   useEffect(() => {
     if (user) {
       setFormData({
@@ -92,11 +109,79 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
         favoriteColor: user.favoriteColor || '',
         avatarUrl: user.avatarUrl || ''
       });
+
+      // Load skills only if authenticated
+      if (isAuthenticated) {
+        loadSkills();
+      }
     }
-  }, [user]);
+  }, [user, isAuthenticated]);
+
+  // Cleanup blob URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      // Clean up the previous avatar URL when component unmounts
+      if (previousAvatarUrl && previousAvatarUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(previousAvatarUrl);
+      }
+    };
+  }, [previousAvatarUrl]);
+
+  const loadSkills = async () => {
+    if (!user) return;
+
+    try {
+      setLoadingSkills(true);
+      const [userSkillsResponse, allSkillsResponse] = await Promise.all([
+        skillService.getMySkills(),
+        skillService.getAllSkills()
+      ]);
+
+      setUserSkills(userSkillsResponse);
+      setAllSkills(allSkillsResponse);
+    } catch (err) {
+      console.error('Failed to load skills:', err);
+      setError('Failed to load skills');
+    } finally {
+      setLoadingSkills(false);
+    }
+  };
+
+  const getSkillLevel = (skillId: number): number => {
+    const userSkill = userSkills.find(skill => skill.skillId === skillId);
+    return userSkill?.level || 0;
+  };
+
+  const getSkillLevelColor = (level: number): string => {
+    if (level >= 4) return 'text-green-600 bg-green-50 border-green-200';
+    if (level >= 3) return 'text-blue-600 bg-blue-50 border-blue-200';
+    if (level >= 2) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+    return 'text-gray-600 bg-gray-50 border-gray-200';
+  };
+
+  const renderSkillLevel = (skill: Skill) => {
+    const level = getSkillLevel(skill.id);
+    const levelColor = getSkillLevelColor(level);
+
+    return (
+      <div key={skill.id} className="flex items-center justify-between p-3 border border-amber-200 rounded-lg bg-white">
+        <div className="flex-1">
+          <h4 className="font-medium text-amber-900">{skill.name}</h4>
+          {skill.description && (
+            <p className="text-sm text-amber-600 mt-1">{skill.description}</p>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge className={`text-xs font-medium border ${levelColor}`}>
+            Level {level}
+          </Badge>
+        </div>
+      </div>
+    );
+  };
 
   const handleInputChange = (field: string, value: string | number) => {
-    setFormData(prev => ({
+    setFormData((prev: any) => ({
       ...prev,
       [field]: value
     }));
@@ -108,10 +193,102 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // For now, we'll use a placeholder URL
-    // In a real implementation, you'd upload to a service like Cloudinary or AWS S3
-    const placeholderUrl = URL.createObjectURL(file);
-    handleInputChange('avatarUrl', placeholderUrl);
+    setUploadingAvatar(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      // File type validation
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setError('Please select a valid image file (JPEG, PNG, or WebP)');
+        setUploadingAvatar(false);
+        return;
+      }
+
+      // File size validation (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        setError('Image file size must be less than 5MB');
+        setUploadingAvatar(false);
+        return;
+      }
+
+      // Create a canvas to resize the image
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        setError('Failed to process image');
+        setUploadingAvatar(false);
+        return;
+      }
+
+      // Create an image element to load the file
+      const img = new Image();
+      img.onload = () => {
+        // Set canvas size to 200x200
+        canvas.width = 200;
+        canvas.height = 200;
+
+        // Calculate scaling to maintain aspect ratio
+        const scale = Math.min(200 / img.width, 200 / img.height);
+        const scaledWidth = img.width * scale;
+        const scaledHeight = img.height * scale;
+        const x = (200 - scaledWidth) / 2;
+        const y = (200 - scaledHeight) / 2;
+
+        // Draw the resized image centered on the canvas
+        ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+
+        // Convert to blob
+        canvas.toBlob((blob) => {
+          if (blob) {
+            // Create a new blob URL
+            const resizedImageUrl = URL.createObjectURL(blob);
+
+            // Clean up the previous avatar URL to prevent memory leaks
+            if (previousAvatarUrl && previousAvatarUrl.startsWith('blob:')) {
+              URL.revokeObjectURL(previousAvatarUrl);
+            }
+
+            handleInputChange('avatarUrl', resizedImageUrl);
+            setError(null);
+            setSuccess('Avatar processed successfully!');
+            setPreviousAvatarUrl(resizedImageUrl);
+          } else {
+            setError('Failed to process image');
+          }
+          setUploadingAvatar(false);
+        }, 'image/jpeg', 0.8); // Convert to JPEG with 80% quality
+      };
+
+      img.onerror = () => {
+        setError('Failed to load image');
+        setUploadingAvatar(false);
+      };
+
+      // Load the image from the file
+      const fileUrl = URL.createObjectURL(file);
+      img.src = fileUrl;
+
+      // Clean up the temporary file URL
+      setTimeout(() => URL.revokeObjectURL(fileUrl), 1000);
+
+    } catch (error) {
+      console.error('Error processing avatar:', error);
+      setError('Failed to process image');
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleClearAvatar = () => {
+    // Clean up the previous avatar URL to prevent memory leaks
+    if (previousAvatarUrl && previousAvatarUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(previousAvatarUrl);
+    }
+    handleInputChange('avatarUrl', '');
+    setPreviousAvatarUrl(null);
+    setSuccess('Avatar removed');
   };
 
   const handleSave = async () => {
@@ -132,6 +309,12 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
       // Update the auth context
       if (updateUser) {
         updateUser(updatedUser);
+      }
+
+      // Clean up the previous avatar URL after successful save
+      if (previousAvatarUrl && previousAvatarUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(previousAvatarUrl);
+        setPreviousAvatarUrl(null);
       }
 
       setSuccess('Character sheet updated successfully!');
@@ -231,12 +414,20 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
                 {/* Avatar */}
                 <div className="text-center">
                   <Avatar className="w-24 h-24 mx-auto border-4 border-amber-300">
-                    <AvatarImage src={formData.avatarUrl || user.avatarUrl} alt="Character Avatar" />
+                    {uploadingAvatar ? (
+                      <div className="w-full h-full flex items-center justify-center bg-amber-100">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+                      </div>
+                    ) : (
+                      <AvatarImage src={formData.avatarUrl || user.avatarUrl} alt="Character Avatar" />
+                    )}
                     <AvatarFallback className="bg-amber-200 text-amber-800 font-bold text-2xl">
                       {formData.characterName ? formData.characterName.charAt(0).toUpperCase() : user.name.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <p className="text-sm text-amber-600 mt-2">Avatar Preview</p>
+                  <p className="text-sm text-amber-600 mt-2">
+                    {uploadingAvatar ? 'Processing...' : 'Avatar Preview'}
+                  </p>
                 </div>
 
                 {/* Character Info */}
@@ -287,8 +478,9 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
             </Card>
           </div>
 
-          {/* Character Form */}
-          <div className="lg:col-span-2">
+          {/* Character Form and Skills */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Character Form */}
             <Card className="border-2 border-amber-200 bg-white shadow-lg">
               <CardHeader>
                 <CardTitle className="text-amber-900 font-serif">Character Details</CardTitle>
@@ -319,20 +511,42 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
                     <Button
                       variant="outline"
                       onClick={() => document.getElementById('avatar-upload')?.click()}
-                      className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                      disabled={uploadingAvatar}
+                      className="border-amber-300 text-amber-700 hover:bg-amber-50 disabled:opacity-50"
                     >
-                      <Upload className="w-4 h-4 mr-2" />
-                      Upload Image
+                      {uploadingAvatar ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-amber-600 mr-2"></div>
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4 mr-2" />
+                          Upload Image
+                        </>
+                      )}
                     </Button>
+                    {(formData.avatarUrl || user.avatarUrl) && (
+                      <Button
+                        variant="outline"
+                        onClick={handleClearAvatar}
+                        disabled={uploadingAvatar}
+                        className="border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50"
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Remove
+                      </Button>
+                    )}
                     <input
                       id="avatar-upload"
                       type="file"
                       accept="image/*"
                       onChange={handleAvatarUpload}
                       className="hidden"
+                      disabled={uploadingAvatar}
                     />
                     <span className="text-sm text-amber-600">
-                      Recommended: Square image, 200x200px or larger
+                      {uploadingAvatar ? 'Processing image...' : 'Recommended: Square image, 200x200px or larger'}
                     </span>
                   </div>
                 </div>
@@ -442,6 +656,35 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
                     )}
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Skills Section */}
+            <Card className="border-2 border-amber-200 bg-white shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-amber-900 font-serif flex items-center gap-2">
+                  <Target className="w-5 h-5" />
+                  Skills & Abilities
+                </CardTitle>
+                <p className="text-amber-700">
+                  Manage your character's skills. Guild Masters can adjust skill levels based on your performance.
+                </p>
+              </CardHeader>
+              <CardContent>
+                {loadingSkills ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+                    <span className="ml-3 text-amber-600">Loading skills...</span>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {allSkills.length === 0 ? (
+                      <p className="text-amber-600 text-center py-8">No skills available yet.</p>
+                    ) : (
+                      allSkills.map(renderSkillLevel)
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
