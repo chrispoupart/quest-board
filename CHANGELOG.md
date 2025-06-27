@@ -1,3 +1,9 @@
+## [1.5.0](https://github.com/chrispoupart/quest-board/compare/v1.4.0...v1.5.0) (2025-06-27)
+
+### Features
+
+* **jobService:** ➕ start scheduled task in node-cron v4 ([02eb54d](https://github.com/chrispoupart/quest-board/commit/02eb54dcc53f530ec8b33d72f91f0e9ee1791e18))
+
 ## [1.4.0](https://github.com/chrispoupart/quest-board/compare/v1.3.0...v1.4.0) (2025-06-27)
 
 ### Features
