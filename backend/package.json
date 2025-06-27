@@ -18,6 +18,9 @@
     "db:reset": "prisma migrate reset --force",
     "promote-admin": "ts-node scripts/promote-to-admin.ts"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "dependencies": {
     "@prisma/client": "^5.7.0",
     "bcryptjs": "^2.4.3",

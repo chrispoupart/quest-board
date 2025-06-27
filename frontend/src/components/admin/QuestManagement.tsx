@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { questService } from '../../services/questService';
-import { Quest, CreateQuestRequest } from '../../types';
+import { skillService } from '../../services/skillService';
+import { Quest, CreateQuestRequest, Skill, CreateQuestRequiredSkillRequest } from '../../types';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
+import { useAuth } from '../../contexts/AuthContext';
 import {
     Plus,
     Pencil,
@@ -13,13 +15,16 @@ import {
     Coins,
     Calendar,
     AlertCircle,
-    Loader2
+    Loader2,
+    X
 } from 'lucide-react';
 
 interface QuestManagementProps { }
 
 const QuestManagement: React.FC<QuestManagementProps> = () => {
+    const { user, isAuthenticated } = useAuth();
     const [quests, setQuests] = useState<Quest[]>([]);
+    const [skills, setSkills] = useState<Skill[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -32,26 +37,53 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
         isRepeatable: false,
         cooldownDays: undefined
     });
+    const [skillRequirements, setSkillRequirements] = useState<CreateQuestRequiredSkillRequest[]>([]);
     const [submitting, setSubmitting] = useState(false);
 
-    // Fetch all quests for management
-    const fetchQuests = async () => {
+    // Fetch all quests and skills for management
+    const fetchData = async () => {
+        if (!isAuthenticated || !user) {
+            console.log('QuestManagement: Not authenticated or no user');
+            console.log('QuestManagement: isAuthenticated:', isAuthenticated);
+            console.log('QuestManagement: user:', user);
+            setError('Authentication required');
+            setLoading(false);
+            return;
+        }
+
+        console.log('QuestManagement: Fetching data for user:', user.id, user.role);
+        console.log('QuestManagement: Token exists:', !!localStorage.getItem('accessToken'));
+        console.log('QuestManagement: Token value:', localStorage.getItem('accessToken')?.substring(0, 20) + '...');
+        console.log('QuestManagement: Refresh token exists:', !!localStorage.getItem('refreshToken'));
+
         try {
             setLoading(true);
             setError(null);
-            const response = await questService.getQuests();
-            setQuests(response.quests);
+            const [questsResponse, skillsResponse] = await Promise.all([
+                questService.getQuests(),
+                skillService.getAllSkills()
+            ]);
+            console.log('QuestManagement: Data fetched successfully');
+            setQuests(questsResponse.quests);
+            setSkills(skillsResponse);
         } catch (err) {
-            console.error('Failed to fetch quests:', err);
-            setError(err instanceof Error ? err.message : 'Failed to fetch quests');
+            console.error('QuestManagement: Failed to fetch data:', err);
+            if (err instanceof Error && err.message.includes('401')) {
+                console.error('QuestManagement: 401 error - token might be expired or invalid');
+                setError('Authentication expired. Please log in again.');
+            } else {
+                setError(err instanceof Error ? err.message : 'Failed to fetch data');
+            }
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchQuests();
-    }, []);
+        if (isAuthenticated && user) {
+            fetchData();
+        }
+    }, [isAuthenticated, user]);
 
     const handleCreateQuest = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -63,10 +95,19 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
         try {
             setSubmitting(true);
             setError(null);
-            await questService.createQuest(formData);
+            const newQuest = await questService.createQuest(formData);
+
+            // Add skill requirements if any
+            if (skillRequirements.length > 0) {
+                for (const skillReq of skillRequirements) {
+                    await skillService.addQuestRequiredSkill(newQuest.id, skillReq);
+                }
+            }
+
             setFormData({ title: '', description: '', bounty: 0, isRepeatable: false, cooldownDays: undefined });
+            setSkillRequirements([]);
             setShowCreateForm(false);
-            await fetchQuests();
+            await fetchData();
         } catch (err) {
             console.error('Failed to create quest:', err);
             setError(err instanceof Error ? err.message : 'Failed to create quest');
@@ -86,9 +127,25 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             setSubmitting(true);
             setError(null);
             await questService.updateQuest(editingQuest.id, formData);
+
+            // Update skill requirements
+            // First, remove all existing skill requirements
+            const existingSkills = await skillService.getQuestRequiredSkills(editingQuest.id);
+            for (const existingSkill of existingSkills) {
+                await skillService.removeQuestRequiredSkill(editingQuest.id, existingSkill.skillId);
+            }
+
+            // Then add new skill requirements
+            if (skillRequirements.length > 0) {
+                for (const skillReq of skillRequirements) {
+                    await skillService.addQuestRequiredSkill(editingQuest.id, skillReq);
+                }
+            }
+
             setEditingQuest(null);
             setFormData({ title: '', description: '', bounty: 0, isRepeatable: false, cooldownDays: undefined });
-            await fetchQuests();
+            setSkillRequirements([]);
+            await fetchData();
         } catch (err) {
             console.error('Failed to update quest:', err);
             setError(err instanceof Error ? err.message : 'Failed to update quest');
@@ -105,14 +162,14 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
         try {
             setError(null);
             await questService.deleteQuest(questId);
-            await fetchQuests();
+            await fetchData();
         } catch (err) {
             console.error('Failed to delete quest:', err);
             setError(err instanceof Error ? err.message : 'Failed to delete quest');
         }
     };
 
-    const handleEditQuest = (quest: Quest) => {
+    const handleEditQuest = async (quest: Quest) => {
         setEditingQuest(quest);
         setFormData({
             title: quest.title,
@@ -121,13 +178,41 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             isRepeatable: quest.isRepeatable,
             cooldownDays: quest.cooldownDays
         });
+
+        // Load existing skill requirements
+        try {
+            const existingSkills = await skillService.getQuestRequiredSkills(quest.id);
+            setSkillRequirements(existingSkills.map(skill => ({
+                skillId: skill.skillId,
+                minLevel: skill.minLevel
+            })));
+        } catch (error) {
+            console.warn('Failed to load skill requirements:', error);
+            setSkillRequirements([]);
+        }
+
         setShowCreateForm(true);
     };
 
     const handleCancelEdit = () => {
         setEditingQuest(null);
         setFormData({ title: '', description: '', bounty: 0, isRepeatable: false, cooldownDays: undefined });
+        setSkillRequirements([]);
         setShowCreateForm(false);
+    };
+
+    const addSkillRequirement = () => {
+        setSkillRequirements([...skillRequirements, { skillId: 0, minLevel: 1 }]);
+    };
+
+    const removeSkillRequirement = (index: number) => {
+        setSkillRequirements(skillRequirements.filter((_, i) => i !== index));
+    };
+
+    const updateSkillRequirement = (index: number, field: 'skillId' | 'minLevel', value: number) => {
+        const updated = [...skillRequirements];
+        updated[index] = { ...updated[index], [field]: value };
+        setSkillRequirements(updated);
     };
 
     const getStatusColor = (status: string) => {
@@ -168,6 +253,18 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                             <AlertCircle className="w-5 h-5" />
                             <span className="font-medium">{error}</span>
                         </div>
+                        {error.includes('Authentication') && (
+                            <div className="mt-3">
+                                <Button
+                                    onClick={() => window.location.href = '/login'}
+                                    variant="outline"
+                                    className="border-red-300 text-red-700 hover:bg-red-50"
+                                    size="sm"
+                                >
+                                    Go to Login
+                                </Button>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             )}
@@ -283,6 +380,73 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                                     </p>
                                 </div>
                             )}
+
+                            {/* Skill Requirements Section */}
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <label className="block text-sm font-medium text-amber-900">
+                                        Required Skills
+                                    </label>
+                                    <Button
+                                        type="button"
+                                        onClick={addSkillRequirement}
+                                        variant="outline"
+                                        size="sm"
+                                        className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                                    >
+                                        <Plus className="w-4 h-4 mr-1" />
+                                        Add Skill
+                                    </Button>
+                                </div>
+
+                                {skillRequirements.length === 0 ? (
+                                    <p className="text-sm text-amber-600 italic">No skill requirements set</p>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {skillRequirements.map((skillReq, index) => (
+                                            <div key={index} className="flex items-center gap-2 p-3 border border-amber-200 rounded-lg bg-white">
+                                                <div className="flex-1">
+                                                    <select
+                                                        value={skillReq.skillId}
+                                                        onChange={(e) => updateSkillRequirement(index, 'skillId', parseInt(e.target.value))}
+                                                        className="w-full p-2 border border-amber-300 rounded-md focus:border-amber-500 focus:ring-amber-500 text-sm"
+                                                    >
+                                                        <option value={0}>Select a skill...</option>
+                                                        {skills.map((skill) => (
+                                                            <option key={skill.id} value={skill.id}>
+                                                                {skill.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <div className="w-24">
+                                                    <Input
+                                                        type="number"
+                                                        value={skillReq.minLevel}
+                                                        onChange={(e) => updateSkillRequirement(index, 'minLevel', parseInt(e.target.value) || 1)}
+                                                        placeholder="Level"
+                                                        className="border-amber-300 focus:border-amber-500 focus:ring-amber-500 text-sm"
+                                                        min="1"
+                                                        max="5"
+                                                    />
+                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    onClick={() => removeSkillRequirement(index)}
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="border-red-300 text-red-700 hover:bg-red-50"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                <p className="text-xs text-amber-600">
+                                    Players must meet the minimum skill level requirements to claim this quest
+                                </p>
+                            </div>
 
                             <div className="flex gap-3 pt-4">
                                 <Button

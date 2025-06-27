@@ -39,7 +39,44 @@ model User {
   createdStoreItems StoreItem[]        @relation("StoreItemCreator")
   storeTransactions StoreTransaction[] @relation("StoreTransactionBuyer")
 
+  // Skills relations
+  userSkills    UserSkill[]
+  createdSkills Skill[]     @relation("SkillCreator")
+
   @@map("users")
+}
+
+model Skill {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdBy   Int      @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  creator           User                 @relation("SkillCreator", fields: [createdBy], references: [id])
+  userSkills        UserSkill[]
+  questRequirements QuestRequiredSkill[] @relation("SkillQuestRequirements")
+
+  @@map("skills")
+}
+
+model UserSkill {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  skillId   Int      @map("skill_id")
+  level     Int      @default(1) // Skill level from 1 to 5
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, skillId])
+  @@map("user_skills")
 }
 
 model Quest {
@@ -60,12 +97,30 @@ model Quest {
   cooldownDays    Int?      @map("cooldown_days") // Number of days before quest can be repeated
   lastCompletedAt DateTime? @map("last_completed_at") // When the quest was last completed for repeat tracking
 
+  // Required skills
+  requiredSkills QuestRequiredSkill[]
+
   // Relations
   creator  User      @relation("QuestCreator", fields: [createdBy], references: [id])
   claimer  User?     @relation("QuestClaimer", fields: [claimedBy], references: [id])
   approval Approval?
 
   @@map("quests")
+}
+
+model QuestRequiredSkill {
+  id        Int      @id @default(autoincrement())
+  questId   Int      @map("quest_id")
+  skillId   Int      @map("skill_id")
+  minLevel  Int      @default(1) @map("min_level") // Minimum skill level required
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  quest Quest @relation(fields: [questId], references: [id], onDelete: Cascade)
+  skill Skill @relation("SkillQuestRequirements", fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([questId, skillId])
+  @@map("quest_required_skills")
 }
 
 model Approval {

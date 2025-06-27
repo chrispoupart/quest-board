@@ -13,7 +13,10 @@ import {
   Heart,
   Star,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Target,
+  Plus,
+  Minus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +27,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '../contexts/AuthContext';
 import { userService } from '../services/userService';
+import { skillService } from '../services/skillService';
+import { Skill, UserSkill } from '../types';
 
 interface CharacterSheetProps {
   onBack?: () => void;
@@ -34,6 +39,9 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [userSkills, setUserSkills] = useState<UserSkill[]>([]);
+  const [allSkills, setAllSkills] = useState<Skill[]>([]);
+  const [loadingSkills, setLoadingSkills] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -92,8 +100,62 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
         favoriteColor: user.favoriteColor || '',
         avatarUrl: user.avatarUrl || ''
       });
+      loadSkills();
     }
   }, [user]);
+
+  const loadSkills = async () => {
+    if (!user) return;
+
+    try {
+      setLoadingSkills(true);
+      const [userSkillsResponse, allSkillsResponse] = await Promise.all([
+        skillService.getMySkills(),
+        skillService.getAllSkills()
+      ]);
+
+      setUserSkills(userSkillsResponse);
+      setAllSkills(allSkillsResponse);
+    } catch (err) {
+      console.error('Failed to load skills:', err);
+      setError('Failed to load skills');
+    } finally {
+      setLoadingSkills(false);
+    }
+  };
+
+  const getSkillLevel = (skillId: number): number => {
+    const userSkill = userSkills.find(skill => skill.skillId === skillId);
+    return userSkill?.level || 0;
+  };
+
+  const getSkillLevelColor = (level: number): string => {
+    if (level >= 4) return 'text-green-600 bg-green-50 border-green-200';
+    if (level >= 3) return 'text-blue-600 bg-blue-50 border-blue-200';
+    if (level >= 2) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+    return 'text-gray-600 bg-gray-50 border-gray-200';
+  };
+
+  const renderSkillLevel = (skill: Skill) => {
+    const level = getSkillLevel(skill.id);
+    const levelColor = getSkillLevelColor(level);
+
+    return (
+      <div key={skill.id} className="flex items-center justify-between p-3 border border-amber-200 rounded-lg bg-white">
+        <div className="flex-1">
+          <h4 className="font-medium text-amber-900">{skill.name}</h4>
+          {skill.description && (
+            <p className="text-sm text-amber-600 mt-1">{skill.description}</p>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge className={`text-xs font-medium border ${levelColor}`}>
+            Level {level}
+          </Badge>
+        </div>
+      </div>
+    );
+  };
 
   const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({
@@ -287,8 +349,9 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
             </Card>
           </div>
 
-          {/* Character Form */}
-          <div className="lg:col-span-2">
+          {/* Character Form and Skills */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Character Form */}
             <Card className="border-2 border-amber-200 bg-white shadow-lg">
               <CardHeader>
                 <CardTitle className="text-amber-900 font-serif">Character Details</CardTitle>
@@ -442,6 +505,35 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
                     )}
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Skills Section */}
+            <Card className="border-2 border-amber-200 bg-white shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-amber-900 font-serif flex items-center gap-2">
+                  <Target className="w-5 h-5" />
+                  Skills & Abilities
+                </CardTitle>
+                <p className="text-amber-700">
+                  Manage your character's skills. Guild Masters can adjust skill levels based on your performance.
+                </p>
+              </CardHeader>
+              <CardContent>
+                {loadingSkills ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+                    <span className="ml-3 text-amber-600">Loading skills...</span>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {allSkills.length === 0 ? (
+                      <p className="text-amber-600 text-center py-8">No skills available yet.</p>
+                    ) : (
+                      allSkills.map(renderSkillLevel)
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

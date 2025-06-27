@@ -25,6 +25,12 @@ router.put('/:id', requireAdminOrEditor, validateQuestId, QuestController.update
 router.post('/:id/approve', requireAdminOrEditor, validateQuestId, QuestController.approveQuest);
 router.post('/:id/reject', requireAdminOrEditor, validateQuestId, QuestController.rejectQuest);
 
+// Quest required skills routes (admin/editor only)
+router.get('/:id/required-skills', requireAdminOrEditor, validateQuestId, QuestController.getQuestRequiredSkills);
+router.post('/:id/required-skills', requireAdminOrEditor, validateQuestId, QuestController.addQuestRequiredSkill);
+router.put('/:id/required-skills/:skillId', requireAdminOrEditor, validateQuestId, QuestController.updateQuestRequiredSkill);
+router.delete('/:id/required-skills/:skillId', requireAdminOrEditor, validateQuestId, QuestController.removeQuestRequiredSkill);
+
 // Admin only routes
 router.delete('/:id', requireAdmin, validateQuestId, QuestController.deleteQuest);
 

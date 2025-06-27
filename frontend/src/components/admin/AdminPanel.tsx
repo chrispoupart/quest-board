@@ -10,12 +10,14 @@ import {
     Shield,
     Star,
     Trophy,
-    Store
+    Store,
+    Target
 } from 'lucide-react';
 import QuestManagement from './QuestManagement';
 import UserManagement from './UserManagement';
 import ApprovalWorkflow from './ApprovalWorkflow';
 import { StoreManagement } from './StoreManagement';
+import SkillManagement from './SkillManagement';
 
 interface AdminPanelProps { }
 
@@ -61,7 +63,7 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
 
                 {/* Admin Tabs */}
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                    <TabsList className="grid w-full grid-cols-4 bg-amber-100 border border-amber-300 max-w-3xl mx-auto">
+                    <TabsList className="grid w-full grid-cols-5 bg-amber-100 border border-amber-300 max-w-4xl mx-auto">
                         <TabsTrigger
                             value="quests"
                             className="data-[state=active]:bg-amber-600 data-[state=active]:text-white font-medium flex items-center gap-2"
@@ -82,6 +84,13 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                         >
                             <Store className="w-4 h-4" />
                             Store Management
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="skills"
+                            className="data-[state=active]:bg-amber-600 data-[state=active]:text-white font-medium flex items-center gap-2"
+                        >
+                            <Target className="w-4 h-4" />
+                            Skills
                         </TabsTrigger>
                         {isAdmin && (
                             <TabsTrigger
@@ -119,6 +128,11 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                             <p className="text-amber-700">Manage the guild store</p>
                         </div>
                         <StoreManagement />
+                    </TabsContent>
+
+                    {/* Skills Management Tab */}
+                    <TabsContent value="skills" className="space-y-6">
+                        <SkillManagement />
                     </TabsContent>
 
                     {/* User Management Tab (Admin Only) */}

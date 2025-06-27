@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react"
-import { Search, Sword, Shield, Coins, Clock, Scroll, Trophy, Check, X, Eye } from "lucide-react"
+import { Search, Sword, Shield, Coins, Clock, Scroll, Trophy, Check, X, Eye, Target } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -8,10 +8,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import QuestDetailsModal from "./QuestDetailsModal"
 import { getLevelInfo } from "../utils/leveling"
+import { skillService } from "../services/skillService"
 
 import { useAuth } from "../contexts/AuthContext"
 import { questService } from "../services/questService"
-import { Quest, QuestListingResponse } from "../types"
+import { Quest, QuestListingResponse, QuestRequiredSkill } from "../types"
 
 // TypeScript Interfaces (extended from the API types)
 interface QuestWithExtras extends Quest {
@@ -19,9 +20,11 @@ interface QuestWithExtras extends Quest {
   timeLimit?: number // hours
   creatorName?: string
   claimerName?: string
+  requiredSkills?: QuestRequiredSkill[]
 }
 
 interface UserStats {
+  id: number
   completedQuests: number
   totalBounty: number
   currentClaimed: number
@@ -130,6 +133,8 @@ const QuestCard: React.FC<{
   currentUser: UserStats;
 }> = ({ quest, onAction, currentUser }) => {
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [userSkillLevels, setUserSkillLevels] = useState<{[skillId: number]: number}>({})
+  const [skillRequirementsLoaded, setSkillRequirementsLoaded] = useState(false)
 
   const difficulty = quest.difficulty || getDifficultyFromBounty(quest.bounty)
   const timeLimit = quest.timeLimit || 48
@@ -137,6 +142,33 @@ const QuestCard: React.FC<{
   const isOverdue =
     quest.claimedAt &&
     new Date().getTime() > new Date(quest.claimedAt).getTime() + timeLimit * 60 * 60 * 1000
+
+  // Load skill requirements and user skill levels when component mounts
+  useEffect(() => {
+    const loadSkillData = async () => {
+      try {
+        // Load skill requirements for this quest
+        const requiredSkills = await skillService.getQuestRequiredSkills(quest.id);
+        quest.requiredSkills = requiredSkills;
+        setSkillRequirementsLoaded(true);
+
+        // Load user skill levels for required skills
+        if (requiredSkills.length > 0) {
+          const skillLevels: {[skillId: number]: number} = {};
+          for (const requiredSkill of requiredSkills) {
+            const level = await skillService.getUserSkillLevel(currentUser.id, requiredSkill.skillId);
+            skillLevels[requiredSkill.skillId] = level;
+          }
+          setUserSkillLevels(skillLevels);
+        }
+      } catch (error) {
+        console.error('Failed to load skill data:', error);
+        setSkillRequirementsLoaded(true); // Mark as loaded even if failed
+      }
+    };
+
+    loadSkillData();
+  }, [quest.id, currentUser.id]);
 
   const handleAction = async (action: string) => {
     setActionLoading(action)
@@ -146,6 +178,28 @@ const QuestCard: React.FC<{
       setActionLoading(null)
     }
   }
+
+  const getSkillRequirementStatus = (requiredSkill: QuestRequiredSkill) => {
+    const userLevel = userSkillLevels[requiredSkill.skillId] || 0;
+    const meetsRequirement = userLevel >= requiredSkill.minLevel;
+
+    return {
+      meetsRequirement,
+      userLevel,
+      requiredLevel: requiredSkill.minLevel,
+      color: meetsRequirement ? 'text-green-600 bg-green-50 border-green-200' : 'text-red-600 bg-red-50 border-red-200'
+    };
+  };
+
+  const canClaimQuest = () => {
+    if (quest.status !== 'AVAILABLE') return false;
+    if (!skillRequirementsLoaded || !quest.requiredSkills || quest.requiredSkills.length === 0) return true;
+
+    return quest.requiredSkills.every(requiredSkill => {
+      const userLevel = userSkillLevels[requiredSkill.skillId] || 0;
+      return userLevel >= requiredSkill.minLevel;
+    });
+  };
 
   return (
     <Card className="relative overflow-hidden border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
@@ -184,6 +238,49 @@ const QuestCard: React.FC<{
       <CardContent className="space-y-4">
         <p className="text-sm text-amber-800 leading-relaxed">{quest.description}</p>
 
+        {/* Skill Requirements */}
+        {quest.requiredSkills && quest.requiredSkills.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm font-medium text-amber-900">
+              <Target className="w-4 h-4" />
+              <span>Required Skills:</span>
+            </div>
+            <div className="space-y-1">
+              {quest.requiredSkills.map((requiredSkill) => {
+                const status = getSkillRequirementStatus(requiredSkill);
+                return (
+                  <div key={requiredSkill.skillId} className="flex items-center justify-between text-xs">
+                    <span className="text-amber-700">{requiredSkill.skill?.name || `Skill ${requiredSkill.skillId}`}</span>
+                    <div className="flex items-center gap-2">
+                      <Badge className={`text-xs font-medium border ${status.color}`}>
+                        Level {status.userLevel}/{status.requiredLevel}
+                      </Badge>
+                      {status.meetsRequirement ? (
+                        <Check className="w-3 h-3 text-green-600" />
+                      ) : (
+                        <X className="w-3 h-3 text-red-600" />
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {!skillRequirementsLoaded && quest.status === 'AVAILABLE' && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm font-medium text-amber-900">
+              <Target className="w-4 h-4" />
+              <span>Checking Requirements...</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-amber-600"></div>
+              <span className="text-xs text-amber-600">Loading skill requirements</span>
+            </div>
+          </div>
+        )}
+
         <div className="space-y-2 text-xs text-amber-700">
           <div className="flex items-center gap-2">
             <Scroll className="w-3 h-3" />
@@ -206,7 +303,7 @@ const QuestCard: React.FC<{
             </div>
           )}
 
-          {quest.completedAt && (quest.status === "COMPLETED" || quest.status === "APPROVED" || quest.status === "REJECTED") && (
+          {quest.completedAt && ["COMPLETED", "APPROVED", "REJECTED"].includes(quest.status) && (
             <div className="flex items-center gap-2 text-green-600">
               <Trophy className="w-3 h-3" />
               <span>Completed: {new Date(quest.completedAt).toLocaleDateString()}</span>
@@ -256,12 +353,17 @@ const QuestCard: React.FC<{
           {quest.status === "AVAILABLE" && (
             <Button
               onClick={() => handleAction("claim")}
-              disabled={actionLoading === "claim"}
-              className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-medium"
+              disabled={actionLoading === "claim" || !canClaimQuest()}
+              className={`flex-1 font-medium ${
+                canClaimQuest()
+                  ? "bg-amber-600 hover:bg-amber-700 text-white"
+                  : "bg-gray-400 text-white cursor-not-allowed"
+              }`}
               size="sm"
             >
               <Sword className="w-4 h-4 mr-1" />
-              {actionLoading === "claim" ? "Claiming..." : "Accept Quest"}
+              {actionLoading === "claim" ? "Claiming..." :
+               canClaimQuest() ? "Accept Quest" : "Skills Required"}
             </Button>
           )}
 
@@ -310,7 +412,7 @@ const QuestCard: React.FC<{
           )}
 
           {/* Show completion status for approved/rejected quests */}
-          {(quest.status === "APPROVED" || quest.status === "REJECTED") && (
+          {["APPROVED", "REJECTED"].includes(quest.status) && (
             <div className="flex-1 flex items-center justify-center">
               <Badge className={`text-xs font-medium border ${quest.status === "APPROVED"
                 ? "text-green-600 bg-green-50 border-green-200"
@@ -407,6 +509,7 @@ const QuestBoard: React.FC = () => {
 
   // Convert user to UserStats format
   const currentUser: UserStats = useMemo(() => ({
+    id: user?.id || 0,
     completedQuests: 0, // Will be fetched from API
     totalBounty: user?.bountyBalance || 0,
     currentClaimed: 0, // Will be calculated from quests
@@ -469,8 +572,9 @@ const QuestBoard: React.FC = () => {
         difficulty: getDifficultyFromBounty(quest.bounty),
         timeLimit: 48, // Default 48 hours
         creatorName: quest.creator?.characterName || quest.creator?.name,
-        claimerName: quest.claimer?.characterName || quest.claimer?.name
-      }))
+        claimerName: quest.claimer?.characterName || quest.claimer?.name,
+        requiredSkills: [] // Initialize empty, will be loaded on demand
+      }));
 
       console.log('Transformed quests:', transformedQuests)
       setQuests(transformedQuests)
@@ -628,13 +732,6 @@ const QuestBoard: React.FC = () => {
                   <Card className="border-2 border-red-200 bg-red-50 shadow-md">
                     <CardContent className="p-4">
                       <div className="text-red-800 font-medium">Error: {error}</div>
-                      <Button
-                        onClick={fetchQuests}
-                        className="mt-2 bg-red-600 hover:bg-red-700 text-white"
-                        size="sm"
-                      >
-                        Retry
-                      </Button>
                     </CardContent>
                   </Card>
                 )}

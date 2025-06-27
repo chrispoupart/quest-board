@@ -632,4 +632,179 @@ export class QuestController {
             res.status(500).json({ success: false, error: { message: 'Internal server error' } });
         }
     }
+
+    /**
+     * Get required skills for a quest
+     */
+    static async getQuestRequiredSkills(req: Request, res: Response): Promise<void> {
+        try {
+            const questId = parseInt(req.params['id'] || '');
+            if (isNaN(questId)) {
+                res.status(400).json({ success: false, error: { message: 'Invalid quest ID' } });
+                return;
+            }
+
+            const requiredSkills = await prisma.questRequiredSkill.findMany({
+                where: { questId },
+                include: {
+                    skill: {
+                        select: {
+                            id: true,
+                            name: true,
+                            description: true,
+                        }
+                    }
+                }
+            });
+
+            res.json({ success: true, data: requiredSkills } as ApiResponse);
+        } catch (error) {
+            console.error('Error getting quest required skills:', error);
+            res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+        }
+    }
+
+    /**
+     * Add a required skill to a quest
+     */
+    static async addQuestRequiredSkill(req: Request, res: Response): Promise<void> {
+        try {
+            const questId = parseInt(req.params['id'] || '');
+            if (isNaN(questId)) {
+                res.status(400).json({ success: false, error: { message: 'Invalid quest ID' } });
+                return;
+            }
+
+            const { skillId, minLevel } = req.body;
+
+            if (!skillId || typeof skillId !== 'number') {
+                res.status(400).json({ success: false, error: { message: 'Skill ID is required' } });
+                return;
+            }
+
+            if (!minLevel || typeof minLevel !== 'number' || minLevel < 1 || minLevel > 5) {
+                res.status(400).json({ success: false, error: { message: 'Minimum level must be between 1 and 5' } });
+                return;
+            }
+
+            // Check if quest exists
+            const quest = await prisma.quest.findUnique({ where: { id: questId } });
+            if (!quest) {
+                res.status(404).json({ success: false, error: { message: 'Quest not found' } });
+                return;
+            }
+
+            // Check if skill exists
+            const skill = await prisma.skill.findUnique({ where: { id: skillId } });
+            if (!skill) {
+                res.status(404).json({ success: false, error: { message: 'Skill not found' } });
+                return;
+            }
+
+            // Check if requirement already exists
+            const existingRequirement = await prisma.questRequiredSkill.findUnique({
+                where: { questId_skillId: { questId, skillId } }
+            });
+
+            if (existingRequirement) {
+                res.status(400).json({ success: false, error: { message: 'Skill requirement already exists for this quest' } });
+                return;
+            }
+
+            const requiredSkill = await prisma.questRequiredSkill.create({
+                data: {
+                    questId,
+                    skillId,
+                    minLevel
+                },
+                include: {
+                    skill: {
+                        select: {
+                            id: true,
+                            name: true,
+                            description: true,
+                        }
+                    }
+                }
+            });
+
+            res.status(201).json({ success: true, data: requiredSkill } as ApiResponse);
+        } catch (error) {
+            console.error('Error adding quest required skill:', error);
+            res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+        }
+    }
+
+    /**
+     * Update a required skill for a quest
+     */
+    static async updateQuestRequiredSkill(req: Request, res: Response): Promise<void> {
+        try {
+            const questId = parseInt(req.params['id'] || '');
+            const skillId = parseInt(req.params['skillId'] || '');
+
+            if (isNaN(questId) || isNaN(skillId)) {
+                res.status(400).json({ success: false, error: { message: 'Invalid quest ID or skill ID' } });
+                return;
+            }
+
+            const { minLevel } = req.body;
+
+            if (!minLevel || typeof minLevel !== 'number' || minLevel < 1 || minLevel > 5) {
+                res.status(400).json({ success: false, error: { message: 'Minimum level must be between 1 and 5' } });
+                return;
+            }
+
+            const requiredSkill = await prisma.questRequiredSkill.update({
+                where: { questId_skillId: { questId, skillId } },
+                data: { minLevel },
+                include: {
+                    skill: {
+                        select: {
+                            id: true,
+                            name: true,
+                            description: true,
+                        }
+                    }
+                }
+            });
+
+            res.json({ success: true, data: requiredSkill } as ApiResponse);
+        } catch (error) {
+            console.error('Error updating quest required skill:', error);
+            if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
+                res.status(404).json({ success: false, error: { message: 'Quest skill requirement not found' } });
+            } else {
+                res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+            }
+        }
+    }
+
+    /**
+     * Remove a required skill from a quest
+     */
+    static async removeQuestRequiredSkill(req: Request, res: Response): Promise<void> {
+        try {
+            const questId = parseInt(req.params['id'] || '');
+            const skillId = parseInt(req.params['skillId'] || '');
+
+            if (isNaN(questId) || isNaN(skillId)) {
+                res.status(400).json({ success: false, error: { message: 'Invalid quest ID or skill ID' } });
+                return;
+            }
+
+            await prisma.questRequiredSkill.delete({
+                where: { questId_skillId: { questId, skillId } }
+            });
+
+            res.json({ success: true, data: null } as ApiResponse);
+        } catch (error) {
+            console.error('Error removing quest required skill:', error);
+            if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
+                res.status(404).json({ success: false, error: { message: 'Quest skill requirement not found' } });
+            } else {
+                res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+            }
+        }
+    }
 }
