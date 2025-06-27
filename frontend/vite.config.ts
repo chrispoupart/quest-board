@@ -16,7 +16,10 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
-          radix: ['@radix-ui/react-avatar', '@radix-ui/react-tabs'],
+          radix: [
+            'axios',
+            '@radix-ui/react-avatar',
+            '@radix-ui/react-tabs'],
         },
       },
     },
