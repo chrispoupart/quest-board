@@ -1,3 +1,9 @@
+## [2.1.0](https://github.com/chrispoupart/quest-board/compare/v2.0.3...v2.1.0) (2025-06-28)
+
+### Features
+
+* **auth:** 🔒️ update OAuth flow to handle tokens ([d118308](https://github.com/chrispoupart/quest-board/commit/d1183086fa207687044749ec14e7ed3ea045579d))
+
 ## [2.0.3](https://github.com/chrispoupart/quest-board/compare/v2.0.2...v2.0.3) (2025-06-28)
 
 ### Bug Fixes
