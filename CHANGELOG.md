@@ -1,3 +1,9 @@
+## [1.6.0](https://github.com/chrispoupart/quest-board/compare/v1.5.1...v1.6.0) (2025-06-28)
+
+### Features
+
+* **backend:** 🔒️ add non-root user to Dockerfile ([5cacc5b](https://github.com/chrispoupart/quest-board/commit/5cacc5b7a7d3bcc3b6010ae6cca872e9ade41d0a))
+
 ## [1.5.1](https://github.com/chrispoupart/quest-board/compare/v1.5.0...v1.5.1) (2025-06-28)
 
 ### Bug Fixes
