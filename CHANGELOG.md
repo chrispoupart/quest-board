@@ -1,3 +1,14 @@
+## [2.2.0](https://github.com/chrispoupart/quest-board/compare/v2.1.8...v2.2.0) (2025-06-28)
+
+### Features
+
+* **scripts:** 🔨 update promote-admin script execution method ([d939f6c](https://github.com/chrispoupart/quest-board/commit/d939f6c832a56842ad511f1b75192d686f2d4ec4))
+* **scripts:** 🛂 add promote-to-admin script ([2958a37](https://github.com/chrispoupart/quest-board/commit/2958a37f3e02db1a0c8f46cf28ba681327573a84))
+
+### Bug Fixes
+
+* **Dockerfile:** 🚚 update script copy path in Dockerfile ([dbb44a9](https://github.com/chrispoupart/quest-board/commit/dbb44a92ca49e5233feccc4ac77b17906a79b029))
+
 ## [2.1.8](https://github.com/chrispoupart/quest-board/compare/v2.1.7...v2.1.8) (2025-06-28)
 
 ### Bug Fixes
