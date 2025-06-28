@@ -1,3 +1,9 @@
+## [2.1.6](https://github.com/chrispoupart/quest-board/compare/v2.1.5...v2.1.6) (2025-06-28)
+
+### Bug Fixes
+
+* **frontend:** 🔥 remove redundant API path segment ([0a011ed](https://github.com/chrispoupart/quest-board/commit/0a011edad648846aa674d9e3330d210671dd8aca))
+
 ## [2.1.5](https://github.com/chrispoupart/quest-board/compare/v2.1.4...v2.1.5) (2025-06-28)
 
 ### Bug Fixes
