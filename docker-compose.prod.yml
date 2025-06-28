@@ -9,7 +9,10 @@ services:
       - DATABASE_URL=file:./prod.db
       - NODE_ENV=production
       - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-this}
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:8080}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://quests.poupart.farm}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - FRONTEND_URL=${FRONTEND_URL:-https://quests.poupart.farm}
     restart: unless-stopped
 
   frontend:
@@ -19,6 +22,8 @@ services:
     environment:
       - BACKEND_HOST=backend
       - BACKEND_PORT=8000
+      - VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-/api}
     depends_on:
       - backend
     restart: unless-stopped

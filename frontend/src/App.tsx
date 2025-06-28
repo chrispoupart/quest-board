@@ -22,13 +22,14 @@ const StorePage = () => {
 
 const ProfilePage = () => <CharacterSheet />;
 
-// Auth callback component that redirects to login with the code
+// Auth callback component that handles the token from backend
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { refreshUser } = useAuth();
 
   React.useEffect(() => {
-    const code = searchParams.get('code');
+    const token = searchParams.get('token');
     const error = searchParams.get('error');
 
     if (error) {
@@ -37,13 +38,28 @@ const AuthCallback: React.FC = () => {
       return;
     }
 
-    if (code) {
-      // Redirect to login page with the code
-      navigate(`/login?code=${encodeURIComponent(code)}`);
+    if (token) {
+      // Backend has already handled the OAuth flow and sent us a token
+      // Store the token
+      localStorage.setItem('accessToken', token);
+
+      // Fetch user data using the token
+      refreshUser()
+        .then(() => {
+          // Successfully authenticated, redirect to dashboard
+          navigate('/dashboard');
+        })
+        .catch((error) => {
+          console.error('Failed to fetch user data:', error);
+          // Clear token and redirect to login
+          localStorage.removeItem('accessToken');
+          navigate('/login?error=' + encodeURIComponent('Failed to authenticate'));
+        });
     } else {
+      // No token, redirect to login
       navigate('/login');
     }
-  }, [navigate, searchParams]);
+  }, [navigate, searchParams, refreshUser]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

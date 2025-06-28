@@ -2,17 +2,10 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User } from '../types';
 import { authService } from '../services/authService';
 
-interface LoginData {
-    token: string;
-    name: string;
-    level: number;
-    progress: number;
-}
-
 interface AuthContextType {
     user: User | null;
     loading: boolean;
-    login: (data: LoginData) => void;
+    login: (code: string, redirectUri: string) => Promise<void>;
     logout: () => Promise<void>;
     refreshUser: () => Promise<void>;
     updateUser: (userData: User) => void;
@@ -35,18 +28,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Check if user is already logged in on app start
         const checkAuth = async () => {
             try {
-                const token = localStorage.getItem('token');
+                const token = localStorage.getItem('accessToken');
                 if (token) {
-                    // With a backend-driven flow, we might need to verify the token
-                    // or fetch user data on initial load.
-                    // For now, we assume the token is valid if it exists.
-                    // A robust implementation would call a `/me` endpoint.
-                    const userData = await authService.getCurrentUser(); // This needs to use the new token
-                    setUser(userData);
+                    try {
+                        const userData = await authService.getCurrentUser();
+                        setUser(userData);
+                    } catch (authError) {
+                        console.error('AuthContext: Current user check failed:', authError);
+                        // Try to refresh the token
+                        try {
+                            const refreshResult = await authService.refreshToken();
+                            localStorage.setItem('accessToken', refreshResult.accessToken);
+                            setUser(refreshResult.user);
+                        } catch (refreshError) {
+                            console.error('AuthContext: Token refresh failed:', refreshError);
+                            // Clear tokens and redirect to login
+                            localStorage.removeItem('accessToken');
+                            localStorage.removeItem('refreshToken');
+                            setUser(null);
+                        }
+                    }
                 }
             } catch (error) {
                 console.error('AuthContext: Auth check failed:', error);
-                localStorage.removeItem('token');
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
                 setUser(null);
             } finally {
                 setLoading(false);
@@ -56,32 +62,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         checkAuth();
     }, []);
 
-    const login = (data: LoginData) => {
-        localStorage.setItem('token', data.token);
-        // We need to fetch the full user object or construct it from the login data
-        // This is a simplified version. A real app might fetch from a /me endpoint.
-        const partialUser: Partial<User> = {
-            name: data.name,
-            // Assuming level and progress can be stored directly or are part of a sub-object
-        };
-        // This is not a complete user object, so you might need to adjust your User type
-        // or fetch the full user object after login.
-        setUser(partialUser as User); 
-        setLoading(false);
+    const login = async (code: string, redirectUri: string) => {
+        try {
+            setLoading(true);
+            const response = await authService.login(code, redirectUri);
+
+            // Store tokens
+            localStorage.setItem('accessToken', response.accessToken);
+            localStorage.setItem('refreshToken', response.refreshToken);
+
+            setUser(response.user);
+        } catch (error) {
+            console.error('Login failed:', error);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
     };
 
     const logout = async () => {
         try {
-            // Inform the backend about logout if necessary
-            // await authService.logout(); 
+            if (user) {
+                await authService.logout();
+            }
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
             // Clear local state regardless of API call success
             setUser(null);
-            localStorage.removeItem('token');
-            // Also remove other related local storage items if any
-            localStorage.removeItem('refreshToken'); // If you were using this
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
         }
     };
 
