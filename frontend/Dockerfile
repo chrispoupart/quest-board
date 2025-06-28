@@ -38,6 +38,9 @@ RUN mkdir -p /var/cache/nginx /var/log/nginx /etc/nginx/conf.d /tmp/nginx && \
     chmod -R 755 /usr/share/nginx/html && \
     chmod 755 /tmp/nginx
 
+# Change ownership of nginx directories to nginx user
+RUN chown -R nginx:nginx /usr/share/nginx/html
+
 # Expose port 8080
 EXPOSE 8080
 
@@ -62,9 +65,6 @@ RUN echo '#!/bin/bash' > /docker-entrypoint.sh && \
     echo '# Start nginx in foreground with custom config' >> /docker-entrypoint.sh && \
     echo 'exec nginx -g "daemon off;" -c /tmp/nginx/nginx.conf' >> /docker-entrypoint.sh && \
     chmod +x /docker-entrypoint.sh
-
-# Use non-root user for security
-USER nginx
 
 # Start nginx with environment variable substitution
 CMD ["/docker-entrypoint.sh"]
