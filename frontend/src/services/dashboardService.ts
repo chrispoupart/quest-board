@@ -30,7 +30,7 @@ export const dashboardService = {
      * Get user dashboard data
      */
     async getUserDashboard(): Promise<DashboardData> {
-        const response = await api.get<ApiResponse<DashboardData>>('/dashboard');
+        const response = await api.get<ApiResponse<DashboardData>>('/api/dashboard');
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch dashboard data');
