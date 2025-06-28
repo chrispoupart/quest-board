@@ -16,8 +16,63 @@ RUN npm ci
 # Generate Prisma client
 RUN npx prisma generate
 
-# Copy scripts directory first to ensure it exists
-COPY scripts ./scripts
+# Create scripts directory and promote-to-admin script
+RUN mkdir -p scripts
+RUN echo '#!/usr/bin/env node' > scripts/promote-to-admin.js
+RUN echo '' >> scripts/promote-to-admin.js
+RUN echo 'const { PrismaClient } = require("@prisma/client");' >> scripts/promote-to-admin.js
+RUN echo '' >> scripts/promote-to-admin.js
+RUN echo 'const prisma = new PrismaClient();' >> scripts/promote-to-admin.js
+RUN echo '' >> scripts/promote-to-admin.js
+RUN echo 'async function promoteToAdmin(email) {' >> scripts/promote-to-admin.js
+RUN echo '    try {' >> scripts/promote-to-admin.js
+RUN echo '        console.log(`🔍 Looking for user with email: ${email}`);' >> scripts/promote-to-admin.js
+RUN echo '' >> scripts/promote-to-admin.js
+RUN echo '        const user = await prisma.user.findUnique({' >> scripts/promote-to-admin.js
+RUN echo '            where: { email }' >> scripts/promote-to-admin.js
+RUN echo '        });' >> scripts/promote-to-admin.js
+RUN echo '' >> scripts/promote-to-admin.js
+RUN echo '        if (!user) {' >> scripts/promote-to-admin.js
+RUN echo '            console.error(`❌ User with email ${email} not found`);' >> scripts/promote-to-admin.js
+RUN echo '            process.exit(1);' >> scripts/promote-to-admin.js
+RUN echo '            return;' >> scripts/promote-to-admin.js
+RUN echo '        }' >> scripts/promote-to-admin.js
+RUN echo '' >> scripts/promote-to-admin.js
+RUN echo '        console.log(`👤 Found user: ${user.name} (ID: ${user.id})`);' >> scripts/promote-to-admin.js
+RUN echo '        console.log(`📊 Current role: ${user.role}`);' >> scripts/promote-to-admin.js
+RUN echo '' >> scripts/promote-to-admin.js
+RUN echo '        if (user.role === "ADMIN") {' >> scripts/promote-to-admin.js
+RUN echo '            console.log(`✅ User ${user.name} is already an admin!`);' >> scripts/promote-to-admin.js
+RUN echo '            process.exit(0);' >> scripts/promote-to-admin.js
+RUN echo '            return;' >> scripts/promote-to-admin.js
+RUN echo '        }' >> scripts/promote-to-admin.js
+RUN echo '' >> scripts/promote-to-admin.js
+RUN echo '        const updatedUser = await prisma.user.update({' >> scripts/promote-to-admin.js
+RUN echo '            where: { id: user.id },' >> scripts/promote-to-admin.js
+RUN echo '            data: { role: "ADMIN" }' >> scripts/promote-to-admin.js
+RUN echo '        });' >> scripts/promote-to-admin.js
+RUN echo '' >> scripts/promote-to-admin.js
+RUN echo '        console.log(`🎉 Successfully promoted ${updatedUser.name} to ADMIN!`);' >> scripts/promote-to-admin.js
+RUN echo '        console.log(`🛡️  ${updatedUser.name} now has full Guild Master privileges`);' >> scripts/promote-to-admin.js
+RUN echo '' >> scripts/promote-to-admin.js
+RUN echo '    } catch (error) {' >> scripts/promote-to-admin.js
+RUN echo '        console.error("❌ Error promoting user:", error);' >> scripts/promote-to-admin.js
+RUN echo '        process.exit(1);' >> scripts/promote-to-admin.js
+RUN echo '    } finally {' >> scripts/promote-to-admin.js
+RUN echo '        await prisma.$disconnect();' >> scripts/promote-to-admin.js
+RUN echo '    }' >> scripts/promote-to-admin.js
+RUN echo '}' >> scripts/promote-to-admin.js
+RUN echo '' >> scripts/promote-to-admin.js
+RUN echo 'const email = process.argv[2];' >> scripts/promote-to-admin.js
+RUN echo '' >> scripts/promote-to-admin.js
+RUN echo 'if (!email) {' >> scripts/promote-to-admin.js
+RUN echo '    console.error("❌ Please provide an email address");' >> scripts/promote-to-admin.js
+RUN echo '    console.log("Usage: npm run promote-admin <email>");' >> scripts/promote-to-admin.js
+RUN echo '    console.log("Example: npm run promote-admin john@example.com");' >> scripts/promote-to-admin.js
+RUN echo '    process.exit(1);' >> scripts/promote-to-admin.js
+RUN echo '}' >> scripts/promote-to-admin.js
+RUN echo '' >> scripts/promote-to-admin.js
+RUN echo 'promoteToAdmin(email);' >> scripts/promote-to-admin.js
 
 # Copy remaining source code
 COPY src ./src
