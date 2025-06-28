@@ -1,9 +1,8 @@
 import axios from 'axios';
 import { User, ApiResponse } from '../types';
 
-// In production, VITE_API_BASE_URL should be '/api', so we use empty string as baseURL
-// In development, use localhost:8000
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL === '/api' ? '' : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000');
+// In production, always use relative paths. In development, use localhost:8000
+const API_BASE_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000');
 
 // Create axios instance with base configuration
 const api = axios.create({
