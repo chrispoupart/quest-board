@@ -1,3 +1,9 @@
+## [2.1.1](https://github.com/chrispoupart/quest-board/compare/v2.1.0...v2.1.1) (2025-06-28)
+
+### Bug Fixes
+
+* **auth:** 🔥 remove AuthCallback component ([aa9c3a0](https://github.com/chrispoupart/quest-board/commit/aa9c3a049f7c1907d3d7cfac2f0cb7f62df441c9))
+
 ## [2.1.0](https://github.com/chrispoupart/quest-board/compare/v2.0.3...v2.1.0) (2025-06-28)
 
 ### Features
