@@ -32,7 +32,7 @@ export const Store: React.FC<StoreProps> = ({ user }) => {
             setLoading(true);
             const [itemsResponse, purchasesResponse] = await Promise.all([
                 storeService.getStoreItems(),
-                storeService.getUserPurchases()
+                storeService.getPurchaseHistory()
             ]);
             setStoreItems(itemsResponse.items);
             setUserPurchases(purchasesResponse.transactions);

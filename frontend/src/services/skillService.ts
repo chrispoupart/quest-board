@@ -38,16 +38,16 @@ class SkillService {
 
     // Skill management (Admin/Editor only)
     async getSkills(page = 1, limit = 10): Promise<SkillsResponse> {
-        return this.request<SkillsResponse>(`/skills?page=${page}&limit=${limit}`);
+        return this.request<SkillsResponse>(`/api/skills?page=${page}&limit=${limit}`);
     }
 
     async getSkill(id: number): Promise<Skill> {
-        const response = await this.request<ApiResponse<Skill>>(`/skills/${id}`);
+        const response = await this.request<ApiResponse<Skill>>(`/api/skills/${id}`);
         return response.data!;
     }
 
     async createSkill(data: CreateSkillRequest): Promise<Skill> {
-        const response = await this.request<ApiResponse<Skill>>('/skills', {
+        const response = await this.request<ApiResponse<Skill>>('/api/skills', {
             method: 'POST',
             body: JSON.stringify(data),
         });
@@ -55,7 +55,7 @@ class SkillService {
     }
 
     async updateSkill(id: number, data: UpdateSkillRequest): Promise<Skill> {
-        const response = await this.request<ApiResponse<Skill>>(`/skills/${id}`, {
+        const response = await this.request<ApiResponse<Skill>>(`/api/skills/${id}`, {
             method: 'PUT',
             body: JSON.stringify(data),
         });
@@ -63,26 +63,26 @@ class SkillService {
     }
 
     async deleteSkill(id: number): Promise<void> {
-        await this.request(`/skills/${id}`, {
+        await this.request(`/api/skills/${id}`, {
             method: 'DELETE',
         });
     }
 
     // User skill management
     async getUserSkills(userId: number, page = 1, limit = 10): Promise<UserSkillsResponse> {
-        const response = await this.request<ApiResponse<UserSkillsResponse>>(`/skills/user/${userId}?page=${page}&limit=${limit}`);
+        const response = await this.request<ApiResponse<UserSkillsResponse>>(`/api/skills/user/${userId}?page=${page}&limit=${limit}`);
         return response.data!;
     }
 
     async getMySkills(): Promise<UserSkill[]> {
-        const response = await this.request<ApiResponse<UserSkill[]>>('/skills/my-skills');
+        const response = await this.request<ApiResponse<UserSkill[]>>('/api/skills/my-skills');
         return response.data!;
     }
 
     async updateUserSkill(userId: number, skillId: number, data: UpdateUserSkillRequest): Promise<UserSkill> {
         const requestBody = { skillId, ...data };
 
-        const response = await this.request<ApiResponse<UserSkill>>(`/skills/user/${userId}`, {
+        const response = await this.request<ApiResponse<UserSkill>>(`/api/skills/user/${userId}`, {
             method: 'POST',
             body: JSON.stringify(requestBody),
         });
@@ -90,24 +90,24 @@ class SkillService {
     }
 
     async deleteUserSkill(userId: number, skillId: number): Promise<void> {
-        await this.request(`/skills/user/${userId}/${skillId}`, {
+        await this.request(`/api/skills/user/${userId}/${skillId}`, {
             method: 'DELETE',
         });
     }
 
     // Quest required skills management
     async getQuestRequiredSkills(questId: number): Promise<QuestRequiredSkill[]> {
-        const response = await this.request<ApiResponse<QuestRequiredSkill[]>>(`/quests/${questId}/required-skills`);
+        const response = await this.request<ApiResponse<QuestRequiredSkill[]>>(`/api/quests/${questId}/required-skills`);
         return response.data!;
     }
 
     async getQuestSkillRequirements(questId: number): Promise<QuestRequiredSkill[]> {
-        const response = await this.request<ApiResponse<QuestRequiredSkill[]>>(`/quests/${questId}/skill-requirements`);
+        const response = await this.request<ApiResponse<QuestRequiredSkill[]>>(`/api/quests/${questId}/skill-requirements`);
         return response.data!;
     }
 
     async addQuestRequiredSkill(questId: number, data: CreateQuestRequiredSkillRequest): Promise<QuestRequiredSkill> {
-        const response = await this.request<ApiResponse<QuestRequiredSkill>>(`/quests/${questId}/required-skills`, {
+        const response = await this.request<ApiResponse<QuestRequiredSkill>>(`/api/quests/${questId}/required-skills`, {
             method: 'POST',
             body: JSON.stringify(data),
         });
@@ -115,7 +115,7 @@ class SkillService {
     }
 
     async updateQuestRequiredSkill(questId: number, skillId: number, data: UpdateQuestRequiredSkillRequest): Promise<QuestRequiredSkill> {
-        const response = await this.request<ApiResponse<QuestRequiredSkill>>(`/quests/${questId}/required-skills/${skillId}`, {
+        const response = await this.request<ApiResponse<QuestRequiredSkill>>(`/api/quests/${questId}/required-skills/${skillId}`, {
             method: 'PUT',
             body: JSON.stringify(data),
         });
@@ -123,20 +123,20 @@ class SkillService {
     }
 
     async removeQuestRequiredSkill(questId: number, skillId: number): Promise<void> {
-        await this.request(`/quests/${questId}/required-skills/${skillId}`, {
+        await this.request(`/api/quests/${questId}/required-skills/${skillId}`, {
             method: 'DELETE',
         });
     }
 
     // Utility methods
     async getAllSkills(): Promise<Skill[]> {
-        const response = await this.request<ApiResponse<Skill[]>>('/skills/available');
+        const response = await this.request<ApiResponse<Skill[]>>('/api/skills/available');
         return response.data!;
     }
 
     async getUserSkillLevel(userId: number, skillId: number): Promise<number> {
         try {
-            const response = await this.request<ApiResponse<{ level: number }>>(`/skills/user/${userId}/${skillId}/level`);
+            const response = await this.request<ApiResponse<{ level: number }>>(`/api/skills/user/${userId}/${skillId}/level`);
             return response.data!.level;
         } catch (error) {
             console.error('Failed to get user skill level:', error);
@@ -146,7 +146,7 @@ class SkillService {
 
     async getMySkillLevel(skillId: number): Promise<number> {
         try {
-            const response = await this.request<ApiResponse<{ level: number }>>(`/skills/my-skill/${skillId}/level`);
+            const response = await this.request<ApiResponse<{ level: number }>>(`/api/skills/my-skill/${skillId}/level`);
             return response.data!.level;
         } catch (error) {
             console.error('Failed to get my skill level:', error);
@@ -155,7 +155,7 @@ class SkillService {
     }
 
     async checkQuestEligibility(userId: number, questId: number): Promise<{ eligible: boolean; missingSkills: string[] }> {
-        const response = await this.request<ApiResponse<{ eligible: boolean; missingSkills: string[] }>>(`/quests/${questId}/check-eligibility/${userId}`);
+        const response = await this.request<ApiResponse<{ eligible: boolean; missingSkills: string[] }>>(`/api/quests/${questId}/check-eligibility/${userId}`);
         return response.data!;
     }
 }

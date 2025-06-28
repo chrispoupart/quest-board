@@ -37,7 +37,7 @@ export const questService = {
         createdBy?: number;
         claimedBy?: number;
     }): Promise<QuestListingResponse> {
-        const response = await api.get<ApiResponse<QuestListingResponse>>('/quests', { params });
+        const response = await api.get<ApiResponse<QuestListingResponse>>('/api/quests', { params });
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch quests');
@@ -47,10 +47,10 @@ export const questService = {
     },
 
     /**
-     * Get a single quest by ID
+     * Get quest by ID
      */
-    async getQuest(id: number): Promise<Quest> {
-        const response = await api.get<ApiResponse<Quest>>(`/quests/${id}`);
+    async getQuestById(id: number): Promise<Quest> {
+        const response = await api.get<ApiResponse<Quest>>(`/api/quests/${id}`);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch quest');
@@ -63,7 +63,7 @@ export const questService = {
      * Create a new quest
      */
     async createQuest(questData: CreateQuestRequest): Promise<Quest> {
-        const response = await api.post<ApiResponse<Quest>>('/quests', questData);
+        const response = await api.post<ApiResponse<Quest>>('/api/quests', questData);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to create quest');
@@ -73,10 +73,10 @@ export const questService = {
     },
 
     /**
-     * Create a new quest with skill requirements (atomic operation)
+     * Create a new quest with skills
      */
     async createQuestWithSkills(questData: CreateQuestRequest & { skillRequirements?: Array<{ skillId: number; minLevel: number }> }): Promise<Quest> {
-        const response = await api.post<ApiResponse<Quest>>('/quests/with-skills', questData);
+        const response = await api.post<ApiResponse<Quest>>('/api/quests/with-skills', questData);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to create quest with skills');
@@ -86,10 +86,10 @@ export const questService = {
     },
 
     /**
-     * Update an existing quest
+     * Update quest
      */
     async updateQuest(id: number, questData: UpdateQuestRequest): Promise<Quest> {
-        const response = await api.put<ApiResponse<Quest>>(`/quests/${id}`, questData);
+        const response = await api.put<ApiResponse<Quest>>(`/api/quests/${id}`, questData);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to update quest');
@@ -99,10 +99,10 @@ export const questService = {
     },
 
     /**
-     * Update an existing quest with skill requirements (atomic operation)
+     * Update quest with skills
      */
     async updateQuestWithSkills(id: number, questData: UpdateQuestRequest & { skillRequirements?: Array<{ skillId: number; minLevel: number }> }): Promise<Quest> {
-        const response = await api.put<ApiResponse<Quest>>(`/quests/${id}/with-skills`, questData);
+        const response = await api.put<ApiResponse<Quest>>(`/api/quests/${id}/with-skills`, questData);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to update quest with skills');
@@ -112,10 +112,10 @@ export const questService = {
     },
 
     /**
-     * Delete a quest
+     * Delete quest
      */
     async deleteQuest(id: number): Promise<void> {
-        const response = await api.delete<ApiResponse>(`/quests/${id}`);
+        const response = await api.delete<ApiResponse>(`/api/quests/${id}`);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to delete quest');
@@ -126,7 +126,7 @@ export const questService = {
      * Claim a quest
      */
     async claimQuest(id: number): Promise<Quest> {
-        const response = await api.post<ApiResponse<Quest>>(`/quests/${id}/claim`);
+        const response = await api.post<ApiResponse<Quest>>(`/api/quests/${id}/claim`);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to claim quest');
@@ -139,7 +139,7 @@ export const questService = {
      * Complete a quest
      */
     async completeQuest(id: number): Promise<Quest> {
-        const response = await api.post<ApiResponse<Quest>>(`/quests/${id}/complete`);
+        const response = await api.post<ApiResponse<Quest>>(`/api/quests/${id}/complete`);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to complete quest');
@@ -149,10 +149,10 @@ export const questService = {
     },
 
     /**
-     * Approve a completed quest
+     * Approve a quest
      */
     async approveQuest(id: number): Promise<Quest> {
-        const response = await api.post<ApiResponse<Quest>>(`/quests/${id}/approve`);
+        const response = await api.post<ApiResponse<Quest>>(`/api/quests/${id}/approve`);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to approve quest');
@@ -162,10 +162,10 @@ export const questService = {
     },
 
     /**
-     * Reject a completed quest
+     * Reject a quest
      */
     async rejectQuest(id: number, reason?: string): Promise<Quest> {
-        const response = await api.post<ApiResponse<Quest>>(`/quests/${id}/reject`, { reason });
+        const response = await api.post<ApiResponse<Quest>>(`/api/quests/${id}/reject`, { reason });
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to reject quest');
@@ -182,7 +182,7 @@ export const questService = {
         limit?: number;
         status?: string;
     }): Promise<QuestListingResponse> {
-        const response = await api.get<ApiResponse<QuestListingResponse>>('/quests/my-created', { params });
+        const response = await api.get<ApiResponse<QuestListingResponse>>('/api/quests/my-created', { params });
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch created quests');
@@ -199,7 +199,7 @@ export const questService = {
         limit?: number;
         status?: string;
     }): Promise<QuestListingResponse> {
-        const response = await api.get<ApiResponse<QuestListingResponse>>('/quests/my-claimed', { params });
+        const response = await api.get<ApiResponse<QuestListingResponse>>('/api/quests/my-claimed', { params });
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch claimed quests');
@@ -209,13 +209,13 @@ export const questService = {
     },
 
     /**
-     * Get repeatable quests available for claiming (respecting cooldown)
+     * Get repeatable quests
      */
     async getRepeatableQuests(params?: {
         page?: number;
         limit?: number;
     }): Promise<QuestListingResponse> {
-        const response = await api.get<ApiResponse<QuestListingResponse>>('/quests/repeatable', { params });
+        const response = await api.get<ApiResponse<QuestListingResponse>>('/api/quests/repeatable', { params });
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch repeatable quests');

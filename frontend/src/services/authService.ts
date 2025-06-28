@@ -102,7 +102,7 @@ export const authService = {
      * Get current user profile
      */
     async getCurrentUser(): Promise<User> {
-        const response = await api.get<ApiResponse<User>>('/users/me');
+        const response = await api.get<ApiResponse<User>>('/api/users/me');
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to get user profile');
@@ -115,7 +115,7 @@ export const authService = {
      * Update current user profile
      */
     async updateProfile(updateData: { name?: string; email?: string }): Promise<User> {
-        const response = await api.put<ApiResponse<User>>('/users/me', updateData);
+        const response = await api.put<ApiResponse<User>>('/api/users/me', updateData);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to update profile');
@@ -135,7 +135,7 @@ export const authService = {
         totalBounty: number;
         averageBounty: number;
     }> {
-        const response = await api.get<ApiResponse>('/users/me/stats');
+        const response = await api.get<ApiResponse>('/api/users/me/stats');
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to get user stats');

@@ -36,13 +36,14 @@ api.interceptors.request.use(
 
 export const storeService = {
     /**
-     * Get all active store items
+     * Get all store items
      */
-    async getStoreItems(params?: {
+    async getStoreItems(params: {
         page?: number;
         limit?: number;
-    }): Promise<StoreItemsResponse> {
-        const response = await api.get<ApiResponse<StoreItemsResponse>>('/store/items', { params });
+        isActive?: boolean;
+    } = {}): Promise<StoreItemsResponse> {
+        const response = await api.get<ApiResponse<StoreItemsResponse>>('/api/store/items', { params });
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch store items');
@@ -52,10 +53,10 @@ export const storeService = {
     },
 
     /**
-     * Get a single store item by ID
+     * Get store item by ID
      */
     async getStoreItem(id: number): Promise<StoreItem> {
-        const response = await api.get<ApiResponse<StoreItem>>(`/store/items/${id}`);
+        const response = await api.get<ApiResponse<StoreItem>>(`/api/store/items/${id}`);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch store item');
@@ -65,10 +66,10 @@ export const storeService = {
     },
 
     /**
-     * Create a new store item (admin/editor only)
+     * Create a new store item
      */
     async createStoreItem(itemData: CreateStoreItemRequest): Promise<StoreItem> {
-        const response = await api.post<ApiResponse<StoreItem>>('/store/items', itemData);
+        const response = await api.post<ApiResponse<StoreItem>>('/api/store/items', itemData);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to create store item');
@@ -78,10 +79,10 @@ export const storeService = {
     },
 
     /**
-     * Update an existing store item (admin/editor only)
+     * Update store item
      */
     async updateStoreItem(id: number, itemData: UpdateStoreItemRequest): Promise<StoreItem> {
-        const response = await api.put<ApiResponse<StoreItem>>(`/store/items/${id}`, itemData);
+        const response = await api.put<ApiResponse<StoreItem>>(`/api/store/items/${id}`, itemData);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to update store item');
@@ -91,10 +92,10 @@ export const storeService = {
     },
 
     /**
-     * Delete a store item (admin only)
+     * Delete store item
      */
     async deleteStoreItem(id: number): Promise<void> {
-        const response = await api.delete<ApiResponse>(`/store/items/${id}`);
+        const response = await api.delete<ApiResponse>(`/api/store/items/${id}`);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to delete store item');
@@ -102,10 +103,10 @@ export const storeService = {
     },
 
     /**
-     * Purchase an item from the store
+     * Purchase an item
      */
     async purchaseItem(itemId: number): Promise<StoreTransaction> {
-        const response = await api.post<ApiResponse<StoreTransaction>>('/store/purchase', { itemId });
+        const response = await api.post<ApiResponse<StoreTransaction>>('/api/store/purchase', { itemId });
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to purchase item');
@@ -117,28 +118,28 @@ export const storeService = {
     /**
      * Get user's purchase history
      */
-    async getUserPurchases(params?: {
+    async getPurchaseHistory(params: {
         page?: number;
         limit?: number;
         status?: string;
-    }): Promise<StoreTransactionsResponse> {
-        const response = await api.get<ApiResponse<StoreTransactionsResponse>>('/store/purchases', { params });
+    } = {}): Promise<StoreTransactionsResponse> {
+        const response = await api.get<ApiResponse<StoreTransactionsResponse>>('/api/store/purchases', { params });
 
         if (!response.data.success) {
-            throw new Error(response.data.error?.message || 'Failed to fetch user purchases');
+            throw new Error(response.data.error?.message || 'Failed to fetch purchase history');
         }
 
         return response.data.data!;
     },
 
     /**
-     * Get all pending transactions (admin/editor only)
+     * Get pending transactions (admin only)
      */
-    async getPendingTransactions(params?: {
+    async getPendingTransactions(params: {
         page?: number;
         limit?: number;
-    }): Promise<StoreTransactionsResponse> {
-        const response = await api.get<ApiResponse<StoreTransactionsResponse>>('/store/transactions/pending', { params });
+    } = {}): Promise<StoreTransactionsResponse> {
+        const response = await api.get<ApiResponse<StoreTransactionsResponse>>('/api/store/transactions/pending', { params });
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch pending transactions');
@@ -148,10 +149,10 @@ export const storeService = {
     },
 
     /**
-     * Approve or reject a transaction (admin/editor only)
+     * Update transaction status (admin only)
      */
     async updateTransaction(transactionId: number, transactionData: UpdateStoreTransactionRequest): Promise<StoreTransaction> {
-        const response = await api.put<ApiResponse<StoreTransaction>>(`/store/transactions/${transactionId}`, transactionData);
+        const response = await api.put<ApiResponse<StoreTransaction>>(`/api/store/transactions/${transactionId}`, transactionData);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to update transaction');

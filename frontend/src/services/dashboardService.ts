@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ApiResponse, DashboardData, AdminDashboardData } from '../types';
+import { ApiResponse, DashboardData, AdminDashboardData, UserStats } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
@@ -30,7 +30,7 @@ export const dashboardService = {
      * Get user dashboard data
      */
     async getUserDashboard(): Promise<DashboardData> {
-        const response = await api.get<ApiResponse<DashboardData>>('/dashboard');
+        const response = await api.get<ApiResponse<DashboardData>>('/api/dashboard');
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch dashboard data');
@@ -43,7 +43,7 @@ export const dashboardService = {
      * Get admin dashboard data
      */
     async getAdminDashboard(): Promise<AdminDashboardData> {
-        const response = await api.get<ApiResponse<AdminDashboardData>>('/dashboard/admin');
+        const response = await api.get<ApiResponse<AdminDashboardData>>('/api/dashboard/admin');
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch admin dashboard data');
@@ -53,17 +53,10 @@ export const dashboardService = {
     },
 
     /**
-     * Get user statistics
+     * Get user dashboard stats
      */
-    async getUserStats(): Promise<{
-        totalQuests: number;
-        completedQuests: number;
-        currentQuests: number;
-        pendingApproval: number;
-        totalBounty: number;
-        averageBounty: number;
-    }> {
-        const response = await api.get<ApiResponse>('/dashboard/stats');
+    async getUserStats(): Promise<UserStats> {
+        const response = await api.get<ApiResponse<UserStats>>('/api/users/me/stats');
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch user stats');

@@ -30,7 +30,7 @@ export const userService = {
      * Get all users (admin only)
      */
     async getAllUsers(): Promise<User[]> {
-        const response = await api.get<ApiResponse<User[]>>('/users');
+        const response = await api.get<ApiResponse<User[]>>('/api/users');
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch users');
@@ -43,7 +43,7 @@ export const userService = {
      * Get user by ID (admin only)
      */
     async getUserById(id: number): Promise<User> {
-        const response = await api.get<ApiResponse<User>>(`/users/${id}`);
+        const response = await api.get<ApiResponse<User>>(`/api/users/${id}`);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch user');
@@ -56,7 +56,7 @@ export const userService = {
      * Update user role (admin only)
      */
     async updateUserRole(id: number, role: 'ADMIN' | 'EDITOR' | 'PLAYER'): Promise<User> {
-        const response = await api.put<ApiResponse<User>>(`/users/${id}/role`, { role });
+        const response = await api.put<ApiResponse<User>>(`/api/users/${id}/role`, { role });
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to update user role');
@@ -69,7 +69,7 @@ export const userService = {
      * Get current user profile
      */
     async getCurrentUser(): Promise<User> {
-        const response = await api.get<ApiResponse<User>>('/users/me');
+        const response = await api.get<ApiResponse<User>>('/api/users/me');
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch current user');
@@ -92,7 +92,7 @@ export const userService = {
         favoriteColor?: string;
         experience?: number;
     }): Promise<User> {
-        const response = await api.put<ApiResponse<User>>('/users/me', userData);
+        const response = await api.put<ApiResponse<User>>('/api/users/me', userData);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to update user profile');
