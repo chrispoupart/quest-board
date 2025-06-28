@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ApiResponse, DashboardData, AdminDashboardData } from '../types';
+import { ApiResponse, DashboardData, AdminDashboardData, UserStats } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
@@ -55,8 +55,8 @@ export const dashboardService = {
     /**
      * Get user dashboard stats
      */
-    async getUserStats(): Promise<DashboardData> {
-        const response = await api.get<ApiResponse>('/api/dashboard/stats');
+    async getUserStats(): Promise<UserStats> {
+        const response = await api.get<ApiResponse<UserStats>>('/api/users/me/stats');
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch user stats');
