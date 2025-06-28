@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { User, ApiResponse } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+// In production, VITE_API_BASE_URL should be '/api', so we use empty string as baseURL
+// In development, use localhost:8000
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL === '/api' ? '' : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000');
 
 // Create axios instance with base configuration
 const api = axios.create({
@@ -37,7 +39,7 @@ api.interceptors.response.use(
             try {
                 const refreshToken = localStorage.getItem('refreshToken');
                 if (refreshToken) {
-                    const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+                    const response = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {
                         refreshToken,
                     });
 
@@ -66,7 +68,7 @@ export const authService = {
      */
     async login(code: string, redirectUri: string): Promise<{ user: User; accessToken: string; refreshToken: string }> {
         try {
-            const response = await api.post<ApiResponse<{ user: User; accessToken: string; refreshToken: string }>>('/auth/google', {
+            const response = await api.post<ApiResponse<{ user: User; accessToken: string; refreshToken: string }>>('/api/auth/google', {
                 code,
                 redirectUri,
             });
@@ -91,7 +93,7 @@ export const authService = {
      */
     async logout(): Promise<void> {
         try {
-            await api.post('/auth/logout');
+            await api.post('/api/auth/logout');
         } catch (error) {
             // Log error but don't throw - we want to clear local state regardless
             console.error('Logout API call failed:', error);
@@ -153,7 +155,7 @@ export const authService = {
             throw new Error('No refresh token available');
         }
 
-        const response = await api.post<ApiResponse<{ accessToken: string; user: User }>>('/auth/refresh', {
+        const response = await api.post<ApiResponse<{ accessToken: string; user: User }>>('/api/auth/refresh', {
             refreshToken,
         });
 
