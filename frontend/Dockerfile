@@ -56,12 +56,15 @@ RUN echo '#!/bin/bash' > /docker-entrypoint.sh && \
     echo 'export BACKEND_HOST=${BACKEND_HOST:-backend}' >> /docker-entrypoint.sh && \
     echo 'export BACKEND_PORT=${BACKEND_PORT:-5000}' >> /docker-entrypoint.sh && \
     echo '' >> /docker-entrypoint.sh && \
+    echo '# Write runtime env.js for frontend config' >> /docker-entrypoint.sh && \
+    echo 'echo "window.ENV = { VITE_GOOGLE_CLIENT_ID: \"$VITE_GOOGLE_CLIENT_ID\" };" > /usr/share/nginx/html/env.js' >> /docker-entrypoint.sh && \
+    echo '' >> /docker-entrypoint.sh && \
     echo '# Log configuration' >> /docker-entrypoint.sh && \
     echo 'echo "Starting Quest Board Frontend..."' >> /docker-entrypoint.sh && \
     echo 'echo "Backend URL: http://$BACKEND_HOST:$BACKEND_PORT"' >> /docker-entrypoint.sh && \
     echo '' >> /docker-entrypoint.sh && \
     echo '# Substitute environment variables in nginx config' >> /docker-entrypoint.sh && \
-    echo 'envsubst "\$BACKEND_HOST \$BACKEND_PORT" < /etc/nginx/nginx.conf.template > /tmp/nginx/nginx.conf' >> /docker-entrypoint.sh && \
+    echo 'envsubst "$BACKEND_HOST $BACKEND_PORT" < /etc/nginx/nginx.conf.template > /tmp/nginx/nginx.conf' >> /docker-entrypoint.sh && \
     echo '' >> /docker-entrypoint.sh && \
     echo '# Test nginx configuration' >> /docker-entrypoint.sh && \
     echo 'nginx -t -c /tmp/nginx/nginx.conf' >> /docker-entrypoint.sh && \

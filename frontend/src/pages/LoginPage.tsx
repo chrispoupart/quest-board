@@ -3,6 +3,15 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Scroll, Shield, Crown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
+// Add a TypeScript declaration for window.ENV
+declare global {
+  interface Window {
+    ENV?: {
+      VITE_GOOGLE_CLIENT_ID?: string;
+    };
+  }
+}
+
 const LoginPage: React.FC = () => {
     const { login, isAuthenticated, loading } = useAuth();
     const navigate = useNavigate();
@@ -52,7 +61,7 @@ const LoginPage: React.FC = () => {
     };
 
     const handleGoogleLogin = () => {
-        const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+        const googleClientId = window.ENV?.VITE_GOOGLE_CLIENT_ID || import.meta.env.VITE_GOOGLE_CLIENT_ID;
         const redirectUri = `${window.location.origin}/auth/callback`;
         const scope = 'email profile';
         const responseType = 'code';
