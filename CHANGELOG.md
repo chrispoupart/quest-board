@@ -1,3 +1,9 @@
+## [2.1.7](https://github.com/chrispoupart/quest-board/compare/v2.1.6...v2.1.7) (2025-06-28)
+
+### Bug Fixes
+
+* **frontend:** 🔒️ add auth proxy to nginx config ([8789a87](https://github.com/chrispoupart/quest-board/commit/8789a87d06fe9ca1a530a4b996de3ad1e04c27a0))
+
 ## [2.1.6](https://github.com/chrispoupart/quest-board/compare/v2.1.5...v2.1.6) (2025-06-28)
 
 ### Bug Fixes
