@@ -1,12 +1,13 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, Transition } from '@headlessui/react';
-import { Scroll, Shield, Crown, Settings, LogOut, Coins, Store } from 'lucide-react';
+import { Scroll, Shield, Crown, Settings, LogOut, Coins, Store, Menu as MenuIcon, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const Header: React.FC = () => {
     const { user, logout, isEditorOrAdmin } = useAuth();
     const navigate = useNavigate();
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const handleLogout = async () => {
         await logout();
@@ -39,11 +40,18 @@ const Header: React.FC = () => {
         }
     };
 
+    const navigationLinks = [
+        { to: '/dashboard', label: 'Dashboard', icon: null },
+        { to: '/quests', label: 'Quest Board', icon: null },
+        { to: '/store', label: 'Guild Store', icon: <Store className="w-4 h-4" /> },
+        ...(isEditorOrAdmin ? [{ to: '/admin', label: 'Guild Hall', icon: <Crown className="w-4 h-4" /> }] : [])
+    ];
+
     return (
         <header className="border-b-4 border-amber-300 bg-gradient-to-r from-amber-200 to-yellow-200 shadow-lg">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
-                    {/* Logo and Navigation */}
+                    {/* Logo */}
                     <div className="flex items-center">
                         <Link to="/dashboard" className="flex items-center group">
                             <div className="shrink-0">
@@ -51,52 +59,34 @@ const Header: React.FC = () => {
                                     <Scroll className="w-6 h-6 text-white" />
                                 </div>
                             </div>
-                            <span className="ml-3 text-2xl font-bold text-amber-900 font-serif group-hover:text-amber-800 transition-colors">
+                            <span className="ml-3 text-xl sm:text-2xl font-bold text-amber-900 font-serif group-hover:text-amber-800 transition-colors">
                                 Quest Board
                             </span>
                         </Link>
+                    </div>
 
-                        {/* Navigation Links */}
-                        <nav className="ml-10 flex space-x-6">
+                    {/* Desktop Navigation */}
+                    <nav className="hidden md:flex ml-10 space-x-6">
+                        {navigationLinks.map((link) => (
                             <Link
-                                to="/dashboard"
-                                className="text-amber-700 hover:text-amber-900 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-amber-100 border border-transparent hover:border-amber-300"
-                            >
-                                Dashboard
-                            </Link>
-                            <Link
-                                to="/quests"
-                                className="text-amber-700 hover:text-amber-900 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-amber-100 border border-transparent hover:border-amber-300"
-                            >
-                                Quest Board
-                            </Link>
-                            <Link
-                                to="/store"
+                                key={link.to}
+                                to={link.to}
                                 className="text-amber-700 hover:text-amber-900 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-amber-100 border border-transparent hover:border-amber-300 flex items-center gap-1"
                             >
-                                <Store className="w-4 h-4" />
-                                Guild Store
+                                {link.icon}
+                                {link.label}
                             </Link>
-                            {isEditorOrAdmin && (
-                                <Link
-                                    to="/admin"
-                                    className="text-amber-700 hover:text-amber-900 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-amber-100 border border-transparent hover:border-amber-300 flex items-center gap-1"
-                                >
-                                    <Crown className="w-4 h-4" />
-                                    Guild Hall
-                                </Link>
-                            )}
-                        </nav>
-                    </div>
+                        ))}
+                    </nav>
 
                     {/* User Menu */}
                     <div className="flex items-center">
                         {user && (
                             <Menu as="div" className="ml-3 relative">
                                 <div>
-                                    <Menu.Button className="flex items-center bg-white border-2 border-amber-300 rounded-lg px-3 py-2 hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="text-right">
+                                    <Menu.Button className="flex items-center bg-white border-2 border-amber-300 rounded-lg px-2 sm:px-3 py-2 hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200">
+                                        <div className="flex items-center space-x-2 sm:space-x-3">
+                                            <div className="text-right hidden sm:block">
                                                 <div className="text-amber-900 font-medium text-sm">
                                                     {user.characterName || user.name}
                                                 </div>
@@ -179,8 +169,39 @@ const Header: React.FC = () => {
                                 </Transition>
                             </Menu>
                         )}
+
+                        {/* Mobile menu button */}
+                        <button
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            className="md:hidden ml-3 p-2 rounded-lg text-amber-700 hover:text-amber-900 hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200"
+                        >
+                            {isMobileMenuOpen ? (
+                                <X className="w-6 h-6" />
+                            ) : (
+                                <MenuIcon className="w-6 h-6" />
+                            )}
+                        </button>
                     </div>
                 </div>
+
+                {/* Mobile Navigation Menu */}
+                {isMobileMenuOpen && (
+                    <div className="md:hidden">
+                        <div className="px-2 pt-2 pb-3 space-y-1 bg-gradient-to-b from-amber-100 to-yellow-100 border-t border-amber-300">
+                            {navigationLinks.map((link) => (
+                                <Link
+                                    key={link.to}
+                                    to={link.to}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="block text-amber-700 hover:text-amber-900 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200 hover:bg-amber-200 border border-transparent hover:border-amber-300 flex items-center gap-2"
+                                >
+                                    {link.icon}
+                                    {link.label}
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </header>
     );
