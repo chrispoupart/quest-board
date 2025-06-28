@@ -16,8 +16,17 @@ RUN npm ci
 # Generate Prisma client
 RUN npx prisma generate
 
-# Copy source code
-COPY . .
+# Copy scripts directory first to ensure it exists
+COPY scripts ./scripts
+
+# Copy remaining source code
+COPY src ./src
+COPY tsconfig.json ./
+COPY jest.config.js ./
+COPY .eslintrc.js ./
+
+# Verify scripts directory exists
+RUN ls -la scripts/ || echo "Scripts directory not found in build context"
 
 # Build the application
 RUN npm run build
@@ -47,6 +56,9 @@ RUN npx prisma generate
 # Copy built application and scripts from builder stage
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/scripts ./scripts
+
+# Verify scripts were copied
+RUN ls -la scripts/ || echo "Scripts directory not found in production stage"
 
 # Change ownership of the app directory to the nodejs user
 RUN chown -R nodejs:nodejs /app
