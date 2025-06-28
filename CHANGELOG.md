@@ -1,3 +1,9 @@
+## [2.1.8](https://github.com/chrispoupart/quest-board/compare/v2.1.7...v2.1.8) (2025-06-28)
+
+### Bug Fixes
+
+* **services:** 🎨 update API base URL handling for env ([9ccd180](https://github.com/chrispoupart/quest-board/commit/9ccd180420de0a29ef1439c425a4b22427e56e2b))
+
 ## [2.1.7](https://github.com/chrispoupart/quest-board/compare/v2.1.6...v2.1.7) (2025-06-28)
 
 ### Bug Fixes
