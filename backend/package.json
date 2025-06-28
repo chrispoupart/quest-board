@@ -17,7 +17,7 @@
     "db:seed": "ts-node prisma/seed.ts",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
-    "promote-admin": "ts-node scripts/promote-to-admin.ts"
+    "promote-admin": "node scripts/promote-to-admin.js"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
