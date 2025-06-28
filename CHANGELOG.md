@@ -1,3 +1,9 @@
+## [2.0.3](https://github.com/chrispoupart/quest-board/compare/v2.0.2...v2.0.3) (2025-06-28)
+
+### Bug Fixes
+
+* **authService:** 🔒️ update login redirect URL ([861cd09](https://github.com/chrispoupart/quest-board/commit/861cd0972d55bcb4c91e5a72e4d5e39bb219d86a))
+
 ## [2.0.2](https://github.com/chrispoupart/quest-board/compare/v2.0.1...v2.0.2) (2025-06-28)
 
 ### Bug Fixes
