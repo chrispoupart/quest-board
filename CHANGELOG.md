@@ -1,3 +1,13 @@
+## [2.3.0](https://github.com/chrispoupart/quest-board/compare/v2.2.0...v2.3.0) (2025-06-28)
+
+### Features
+
+* **header:** 💄 add responsive mobile navigation menu ([defcac0](https://github.com/chrispoupart/quest-board/commit/defcac074b48a5c2556cc0014db9ca4b7a977ed0))
+
+### Bug Fixes
+
+* **header:** 💄 update UI structure for desktop navigation ([c73bffb](https://github.com/chrispoupart/quest-board/commit/c73bffbad1994d4f2541544c180aa7b4e68b0e6d))
+
 ## [2.2.0](https://github.com/chrispoupart/quest-board/compare/v2.1.8...v2.2.0) (2025-06-28)
 
 ### Features
