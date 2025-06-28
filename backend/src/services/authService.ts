@@ -4,7 +4,6 @@ import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 import { UserRole, JwtPayload, GoogleUserInfo, AuthUser } from '../types';
 import { calculateLevel } from '../utils/leveling';
-import { User } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
