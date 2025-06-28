@@ -1,15 +1,14 @@
 import { Router } from 'express';
-import { authController } from '../controllers/authController';
+import { googleLogin, googleCallback } from '../controllers/authController';
 
 const router = Router();
 
 // Google OAuth2 login
-router.post('/google', authController.googleLogin);
+router.get('/google/login', googleLogin);
+router.get('/google/callback', (req, res, next) => {
+  googleCallback(req, res).catch(next);
+});
 
-// Refresh access token
-router.post('/refresh', authController.refreshToken);
-
-// Logout
-router.post('/logout', authController.logout);
+// Other routes like refreshToken and logout can be added back here if needed.
 
 export default router;

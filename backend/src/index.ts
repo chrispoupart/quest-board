@@ -12,9 +12,12 @@ import dashboardRoutes from './routes/dashboard';
 import jobRoutes from './routes/jobs';
 import storeRoutes from './routes/store';
 import skillRoutes from './routes/skills';
+import { PrismaClient } from '@prisma/client';
 
 // Load environment variables
 dotenv.config();
+
+export const prisma = new PrismaClient();
 
 const app = express();
 const PORT = process.env['PORT'] || 8000;

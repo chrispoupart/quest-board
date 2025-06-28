@@ -110,3 +110,12 @@ export function checkLevelUp(oldExperience: number, newExperience: number): bool
   const newLevel = calculateLevel(newExperience);
   return newLevel > oldLevel;
 }
+
+const XP_PER_LEVEL = 1000;
+
+export const getLevel = (xp: number): { level: number; progress: number } => {
+  const level = Math.floor(xp / XP_PER_LEVEL) + 1;
+  const xpIntoLevel = xp % XP_PER_LEVEL;
+  const progress = (xpIntoLevel / XP_PER_LEVEL) * 100;
+  return { level, progress };
+};

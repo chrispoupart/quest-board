@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 import { UserRole, JwtPayload, GoogleUserInfo, AuthUser } from '../types';
 import { calculateLevel } from '../utils/leveling';
+import { User } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -12,6 +13,8 @@ const googleClient = new OAuth2Client(
     process.env['GOOGLE_CLIENT_ID'],
     process.env['GOOGLE_CLIENT_SECRET']
 );
+
+const JWT_SECRET = process.env['JWT_SECRET'] || 'your-default-secret-key';
 
 export class AuthService {
     /**
@@ -121,7 +124,7 @@ export class AuthService {
      * Generate JWT token for user
      */
     static generateToken(user: AuthUser): string {
-        const payload: JwtPayload = {
+        const payload = {
             userId: user.id,
             email: user.email,
             role: user.role,
@@ -277,3 +280,7 @@ export class AuthService {
         return userRole === 'EDITOR' || userRole === 'ADMIN';
     }
 }
+
+export const generateToken = (user: AuthUser): string => {
+    return AuthService.generateToken(user);
+};
