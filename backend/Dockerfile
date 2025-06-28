@@ -44,9 +44,9 @@ RUN npm ci --omit=dev
 # Generate Prisma client
 RUN npx prisma generate
 
-# Copy built application and compiled scripts from builder stage
+# Copy built application and scripts from builder stage
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/dist/scripts ./scripts
+COPY --from=builder /app/scripts ./scripts
 
 # Change ownership of the app directory to the nodejs user
 RUN chown -R nodejs:nodejs /app
