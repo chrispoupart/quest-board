@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/chrispoupart/quest-board/compare/v1.5.0...v1.5.1) (2025-06-28)
+
+### Bug Fixes
+
+* **backend:** 🔨 update start script path in package.json ([aa8001b](https://github.com/chrispoupart/quest-board/commit/aa8001b9e63e4bf6c67bb2e6deab13844299d41f))
+* **backend:** 🚚 update main entry point path in package.json ([6e58699](https://github.com/chrispoupart/quest-board/commit/6e586993275238cb419d9d33da0ea1ab003270bc))
+
 ## [1.5.0](https://github.com/chrispoupart/quest-board/compare/v1.4.0...v1.5.0) (2025-06-27)
 
 ### Features
