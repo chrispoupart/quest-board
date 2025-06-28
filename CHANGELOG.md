@@ -1,3 +1,9 @@
+## [1.7.0](https://github.com/chrispoupart/quest-board/compare/v1.6.1...v1.7.0) (2025-06-28)
+
+### Features
+
+* **frontend:** 🔊 redirect nginx logs to stdout/stderr for containerization ([1eb3ce3](https://github.com/chrispoupart/quest-board/commit/1eb3ce34a97fb1b7c6a67f86720b985dfbc17d6d))
+
 ## [1.6.1](https://github.com/chrispoupart/quest-board/compare/v1.6.0...v1.6.1) (2025-06-28)
 
 ### Bug Fixes
