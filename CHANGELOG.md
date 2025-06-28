@@ -1,3 +1,9 @@
+## [1.8.0](https://github.com/chrispoupart/quest-board/compare/v1.7.0...v1.8.0) (2025-06-28)
+
+### Features
+
+* **auth:** 🔐 add runtime environment configuration for Google login ([ac86205](https://github.com/chrispoupart/quest-board/commit/ac86205317a3b4f8dfc8b51572c55406e8cc880d))
+
 ## [1.7.0](https://github.com/chrispoupart/quest-board/compare/v1.6.1...v1.7.0) (2025-06-28)
 
 ### Features
