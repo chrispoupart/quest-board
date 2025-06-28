@@ -51,7 +51,7 @@ const Header: React.FC = () => {
         <header className="border-b-4 border-amber-300 bg-gradient-to-r from-amber-200 to-yellow-200 shadow-lg">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
-                    {/* Logo */}
+                    {/* Logo and Desktop Navigation */}
                     <div className="flex items-center">
                         <Link to="/dashboard" className="flex items-center group">
                             <div className="shrink-0">
@@ -63,21 +63,21 @@ const Header: React.FC = () => {
                                 Quest Board
                             </span>
                         </Link>
-                    </div>
 
-                    {/* Desktop Navigation */}
-                    <nav className="hidden md:flex ml-10 space-x-6">
-                        {navigationLinks.map((link) => (
-                            <Link
-                                key={link.to}
-                                to={link.to}
-                                className="text-amber-700 hover:text-amber-900 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-amber-100 border border-transparent hover:border-amber-300 flex items-center gap-1"
-                            >
-                                {link.icon}
-                                {link.label}
-                            </Link>
-                        ))}
-                    </nav>
+                        {/* Desktop Navigation */}
+                        <nav className="hidden md:flex ml-10 space-x-6">
+                            {navigationLinks.map((link) => (
+                                <Link
+                                    key={link.to}
+                                    to={link.to}
+                                    className="text-amber-700 hover:text-amber-900 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-amber-100 border border-transparent hover:border-amber-300 flex items-center gap-1"
+                                >
+                                    {link.icon}
+                                    {link.label}
+                                </Link>
+                            ))}
+                        </nav>
+                    </div>
 
                     {/* User Menu */}
                     <div className="flex items-center">
@@ -193,7 +193,7 @@ const Header: React.FC = () => {
                                     key={link.to}
                                     to={link.to}
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="block text-amber-700 hover:text-amber-900 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200 hover:bg-amber-200 border border-transparent hover:border-amber-300 flex items-center gap-2"
+                                    className="text-amber-700 hover:text-amber-900 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200 hover:bg-amber-200 border border-transparent hover:border-amber-300 flex items-center gap-2"
                                 >
                                     {link.icon}
                                     {link.label}
