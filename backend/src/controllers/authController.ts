@@ -37,7 +37,7 @@ export const googleCallback = async (req: Request, res: Response): Promise<Respo
       code: code as string,
       redirect_uri: GOOGLE_CALLBACK_URL,
     });
-    
+
     if (!tokens.id_token) {
         return res.status(400).send('ID token is missing from Google response');
     }
@@ -68,7 +68,7 @@ export const googleCallback = async (req: Request, res: Response): Promise<Respo
     }
 
     const { level, progress } = getLevel(user.experience);
-    
+
     // Construct the AuthUser object expected by the token generator
     const authUser = {
       ...user,
@@ -81,10 +81,13 @@ export const googleCallback = async (req: Request, res: Response): Promise<Respo
       preferredPronouns: user.preferredPronouns ?? undefined,
       favoriteColor: user.favoriteColor ?? undefined,
     };
-    
+
     const token = AuthService.generateToken(authUser);
 
-    return res.redirect(`${FRONTEND_URL}/auth/callback?token=${token}&level=${level}&progress=${progress}&name=${encodeURIComponent(user.name)}`);
+    const redirectUrl = `${FRONTEND_URL}/auth/callback?token=${token}&level=${level}&progress=${progress}&name=${encodeURIComponent(user.name)}`;
+    console.log('AuthController: Redirecting to:', redirectUrl);
+
+    return res.redirect(redirectUrl);
 
   } catch (error) {
     console.error('Authentication error:', error);

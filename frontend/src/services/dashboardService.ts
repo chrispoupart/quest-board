@@ -43,7 +43,7 @@ export const dashboardService = {
      * Get admin dashboard data
      */
     async getAdminDashboard(): Promise<AdminDashboardData> {
-        const response = await api.get<ApiResponse<AdminDashboardData>>('/dashboard/admin');
+        const response = await api.get<ApiResponse<AdminDashboardData>>('/api/dashboard/admin');
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch admin dashboard data');
@@ -53,17 +53,10 @@ export const dashboardService = {
     },
 
     /**
-     * Get user statistics
+     * Get user dashboard stats
      */
-    async getUserStats(): Promise<{
-        totalQuests: number;
-        completedQuests: number;
-        currentQuests: number;
-        pendingApproval: number;
-        totalBounty: number;
-        averageBounty: number;
-    }> {
-        const response = await api.get<ApiResponse>('/dashboard/stats');
+    async getUserStats(): Promise<DashboardData> {
+        const response = await api.get<ApiResponse>('/api/dashboard/stats');
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch user stats');

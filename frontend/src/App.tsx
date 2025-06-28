@@ -32,6 +32,10 @@ const AuthCallback: React.FC = () => {
     const token = searchParams.get('token');
     const error = searchParams.get('error');
 
+    console.log('AuthCallback: Received token:', token ? 'present' : 'not present');
+    console.log('AuthCallback: Received error:', error);
+    console.log('AuthCallback: All search params:', Object.fromEntries(searchParams.entries()));
+
     if (error) {
       console.error('OAuth error:', error);
       navigate('/login?error=' + encodeURIComponent(error));
@@ -39,6 +43,7 @@ const AuthCallback: React.FC = () => {
     }
 
     if (token) {
+      console.log('AuthCallback: Storing token and fetching user data...');
       // Backend has already handled the OAuth flow and sent us a token
       // Store the token
       localStorage.setItem('accessToken', token);
@@ -46,16 +51,18 @@ const AuthCallback: React.FC = () => {
       // Fetch user data using the token
       refreshUser()
         .then(() => {
+          console.log('AuthCallback: Successfully authenticated, redirecting to dashboard');
           // Successfully authenticated, redirect to dashboard
           navigate('/dashboard');
         })
         .catch((error) => {
-          console.error('Failed to fetch user data:', error);
+          console.error('AuthCallback: Failed to fetch user data:', error);
           // Clear token and redirect to login
           localStorage.removeItem('accessToken');
           navigate('/login?error=' + encodeURIComponent('Failed to authenticate'));
         });
     } else {
+      console.log('AuthCallback: No token found, redirecting to login');
       // No token, redirect to login
       navigate('/login');
     }
