@@ -1,3 +1,9 @@
+## [1.6.1](https://github.com/chrispoupart/quest-board/compare/v1.6.0...v1.6.1) (2025-06-28)
+
+### Bug Fixes
+
+* **frontend:** 🔨 update nginx config handling in Dockerfile ([2da2676](https://github.com/chrispoupart/quest-board/commit/2da2676a19bde18d5bb9b14542bb72374e29374c))
+
 ## [1.6.0](https://github.com/chrispoupart/quest-board/compare/v1.5.1...v1.6.0) (2025-06-28)
 
 ### Features
