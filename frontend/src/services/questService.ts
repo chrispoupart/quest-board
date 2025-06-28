@@ -37,7 +37,7 @@ export const questService = {
         createdBy?: number;
         claimedBy?: number;
     }): Promise<QuestListingResponse> {
-        const response = await api.get<ApiResponse<QuestListingResponse>>('/quests', { params });
+        const response = await api.get<ApiResponse<QuestListingResponse>>('/api/quests', { params });
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch quests');
