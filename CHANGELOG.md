@@ -1,3 +1,12 @@
+## [2.1.3](https://github.com/chrispoupart/quest-board/compare/v2.1.2...v2.1.3) (2025-06-28)
+
+### Bug Fixes
+
+* **auth:** 🚚 update API endpoints and add logging ([5d47f5d](https://github.com/chrispoupart/quest-board/commit/5d47f5d44deadf3aaf7d1dd23884fa3d1ecf26fb))
+* **dashboardService:** 🏷️  Update getUserStats return type ([d8bdc00](https://github.com/chrispoupart/quest-board/commit/d8bdc00ad1abdd204756d5a18887ade41e8d166f))
+* **dashboardService:** 🩹 update dashboard API endpoint path ([982e2f6](https://github.com/chrispoupart/quest-board/commit/982e2f61e947fed2cfb14120d93431df6f77bdf7))
+* **questService:** 👽️ update API endpoint path ([fb7c84f](https://github.com/chrispoupart/quest-board/commit/fb7c84fc93a233c83271684cd6ae23b0c0e95a11))
+
 ## [2.1.2](https://github.com/chrispoupart/quest-board/compare/v2.1.1...v2.1.2) (2025-06-28)
 
 ### Bug Fixes
