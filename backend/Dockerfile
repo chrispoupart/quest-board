@@ -25,6 +25,10 @@ RUN npm run build
 # Production stage
 FROM node:20-alpine AS production
 
+# Create a non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
 WORKDIR /app
 
 # Install system dependencies
@@ -42,6 +46,12 @@ RUN npx prisma generate
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
+
+# Change ownership of the app directory to the nodejs user
+RUN chown -R nodejs:nodejs /app
+
+# Switch to non-root user
+USER nodejs
 
 EXPOSE 8000
 
