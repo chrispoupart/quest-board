@@ -1,3 +1,9 @@
+## [2.1.5](https://github.com/chrispoupart/quest-board/compare/v2.1.4...v2.1.5) (2025-06-28)
+
+### Bug Fixes
+
+* **services:** 🔒️ update API base URL logic for environments ([405e549](https://github.com/chrispoupart/quest-board/commit/405e549116dfe126dfc6018d3ad00b566643db60))
+
 ## [2.1.4](https://github.com/chrispoupart/quest-board/compare/v2.1.3...v2.1.4) (2025-06-28)
 
 ### Bug Fixes
