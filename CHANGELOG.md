@@ -1,3 +1,9 @@
+## [2.1.2](https://github.com/chrispoupart/quest-board/compare/v2.1.1...v2.1.2) (2025-06-28)
+
+### Bug Fixes
+
+* **frontend:** 🔀 update API proxy path in nginx config ([e13fb67](https://github.com/chrispoupart/quest-board/commit/e13fb677df7f52523def8da8a4ca0c30287c3570))
+
 ## [2.1.1](https://github.com/chrispoupart/quest-board/compare/v2.1.0...v2.1.1) (2025-06-28)
 
 ### Bug Fixes
