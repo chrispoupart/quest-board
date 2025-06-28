@@ -1,3 +1,9 @@
+## [2.0.1](https://github.com/chrispoupart/quest-board/compare/v2.0.0...v2.0.1) (2025-06-28)
+
+### Bug Fixes
+
+* **routes:** 🚚 Change auth route path from '/auth' to '/api' ([21cebf5](https://github.com/chrispoupart/quest-board/commit/21cebf5dc832569f5de4192e96369e27edbd1f91))
+
 ## [2.0.0](https://github.com/chrispoupart/quest-board/compare/v1.8.0...v2.0.0) (2025-06-28)
 
 ### ⚠ BREAKING CHANGES
