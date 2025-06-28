@@ -33,9 +33,10 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf.template
 
 # Create necessary directories and set permissions
-RUN mkdir -p /var/cache/nginx /var/log/nginx /etc/nginx/conf.d && \
-    chown -R nginx:nginx /var/cache/nginx /var/log/nginx /etc/nginx/conf.d /usr/share/nginx/html && \
-    chmod -R 755 /usr/share/nginx/html
+RUN mkdir -p /var/cache/nginx /var/log/nginx /etc/nginx/conf.d /tmp/nginx && \
+    chown -R nginx:nginx /var/cache/nginx /var/log/nginx /etc/nginx/conf.d /usr/share/nginx/html /tmp/nginx && \
+    chmod -R 755 /usr/share/nginx/html && \
+    chmod 755 /tmp/nginx
 
 # Expose port 8080
 EXPOSE 8080
@@ -53,13 +54,13 @@ RUN echo '#!/bin/bash' > /docker-entrypoint.sh && \
     echo 'echo "Backend URL: http://$BACKEND_HOST:$BACKEND_PORT"' >> /docker-entrypoint.sh && \
     echo '' >> /docker-entrypoint.sh && \
     echo '# Substitute environment variables in nginx config' >> /docker-entrypoint.sh && \
-    echo 'envsubst "\$BACKEND_HOST \$BACKEND_PORT" < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf' >> /docker-entrypoint.sh && \
+    echo 'envsubst "\$BACKEND_HOST \$BACKEND_PORT" < /etc/nginx/nginx.conf.template > /tmp/nginx/nginx.conf' >> /docker-entrypoint.sh && \
     echo '' >> /docker-entrypoint.sh && \
     echo '# Test nginx configuration' >> /docker-entrypoint.sh && \
-    echo 'nginx -t' >> /docker-entrypoint.sh && \
+    echo 'nginx -t -c /tmp/nginx/nginx.conf' >> /docker-entrypoint.sh && \
     echo '' >> /docker-entrypoint.sh && \
-    echo '# Start nginx in foreground' >> /docker-entrypoint.sh && \
-    echo 'exec nginx -g "daemon off;"' >> /docker-entrypoint.sh && \
+    echo '# Start nginx in foreground with custom config' >> /docker-entrypoint.sh && \
+    echo 'exec nginx -g "daemon off;" -c /tmp/nginx/nginx.conf' >> /docker-entrypoint.sh && \
     chmod +x /docker-entrypoint.sh
 
 # Use non-root user for security
