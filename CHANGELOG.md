@@ -1,3 +1,14 @@
+## [2.0.0](https://github.com/chrispoupart/quest-board/compare/v1.8.0...v2.0.0) (2025-06-28)
+
+### ⚠ BREAKING CHANGES
+
+* **auth:** 🏗️ migrate from client-side to server-side OAuth flow
+
+### Features
+
+* **auth:** 🏗️ Implement OAuth flow with redirect-based authentication ([e2516fc](https://github.com/chrispoupart/quest-board/commit/e2516fcfe212945db11f780a6bbd2c56cb89f263))
+* **auth:** 🏗️ migrate from client-side to server-side OAuth flow ([f926c9d](https://github.com/chrispoupart/quest-board/commit/f926c9df66f0ce9c2fe13cfe29d7a9f3b0d377e8))
+
 ## [1.8.0](https://github.com/chrispoupart/quest-board/compare/v1.7.0...v1.8.0) (2025-06-28)
 
 ### Features
