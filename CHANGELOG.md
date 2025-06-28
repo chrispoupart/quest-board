@@ -1,3 +1,9 @@
+## [2.1.4](https://github.com/chrispoupart/quest-board/compare/v2.1.3...v2.1.4) (2025-06-28)
+
+### Bug Fixes
+
+* **authService:** 🔒️ update API endpoints for secure routing ([5e742b0](https://github.com/chrispoupart/quest-board/commit/5e742b0af30d75ace915346a9cf2c5ac25821a76))
+
 ## [2.1.3](https://github.com/chrispoupart/quest-board/compare/v2.1.2...v2.1.3) (2025-06-28)
 
 ### Bug Fixes
