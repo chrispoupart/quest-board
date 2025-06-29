@@ -3,7 +3,7 @@ set -e
 
 # Use environment variables, with defaults for local development
 export BACKEND_HOST=${BACKEND_HOST:-backend}
-export BACKEND_PORT=${BACKEND_PORT:-5000}
+export BACKEND_PORT=${BACKEND_PORT:-8000}
 
 echo "Using backend at: http://${BACKEND_HOST}:${BACKEND_PORT}"
 
