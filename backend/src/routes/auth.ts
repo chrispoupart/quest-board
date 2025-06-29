@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { googleLogin, googleCallback } from '../controllers/authController';
+import { googleLogin, googleCallback, refreshTokenHandler } from '../controllers/authController';
 
 const router = Router();
 
@@ -9,6 +9,10 @@ router.get('/google/callback', (req, res, next) => {
   googleCallback(req, res).catch(next);
 });
 
-// Other routes like refreshToken and logout can be added back here if needed.
+// Refresh token route
+router.post('/refresh', (req, res, next) => {
+  refreshTokenHandler(req, res).catch(next);
+});
+
 
 export default router;

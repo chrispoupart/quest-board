@@ -148,20 +148,27 @@ export const authService = {
     /**
      * Refresh access token
      */
-    async refreshToken(): Promise<{ accessToken: string; user: User }> {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) {
+    async refreshToken(): Promise<{ accessToken: string }> { // User data will be refetched by caller if needed
+        const refreshTokenValue = localStorage.getItem('refreshToken');
+        if (!refreshTokenValue) {
             throw new Error('No refresh token available');
         }
 
-        const response = await api.post<ApiResponse<{ accessToken: string; user: User }>>('/api/auth/refresh', {
-            refreshToken,
+        // The interceptor itself will use this endpoint structure.
+        // This standalone function is used by AuthContext during startup.
+        const response = await axios.post<ApiResponse<{ accessToken: string }>>(`${API_BASE_URL}/api/auth/refresh`, {
+            refreshToken: refreshTokenValue,
+        }, {
+           // Ensure this call doesn't get intercepted infinitely if refresh token itself is invalid
+          _isRetry: true, // Adding a flag to prevent potential interceptor loops if not already handled
         });
 
-        if (!response.data.success) {
+
+        if (!response.data.success || !response.data.data?.accessToken) {
             throw new Error(response.data.error?.message || 'Token refresh failed');
         }
 
-        return response.data.data!;
+        // The caller (AuthContext) will store the new accessToken and then re-fetch user data.
+        return { accessToken: response.data.data.accessToken };
     },
 };

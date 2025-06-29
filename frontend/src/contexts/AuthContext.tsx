@@ -27,30 +27,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     useEffect(() => {
         // Check if user is already logged in on app start
         const checkAuth = async () => {
+            setLoading(true);
             try {
-                const token = localStorage.getItem('accessToken');
-                if (token) {
+                const accessToken = localStorage.getItem('accessToken');
+                if (accessToken) {
                     try {
+                        // Validate token locally first (optional, but good for quick check)
+                        // For now, directly try to get user data
                         const userData = await authService.getCurrentUser();
                         setUser(userData);
                     } catch (authError) {
-                        console.error('AuthContext: Current user check failed:', authError);
-                        // Try to refresh the token
-                        try {
-                            const refreshResult = await authService.refreshToken();
-                            localStorage.setItem('accessToken', refreshResult.accessToken);
-                            setUser(refreshResult.user);
-                        } catch (refreshError) {
-                            console.error('AuthContext: Token refresh failed:', refreshError);
-                            // Clear tokens and redirect to login
+                        console.warn('AuthContext: Current user check failed, attempting token refresh:', authError);
+                        const refreshToken = localStorage.getItem('refreshToken');
+                        if (refreshToken) {
+                            try {
+                                const refreshResult = await authService.refreshToken(); // This now returns { accessToken, user (optional) }
+                                localStorage.setItem('accessToken', refreshResult.accessToken);
+                                // After refreshing, refetch user data with new token
+                                const userData = await authService.getCurrentUser();
+                                setUser(userData);
+                            } catch (refreshError) {
+                                console.error('AuthContext: Token refresh failed:', refreshError);
+                                // Clear tokens and effectively log out user
+                                localStorage.removeItem('accessToken');
+                                localStorage.removeItem('refreshToken');
+                                setUser(null);
+                                // Optionally redirect to login: window.location.href = '/login';
+                            }
+                        } else {
+                             // No refresh token, so clear tokens and log out
                             localStorage.removeItem('accessToken');
-                            localStorage.removeItem('refreshToken');
                             setUser(null);
                         }
                     }
                 }
             } catch (error) {
-                console.error('AuthContext: Auth check failed:', error);
+                // This catch is for unexpected errors during the auth check process itself
+                console.error('AuthContext: Auth check process failed:', error);
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('refreshToken');
                 setUser(null);
@@ -62,22 +75,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         checkAuth();
     }, []);
 
+    // The login function is not directly used in the Google OAuth flow with redirects.
+    // Token handling happens in LoginPage or a callback component.
+    // This login function stub might be for a different auth method (e.g. username/password)
+    // or needs to be adapted if it's intended for post-OAuth callback processing.
+    // For now, ensuring token storage is handled correctly upon redirect is key.
     const login = async (code: string, redirectUri: string) => {
-        try {
-            setLoading(true);
-            const response = await authService.login(code, redirectUri);
-
-            // Store tokens
-            localStorage.setItem('accessToken', response.accessToken);
-            localStorage.setItem('refreshToken', response.refreshToken);
-
-            setUser(response.user);
-        } catch (error) {
-            console.error('Login failed:', error);
-            throw error;
-        } finally {
-            setLoading(false);
-        }
+        // This function's role might need re-evaluation based on actual usage.
+        // The primary "login" action for Google OAuth is the redirect to Google,
+        // and then handling the callback where tokens are received.
+        // If this function is called from a callback page, it would make more sense.
+        console.warn("AuthContext login function called. Ensure it's used appropriately in the OAuth flow.");
+        // For now, let's assume it's a placeholder or for a different flow.
+        // The critical part is that tokens from URL are stored by the component handling the callback.
     };
 
     const logout = async () => {

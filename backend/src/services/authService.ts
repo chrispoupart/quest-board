@@ -122,11 +122,12 @@ export class AuthService {
     /**
      * Generate JWT token for user
      */
-    static generateToken(user: AuthUser): string {
+    static generateAccessToken(user: AuthUser): string {
         const payload = {
             userId: user.id,
             email: user.email,
             role: user.role,
+            type: 'access', // Differentiate token type
         };
 
         const secret = process.env['JWT_SECRET'];
@@ -134,22 +135,60 @@ export class AuthService {
             throw new Error('JWT secret not configured');
         }
 
-        return jwt.sign(payload, secret, { expiresIn: '30m' });
+        const expiresIn = process.env['ACCESS_TOKEN_EXPIRY_DURATION'] || '7d';
+        return jwt.sign(payload, secret, { expiresIn });
+    }
+
+    static generateRefreshToken(user: AuthUser): string {
+        const payload = {
+            userId: user.id,
+            // Add a scope or type to identify it as a refresh token
+            type: 'refresh',
+        };
+
+        const secret = process.env['JWT_REFRESH_SECRET'] || (process.env['JWT_SECRET'] + '_refresh'); // Use a different secret or derive one
+        if (!secret) {
+            throw new Error('JWT refresh secret not configured');
+        }
+        // Longer expiry for refresh token
+        return jwt.sign(payload, secret, { expiresIn: '30d' });
+    }
+
+    static generateTokens(user: AuthUser): { accessToken: string; refreshToken: string } {
+        const accessToken = this.generateAccessToken(user);
+        const refreshToken = this.generateRefreshToken(user);
+        return { accessToken, refreshToken };
     }
 
     /**
      * Verify JWT token
      */
-    static verifyToken(token: string): JwtPayload {
+    static verifyToken(token: string, isRefreshToken: boolean = false): JwtPayload & { type?: string } {
         try {
-            const secret = process.env['JWT_SECRET'];
-            if (!secret) {
-                throw new Error('JWT secret not configured');
+            let secret;
+            if (isRefreshToken) {
+                secret = process.env['JWT_REFRESH_SECRET'] || (process.env['JWT_SECRET'] + '_refresh');
+            } else {
+                secret = process.env['JWT_SECRET'];
             }
 
-            const decoded = jwt.verify(token, secret) as JwtPayload;
+            if (!secret) {
+                throw new Error(`JWT${isRefreshToken ? ' refresh' : ''} secret not configured`);
+            }
+
+            const decoded = jwt.verify(token, secret) as JwtPayload & { type?: string };
+
+            // Validate token type if present in payload
+            if (isRefreshToken && decoded.type !== 'refresh') {
+                throw new Error('Invalid token type: expected refresh token');
+            }
+            if (!isRefreshToken && decoded.type === 'refresh') { // Allow access tokens without type for backward compatibility if needed
+                throw new Error('Invalid token type: expected access token');
+            }
+
             return decoded;
         } catch (error) {
+            console.error("Token verification error:", error);
             throw new Error('Invalid token');
         }
     }
@@ -157,10 +196,14 @@ export class AuthService {
     /**
      * Refresh JWT token
      */
-    static async refreshToken(refreshToken: string): Promise<string> {
+    static async refreshToken(token: string): Promise<{accessToken: string}> {
         try {
             // Verify the refresh token
-            const decoded = this.verifyToken(refreshToken);
+            const decoded = this.verifyToken(token, true);
+
+            if (!decoded.userId) {
+                throw new Error('Invalid refresh token payload');
+            }
 
             // Get current user data
             const user = await prisma.user.findUnique({
@@ -168,10 +211,10 @@ export class AuthService {
             });
 
             if (!user) {
-                throw new Error('User not found');
+                throw new Error('User not found for refresh token');
             }
 
-            // Generate new token
+            // Generate new access token
             const authUser: AuthUser = {
                 id: user.id,
                 googleId: user.googleId,
@@ -191,8 +234,10 @@ export class AuthService {
                 level: calculateLevel(user.experience)
             };
 
-            return this.generateToken(authUser);
+            const newAccessToken = this.generateAccessToken(authUser);
+            return { accessToken: newAccessToken };
         } catch (error) {
+            console.error("Token refresh error:", error);
             throw new Error('Token refresh failed');
         }
     }
@@ -280,6 +325,6 @@ export class AuthService {
     }
 }
 
-export const generateToken = (user: AuthUser): string => {
-    return AuthService.generateToken(user);
+export const generateTokens = (user: AuthUser): { accessToken: string; refreshToken: string } => {
+    return AuthService.generateTokens(user);
 };

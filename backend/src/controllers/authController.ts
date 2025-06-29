@@ -82,9 +82,14 @@ export const googleCallback = async (req: Request, res: Response): Promise<Respo
       favoriteColor: user.favoriteColor ?? undefined,
     };
 
-    const token = AuthService.generateToken(authUser);
+    const { accessToken, refreshToken } = AuthService.generateTokens(authUser);
 
-    const redirectUrl = `${FRONTEND_URL}/auth/callback?token=${token}&level=${level}&progress=${progress}&name=${encodeURIComponent(user.name)}`;
+    // Pass both tokens to the frontend.
+    // The frontend will need to be updated to handle both.
+    // Storing refreshToken in a query parameter is not ideal for production,
+    // but aligns with current token passing.
+    // A more secure method (e.g., HttpOnly cookie for refreshToken) is recommended for future enhancement.
+    const redirectUrl = `${FRONTEND_URL}/auth/callback?accessToken=${accessToken}&refreshToken=${refreshToken}&level=${level}&progress=${progress}&name=${encodeURIComponent(user.name)}`;
     console.log('AuthController: Redirecting to:', redirectUrl);
 
     return res.redirect(redirectUrl);
@@ -92,5 +97,28 @@ export const googleCallback = async (req: Request, res: Response): Promise<Respo
   } catch (error) {
     console.error('Authentication error:', error);
     return res.status(500).send('Authentication failed');
+  }
+};
+
+export const refreshTokenHandler = async (req: Request, res: Response): Promise<Response> => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(400).json({ success: false, error: { message: 'Refresh token is required' } });
+  }
+
+  try {
+    const { accessToken: newAccessToken } = await AuthService.refreshToken(refreshToken);
+    return res.json({ success: true, data: { accessToken: newAccessToken } });
+  } catch (error) {
+    console.error('Refresh token error:', error);
+    // Differentiate between invalid token and other errors if needed
+    if (error instanceof Error && error.message.includes('Invalid token') ) {
+        return res.status(401).json({ success: false, error: { message: 'Invalid or expired refresh token' } });
+    }
+    if (error instanceof Error && error.message.includes('User not found') ) {
+      return res.status(401).json({ success: false, error: { message: 'User not found for refresh token' } });
+    }
+    return res.status(500).json({ success: false, error: { message: 'Failed to refresh token' } });
   }
 };
