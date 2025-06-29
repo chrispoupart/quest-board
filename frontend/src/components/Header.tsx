@@ -1,13 +1,14 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, Transition } from '@headlessui/react';
-import { Crown, Settings, LogOut } from 'lucide-react';
+import { Crown, Settings, LogOut, Menu as MenuIcon, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { ThemeToggle } from './ui/theme-toggle';
 
 const Header: React.FC = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const handleLogout = async () => {
         try {
@@ -30,7 +31,7 @@ const Header: React.FC = () => {
                         <span className="text-xl font-bold text-foreground font-serif">Quest Board</span>
                     </Link>
 
-                    {/* Navigation */}
+                    {/* Desktop Navigation */}
                     <nav className="hidden md:flex items-center space-x-6">
                         <Link
                             to="/quests"
@@ -66,7 +67,7 @@ const Header: React.FC = () => {
                         )}
                     </nav>
 
-                    {/* User Menu */}
+                    {/* User Menu and Mobile Menu Button */}
                     <div className="flex items-center">
                         {/* Theme Toggle */}
                         <ThemeToggle />
@@ -124,8 +125,65 @@ const Header: React.FC = () => {
                                 </Transition>
                             </Menu>
                         )}
+
+                        {/* Mobile menu button */}
+                        <button
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            className="md:hidden ml-3 p-2 rounded-lg text-foreground hover:text-primary hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
+                        >
+                            {isMobileMenuOpen ? (
+                                <X className="w-6 h-6" />
+                            ) : (
+                                <MenuIcon className="w-6 h-6" />
+                            )}
+                        </button>
                     </div>
                 </div>
+
+                {/* Mobile Navigation Menu */}
+                {isMobileMenuOpen && (
+                    <div className="md:hidden">
+                        <div className="px-2 pt-2 pb-3 space-y-1 bg-card border-t border-border">
+                            <Link
+                                to="/quests"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="text-foreground hover:text-primary px-3 py-2 rounded-lg text-base font-medium transition-all duration-200 hover:bg-muted border border-transparent hover:border-border flex items-center gap-2"
+                            >
+                                Quests
+                            </Link>
+                            <Link
+                                to="/dashboard"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="text-foreground hover:text-primary px-3 py-2 rounded-lg text-base font-medium transition-all duration-200 hover:bg-muted border border-transparent hover:border-border flex items-center gap-2"
+                            >
+                                Dashboard
+                            </Link>
+                            <Link
+                                to="/store"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="text-foreground hover:text-primary px-3 py-2 rounded-lg text-base font-medium transition-all duration-200 hover:bg-muted border border-transparent hover:border-border flex items-center gap-2"
+                            >
+                                Store
+                            </Link>
+                            <Link
+                                to="/profile"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="text-foreground hover:text-primary px-3 py-2 rounded-lg text-base font-medium transition-all duration-200 hover:bg-muted border border-transparent hover:border-border flex items-center gap-2"
+                            >
+                                Character
+                            </Link>
+                            {(user?.role === "ADMIN" || user?.role === "EDITOR") && (
+                                <Link
+                                    to="/admin"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="text-foreground hover:text-primary px-3 py-2 rounded-lg text-base font-medium transition-all duration-200 hover:bg-muted border border-transparent hover:border-border flex items-center gap-2"
+                                >
+                                    Admin
+                                </Link>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
         </header>
     );
