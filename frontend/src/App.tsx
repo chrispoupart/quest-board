@@ -30,12 +30,14 @@ const AuthCallback: React.FC = () => {
   const { refreshUser } = useAuth();
 
   React.useEffect(() => {
-    const token = searchParams.get('token');
+    const accessToken = searchParams.get('accessToken');
+    const refreshToken = searchParams.get('refreshToken');
     const error = searchParams.get('error');
 
-    console.log('AuthCallback: Received token:', token ? 'present' : 'not present');
+    console.log('AuthCallback: Received accessToken:', accessToken ? 'present' : 'not present');
+    console.log('AuthCallback: Received refreshToken:', refreshToken ? 'present' : 'not present');
     console.log('AuthCallback: Received error:', error);
-    console.log('AuthCallback: All search params:', Object.fromEntries(searchParams.entries()));
+    // console.log('AuthCallback: All search params:', Object.fromEntries(searchParams.entries())); // Optional: for debugging
 
     if (error) {
       console.error('OAuth error:', error);
@@ -43,29 +45,37 @@ const AuthCallback: React.FC = () => {
       return;
     }
 
-    if (token) {
-      console.log('AuthCallback: Storing token and fetching user data...');
-      // Backend has already handled the OAuth flow and sent us a token
-      // Store the token
-      localStorage.setItem('accessToken', token);
+    if (accessToken && refreshToken) {
+      console.log('AuthCallback: Storing tokens and fetching user data...');
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
 
-      // Fetch user data using the token
+      // Fetch user data using the new accessToken
       refreshUser()
         .then(() => {
           console.log('AuthCallback: Successfully authenticated, redirecting to dashboard');
-          // Successfully authenticated, redirect to dashboard
           navigate('/dashboard');
         })
-        .catch((error) => {
-          console.error('AuthCallback: Failed to fetch user data:', error);
-          // Clear token and redirect to login
+        .catch((fetchError) => {
+          console.error('AuthCallback: Failed to fetch user data after storing tokens:', fetchError);
           localStorage.removeItem('accessToken');
-          navigate('/login?error=' + encodeURIComponent('Failed to authenticate'));
+          localStorage.removeItem('refreshToken');
+          navigate('/login?error=' + encodeURIComponent('Failed to authenticate after token storage'));
         });
+    } else if (accessToken && !refreshToken) {
+        // This case should ideally not happen if backend sends both or none.
+        console.warn('AuthCallback: Received accessToken but no refreshToken. This might indicate an issue.');
+        // Decide if you want to proceed with only accessToken or treat as error
+        localStorage.setItem('accessToken', accessToken);
+        // Potentially clear any old refresh token
+        localStorage.removeItem('refreshToken');
+         refreshUser()
+        .then(() => navigate('/dashboard'))
+        .catch(() => navigate('/login?error=auth_incomplete'));
+
     } else {
-      console.log('AuthCallback: No token found, redirecting to login');
-      // No token, redirect to login
-      navigate('/login');
+      console.log('AuthCallback: No tokens found (accessToken or refreshToken missing), redirecting to login');
+      navigate('/login?error=' + encodeURIComponent('Authentication tokens missing'));
     }
   }, [navigate, searchParams, refreshUser]);
 
