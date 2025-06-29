@@ -123,4 +123,5 @@ USER nodejs
 
 EXPOSE 8000
 
-CMD ["npm", "start"]
+# Run migrations and then start the application
+CMD npx prisma migrate deploy && npm start
