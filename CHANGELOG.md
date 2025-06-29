@@ -1,3 +1,26 @@
+## [2.7.0](https://github.com/chrispoupart/quest-board/compare/v2.6.0...v2.7.0) (2025-06-29)
+
+### Features
+
+* **auth:** make access token expiry configurable and extend session ([6c1e8f1](https://github.com/chrispoupart/quest-board/commit/6c1e8f1dc4dcc0592e30da5fb45f7515242eff78))
+* **authService:** 🔐 add refresh token secret validation ([2d282c6](https://github.com/chrispoupart/quest-board/commit/2d282c619f892fa0f5a71f36cc952e398cf991a5))
+* **header:** simplify header UI layout ([d3ea882](https://github.com/chrispoupart/quest-board/commit/d3ea8824a7a5280ce64a13b8feed95a96d74bab3))
+* **theme:** finish implementing dynamic themes ([ae86448](https://github.com/chrispoupart/quest-board/commit/ae864483baeee7af25d8023dc69998dbc35d27b6))
+
+### Bug Fixes
+
+* **admin:** 💄 add mobile dropdown for admin tabs ([fa0adad](https://github.com/chrispoupart/quest-board/commit/fa0adadc8b1e5088957d402e590abd5ff01fd59d))
+* **authService:** add type assertion to jwt sign options ([91df32f](https://github.com/chrispoupart/quest-board/commit/91df32f0bd1a6efecf95e85d6422c011a6252840))
+* **authService:** prevent infinite loops in token refresh logic ([7024366](https://github.com/chrispoupart/quest-board/commit/7024366a5eabb9e9d705f013d40b10d50510adea))
+* **CharacterSheet:** 🦺 handle updateUser function safely ([87fa0fb](https://github.com/chrispoupart/quest-board/commit/87fa0fbf2acb8837f6ce2e187548ff08490096bb))
+* **frontend:** 🔒️ update API proxy to include auth and users ([331d316](https://github.com/chrispoupart/quest-board/commit/331d316ed4bba5602856bcf141dbf27cd4922e9a))
+* **frontend:** 🔒️ update nginx config for API proxy handling ([87077b2](https://github.com/chrispoupart/quest-board/commit/87077b2431788dabc781daa517775a77e907db02))
+* **frontend:** 🔥 remove trailing slash from proxy_pass URL ([76ed272](https://github.com/chrispoupart/quest-board/commit/76ed272b8ccb225f0269787adf6b07ca9da298f8))
+* **frontend:** 🔨 exclude /auth/callback from proxying ([057e812](https://github.com/chrispoupart/quest-board/commit/057e81216c227fd6e1dc69f0b36c40a2fa6d2f35))
+* **header:** improve responsive design for navigation ([84e0e56](https://github.com/chrispoupart/quest-board/commit/84e0e56706f41a153bdf0d00fc1b5e1d4b5f7bed))
+* **quest-board:** 💄 update border colour for requirement status ([7385d7d](https://github.com/chrispoupart/quest-board/commit/7385d7d8a385d610b3891676ab72a91475bac3cc))
+* **ui:** Add font styling to TabsTrigger ([3a5b2af](https://github.com/chrispoupart/quest-board/commit/3a5b2af4a53ef27dbbc436410457d26170a1a367))
+
 ## [2.6.0](https://github.com/chrispoupart/quest-board/compare/v2.5.0...v2.6.0) (2025-06-29)
 
 ### Features
