@@ -63,31 +63,31 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
 
                 {/* Admin Tabs */}
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                    <TabsList className="grid w-full grid-cols-5 bg-amber-100 border border-amber-300 max-w-4xl mx-auto">
+                    <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 bg-amber-100 border border-amber-300 max-w-4xl mx-auto">
                         <TabsTrigger
                             value="quests"
-                            className="data-[state=active]:bg-amber-600 data-[state=active]:text-white font-medium flex items-center gap-2"
+                            className="data-[state=active]:bg-amber-600 data-[state=active]:text-white font-medium flex items-center gap-2 text-xs sm:text-sm"
                         >
                             <Scroll className="w-4 h-4" />
                             Quest Management
                         </TabsTrigger>
                         <TabsTrigger
                             value="approvals"
-                            className="data-[state=active]:bg-amber-600 data-[state=active]:text-white font-medium flex items-center gap-2"
+                            className="data-[state=active]:bg-amber-600 data-[state=active]:text-white font-medium flex items-center gap-2 text-xs sm:text-sm"
                         >
                             <CheckCircle className="w-4 h-4" />
                             Approvals
                         </TabsTrigger>
                         <TabsTrigger
                             value="store"
-                            className="data-[state=active]:bg-amber-600 data-[state=active]:text-white font-medium flex items-center gap-2"
+                            className="data-[state=active]:bg-amber-600 data-[state=active]:text-white font-medium flex items-center gap-2 text-xs sm:text-sm"
                         >
                             <Store className="w-4 h-4" />
                             Store Management
                         </TabsTrigger>
                         <TabsTrigger
                             value="skills"
-                            className="data-[state=active]:bg-amber-600 data-[state=active]:text-white font-medium flex items-center gap-2"
+                            className="data-[state=active]:bg-amber-600 data-[state=active]:text-white font-medium flex items-center gap-2 text-xs sm:text-sm"
                         >
                             <Target className="w-4 h-4" />
                             Skills
@@ -95,7 +95,7 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                         {isAdmin && (
                             <TabsTrigger
                                 value="users"
-                                className="data-[state=active]:bg-amber-600 data-[state=active]:text-white font-medium flex items-center gap-2"
+                                className="data-[state=active]:bg-amber-600 data-[state=active]:text-white font-medium flex items-center gap-2 text-xs sm:text-sm"
                             >
                                 <Users className="w-4 h-4" />
                                 User Management
