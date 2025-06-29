@@ -190,7 +190,7 @@ const QuestCard: React.FC<{
       meetsRequirement,
       userLevel,
       requiredLevel: requiredSkill.minLevel,
-      color: meetsRequirement ? 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 border-green-200 dark:border-green-700' : 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border-red-200 dark:border-red-700'
+      color: meetsRequirement ? 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700' : 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700'
     };
   };
 
