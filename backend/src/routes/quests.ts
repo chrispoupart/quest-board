@@ -13,6 +13,7 @@ router.get('/', QuestController.getAllQuests);
 router.get('/repeatable', QuestController.getRepeatableQuests);
 router.get('/my-created', QuestController.getMyCreatedQuests);
 router.get('/my-claimed', QuestController.getMyClaimedQuests);
+router.get('/my-completion-history', QuestController.getMyCompletionHistory);
 router.get('/:id', validateQuestId, QuestController.getQuestById);
 
 // Quest workflow routes (authenticated users)

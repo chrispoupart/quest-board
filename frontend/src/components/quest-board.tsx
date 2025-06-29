@@ -228,7 +228,9 @@ const QuestCard: React.FC<{
           <Badge className={`text-xs font-medium border ${getStatusColor(quest.status)}`}>
             {quest.status === "COMPLETED" ? "Pending Approval" :
               quest.status === "COOLDOWN" ? "On Cooldown" :
-                quest.status.replace("_", " ")}
+                (quest as any)._displayStatus === 'COMPLETED_REPEATABLE' ? "Completed" :
+                  (quest as any)._displayStatus === 'COMPLETED_HISTORY' ? "Completed" :
+                    quest.status.replace("_", " ")}
           </Badge>
           {quest.isRepeatable && (
             <Badge className="text-xs font-medium border text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700">
@@ -306,21 +308,53 @@ const QuestCard: React.FC<{
             </div>
           )}
 
-          {quest.completedAt && ["COMPLETED", "APPROVED", "REJECTED"].includes(quest.status) && (
+          {quest.completedAt && ["COMPLETED", "APPROVED", "REJECTED"].includes(quest.status) && !(quest as any)._displayStatus && (
             <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
               <Trophy className="w-3 h-3" />
               <span>Completed: {new Date(quest.completedAt).toLocaleDateString()}</span>
             </div>
           )}
 
-          {quest.status === "APPROVED" && (
+          {/* Handle repeatable quests that have been reset but were completed */}
+          {(quest as any)._displayStatus === 'COMPLETED_REPEATABLE' && (quest as any)._completionDate && (
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+              <Trophy className="w-3 h-3" />
+              <span>Completed: {new Date((quest as any)._completionDate).toLocaleDateString()}</span>
+            </div>
+          )}
+
+          {/* Handle quests from completion history */}
+          {(quest as any)._displayStatus === 'COMPLETED_HISTORY' && (quest as any)._completionDate && (
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+              <Trophy className="w-3 h-3" />
+              <span>Completed: {new Date((quest as any)._completionDate).toLocaleDateString()}</span>
+            </div>
+          )}
+
+          {quest.status === "APPROVED" && !(quest as any)._displayStatus && (
             <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-medium">
               <Check className="w-3 h-3" />
               <span>Approved - Bounty awarded!</span>
             </div>
           )}
 
-          {quest.status === "REJECTED" && (
+          {/* Handle repeatable quests that have been reset but were approved */}
+          {(quest as any)._displayStatus === 'COMPLETED_REPEATABLE' && (quest as any)._approvalStatus === 'APPROVED' && (
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-medium">
+              <Check className="w-3 h-3" />
+              <span>Approved - Bounty awarded!</span>
+            </div>
+          )}
+
+          {/* Handle quests from completion history */}
+          {(quest as any)._displayStatus === 'COMPLETED_HISTORY' && (quest as any)._approvalStatus === 'APPROVED' && (
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-medium">
+              <Check className="w-3 h-3" />
+              <span>Approved - Bounty awarded!</span>
+            </div>
+          )}
+
+          {quest.status === "REJECTED" && !(quest as any)._displayStatus && (
             <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-medium">
               <X className="w-3 h-3" />
               <span>Rejected</span>
@@ -381,7 +415,7 @@ const QuestCard: React.FC<{
             </Button>
           )}
 
-          {quest.status === "CLAIMED" && quest.claimerName === currentUser.name && (
+          {quest.status === "CLAIMED" && currentUser.id === quest.claimedBy && (
             <Button
               onClick={() => handleAction("complete")}
               disabled={actionLoading === "complete"}
@@ -418,13 +452,34 @@ const QuestCard: React.FC<{
           )}
 
           {/* Show completion status for approved/rejected quests */}
-          {["APPROVED", "REJECTED"].includes(quest.status) && (
+          {["APPROVED", "REJECTED"].includes(quest.status) && !(quest as any)._displayStatus && (
             <div className="flex-1 flex items-center justify-center">
               <Badge className={`text-xs font-medium border ${quest.status === "APPROVED"
                 ? "text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 border-green-200 dark:border-green-700"
                 : "text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border-red-200 dark:border-red-700"
                 }`}>
                 {quest.status === "APPROVED" ? "✓ Completed" : "✗ Rejected"}
+              </Badge>
+            </div>
+          )}
+
+          {/* Show completion status for repeatable quests that have been reset */}
+          {(quest as any)._displayStatus === 'COMPLETED_REPEATABLE' && (
+            <div className="flex-1 flex items-center justify-center">
+              <Badge className="text-xs font-medium border text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 border-green-200 dark:border-green-700">
+                ✓ Completed
+              </Badge>
+            </div>
+          )}
+
+          {/* Show completion status for quests from completion history */}
+          {(quest as any)._displayStatus === 'COMPLETED_HISTORY' && (
+            <div className="flex-1 flex items-center justify-center">
+              <Badge className={`text-xs font-medium border ${(quest as any)._approvalStatus === "APPROVED"
+                ? "text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 border-green-200 dark:border-green-700"
+                : "text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border-red-200 dark:border-red-700"
+                }`}>
+                {(quest as any)._approvalStatus === "APPROVED" ? "✓ Completed" : "✗ Rejected"}
               </Badge>
             </div>
           )}
@@ -570,9 +625,8 @@ const QuestBoard: React.FC = () => {
           })
           break
         case "completed":
-          // Show user's own completed quests (approved/rejected)
-          questData = await questService.getMyClaimedQuests({
-            status: "APPROVED,REJECTED",
+          // Show user's own completed quests (approved/rejected) and repeatable quests that have been reset
+          questData = await questService.getMyCompletionHistory({
             ...params
           })
           break
@@ -755,7 +809,22 @@ const QuestBoard: React.FC = () => {
           {/* Main Content */}
           <div className="lg:col-span-3">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className={`grid w-full ${(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") ? 'grid-cols-4' : 'grid-cols-3'} bg-muted border border-border text-muted-foreground`}>
+              {/* Mobile Dropdown */}
+              <div className="block md:hidden mb-4">
+                <select
+                  className="w-full rounded px-3 py-2 border border-border bg-background text-foreground"
+                  value={activeTab}
+                  onChange={e => setActiveTab(e.target.value)}
+                >
+                  <option value="available">Available Quests</option>
+                  <option value="claimed">My Quests</option>
+                  {(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") && (
+                    <option value="pending">Pending Approval</option>
+                  )}
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+              <TabsList className={`hidden md:grid w-full ${(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") ? 'grid-cols-4' : 'grid-cols-3'} bg-muted border border-border text-muted-foreground`}>
                 <TabsTrigger
                   value="available"
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium"

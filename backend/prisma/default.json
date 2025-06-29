@@ -1,0 +1,322 @@
+{
+    "skills": [
+      {
+        "name": "Dishwasher",
+        "description": "Operating, loading, and unloading a dishwasher effectively"
+      },
+      {
+        "name": "Lawnmower",
+        "description": "Safely operating and maintaining a lawnmower"
+      },
+      {
+        "name": "Laundry",
+        "description": "Washing, drying, folding, and sorting clothes"
+      },
+      {
+        "name": "Driving",
+        "description": "Safely driving a vehicle, including for chore-related tasks"
+      }
+    ],
+    "quests": [
+      {
+        "title": "🛁 Chambers of Cleansing: Sanctify the Chamber of Waters",
+        "description": "Clean the bathtub or shower stalls, as well as the sink. Declutter and restock as needed.",
+        "bounty": 4,
+        "isRepeatable": true,
+        "cooldownDays": 7,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🛁 Chambers of Cleansing: Purge the Porcelain Throne",
+        "description": "Scrub and disinfect the toilet, including under the rim and behind the seat.",
+        "bounty": 3,
+        "isRepeatable": true,
+        "cooldownDays": 3,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🛁 Chambers of Cleansing: Polish the Scrying Glass",
+        "description": "Wipe down the mirror to a spotless shine. Remove all fingerprints and smudges.",
+        "bounty": 1,
+        "isRepeatable": true,
+        "cooldownDays": 3,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🛁 Chambers of Cleansing: Cleanse the Tiled Moat",
+        "description": "Mop the bathroom floor, reaching behind and around fixtures.",
+        "bounty": 2,
+        "isRepeatable": true,
+        "cooldownDays": 7,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🛁 Chambers of Cleansing: Cast Out the Unholy Offerings",
+        "description": "Take out the bathroom trash and replace the liner.",
+        "bounty": 1,
+        "isRepeatable": true,
+        "cooldownDays": 2,
+        "status": "AVAILABLE"
+      },
+
+      {
+        "title": "🍽️ The Hearthkeep: Cleanse the Feast Relics",
+        "description": "Do the dishes and put them away. May include dishwasher or handwashing.",
+        "bounty": 2,
+        "isRepeatable": true,
+        "cooldownDays": 1,
+        "requiredSkills": [
+          {
+            "skillName": "Dishwasher",
+            "minLevel": 2
+          }
+        ],
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🍽️ The Hearthkeep: Banish the Refuse of the Banquet",
+        "description": "Take out the kitchen trash and compost. Replace bags as needed.",
+        "bounty": 2,
+        "isRepeatable": true,
+        "cooldownDays": 2,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🍽️ The Hearthkeep: Wipe the Alchemist’s Workbench",
+        "description": "Wipe down kitchen counters and stove top.",
+        "bounty": 2,
+        "isRepeatable": true,
+        "cooldownDays": 2,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🍽️ The Hearthkeep: Scour the Hearthstones",
+        "description": "Sweep the kitchen floor thoroughly, including corners and under furniture.",
+        "bounty": 2,
+        "isRepeatable": true,
+        "cooldownDays": 3,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🍽️ The Hearthkeep: Purge the Icebound Vault",
+        "description": "Remove expired items and wipe down fridge shelves.",
+        "bounty": 5,
+        "isRepeatable": true,
+        "cooldownDays": 14,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🍽️ The Hearthkeep: Sort the Storeroom of Provisions",
+        "description": "Organize the pantry. Group like items and rotate stock.",
+        "bounty": 4,
+        "isRepeatable": true,
+        "cooldownDays": 10,
+        "status": "AVAILABLE"
+      },
+
+      {
+        "title": "🛏️ Chambers of Rest: Prepare the Resting Altar",
+        "description": "Make the bed neatly and arrange pillows and blankets.",
+        "bounty": 1,
+        "isRepeatable": true,
+        "cooldownDays": 1,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🛏️ Chambers of Rest: Renew the Sacred Linens",
+        "description": "Remove and replace sheets with clean ones.",
+        "bounty": 3,
+        "isRepeatable": true,
+        "cooldownDays": 7,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🛏️ Chambers of Rest: Dispel the Settled Ash of Time",
+        "description": "Dust furniture and surfaces in the bedroom.",
+        "bounty": 2,
+        "isRepeatable": true,
+        "cooldownDays": 7,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🛏️ Chambers of Rest: Summon the Windwyrm to Cleanse the Rug",
+        "description": "Vacuum the bedroom carpet or rug thoroughly.",
+        "bounty": 2,
+        "isRepeatable": true,
+        "cooldownDays": 4,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🛏️ Chambers of Rest: Restore Order to the Private Sanctum",
+        "description": "Tidy clutter and return items to their proper place.",
+        "bounty": 2,
+        "isRepeatable": true,
+        "cooldownDays": 3,
+        "status": "AVAILABLE"
+      },
+
+      {
+        "title": "🪜 The Passages: Cleanse the Steps of Passage",
+        "description": "Sweep the stairs, including corners and edges.",
+        "bounty": 2,
+        "isRepeatable": true,
+        "cooldownDays": 4,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🪜 The Passages: Call the Carpet Warden",
+        "description": "Vacuum the hallway carpets thoroughly.",
+        "bounty": 2,
+        "isRepeatable": true,
+        "cooldownDays": 4,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🪜 The Passages: Expel the Lurking Dust Imps",
+        "description": "Dust railings, corners, and baseboards in hallways.",
+        "bounty": 2,
+        "isRepeatable": true,
+        "cooldownDays": 5,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🪜 The Passages: Marshal the Garments of the Journey",
+        "description": "Tidy up shoes and coats in the hallway.",
+        "bounty": 1,
+        "isRepeatable": true,
+        "cooldownDays": 3,
+        "status": "AVAILABLE"
+      },
+
+      {
+        "title": "🪟 The Great Hall: Polish the Thrones of Comfort",
+        "description": "Dust living room furniture, electronics, and shelves.",
+        "bounty": 2,
+        "isRepeatable": true,
+        "cooldownDays": 5,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🪟 The Great Hall: Scour the Gathering Ground",
+        "description": "Vacuum or sweep the living room floor.",
+        "bounty": 2,
+        "isRepeatable": true,
+        "cooldownDays": 4,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🪟 The Great Hall: Uncloud the Viewing Portals",
+        "description": "Clean living room windows inside.",
+        "bounty": 3,
+        "isRepeatable": true,
+        "cooldownDays": 10,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🪟 The Great Hall: Restore the Harmony of the Hall",
+        "description": "Organize books, games, or clutter in the living room.",
+        "bounty": 2,
+        "isRepeatable": true,
+        "cooldownDays": 4,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🪟 The Great Hall: Enchant the Resting Stones",
+        "description": "Fluff pillows and cushions. Straighten throws or blankets.",
+        "bounty": 1,
+        "isRepeatable": true,
+        "cooldownDays": 2,
+        "status": "AVAILABLE"
+      },
+
+      {
+        "title": "🌲 The Outer Realm: Trim the Verdant Expanse",
+        "description": "Mow the lawn and dispose of clippings.",
+        "bounty": 5,
+        "isRepeatable": true,
+        "cooldownDays": 7,
+        "requiredSkills": [
+          {
+            "skillName": "Lawnmower",
+            "minLevel": 3
+          }
+        ],
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🌲 The Outer Realm: Uproot the Thornkin Horde",
+        "description": "Weed the garden and flowerbeds.",
+        "bounty": 4,
+        "isRepeatable": true,
+        "cooldownDays": 7,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🌲 The Outer Realm: Gather the Fallen Foliage of Autumn’s Wrath",
+        "description": "Rake leaves and place them in yard bags.",
+        "bounty": 4,
+        "isRepeatable": true,
+        "cooldownDays": 14,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🌲 The Outer Realm: Exile the Refuse to the Dark Bin Beyond",
+        "description": "Take out all household trash bins to the curb or main container.",
+        "bounty": 2,
+        "isRepeatable": true,
+        "cooldownDays": 2,
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🌲 The Outer Realm: Cleanse the Threshold of the Homestead",
+        "description": "Sweep the porch or deck area clean of debris.",
+        "bounty": 2,
+        "isRepeatable": true,
+        "cooldownDays": 5,
+        "status": "AVAILABLE"
+      },
+
+      {
+        "title": "🧺 The Fabric Hall: Baptize the Woven Garments",
+        "description": "Do a full load of laundry and move to dryer or drying rack.",
+        "bounty": 3,
+        "isRepeatable": true,
+        "cooldownDays": 2,
+        "requiredSkills": [
+          {
+            "skillName": "Laundry",
+            "minLevel": 2
+          }
+        ],
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🧺 The Fabric Hall: Order the Vestments of the Realm",
+        "description": "Fold clean laundry and deliver to proper rooms.",
+        "bounty": 2,
+        "isRepeatable": true,
+        "cooldownDays": 2,
+        "requiredSkills": [
+          {
+            "skillName": "Laundry",
+            "minLevel": 1
+          }
+        ],
+        "status": "AVAILABLE"
+      },
+      {
+        "title": "🧺 The Fabric Hall: Separate the Linens of Light and Shadow",
+        "description": "Sort dirty laundry by color, fabric, and washing needs.",
+        "bounty": 1,
+        "isRepeatable": true,
+        "cooldownDays": 2,
+        "requiredSkills": [
+          {
+            "skillName": "Laundry",
+            "minLevel": 1
+          }
+        ],
+        "status": "AVAILABLE"
+      }
+    ]
+  }

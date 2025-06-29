@@ -40,8 +40,9 @@ model User {
   storeTransactions StoreTransaction[] @relation("StoreTransactionBuyer")
 
   // Skills relations
-  userSkills    UserSkill[]
-  createdSkills Skill[]     @relation("SkillCreator")
+  userSkills      UserSkill[]
+  createdSkills   Skill[]           @relation("SkillCreator")
+  QuestCompletion QuestCompletion[]
 
   @@map("users")
 }
@@ -101,9 +102,10 @@ model Quest {
   requiredSkills QuestRequiredSkill[]
 
   // Relations
-  creator  User      @relation("QuestCreator", fields: [createdBy], references: [id])
-  claimer  User?     @relation("QuestClaimer", fields: [claimedBy], references: [id])
-  approval Approval?
+  creator         User              @relation("QuestCreator", fields: [createdBy], references: [id])
+  claimer         User?             @relation("QuestClaimer", fields: [claimedBy], references: [id])
+  approval        Approval?
+  QuestCompletion QuestCompletion[]
 
   @@map("quests")
 }
@@ -169,4 +171,16 @@ model StoreTransaction {
   buyer User      @relation("StoreTransactionBuyer", fields: [buyerId], references: [id])
 
   @@map("store_transactions")
+}
+
+model QuestCompletion {
+  id          Int       @id @default(autoincrement())
+  questId     Int
+  userId      Int
+  completedAt DateTime
+  approvedAt  DateTime?
+  status      String // APPROVED, REJECTED
+
+  quest Quest @relation(fields: [questId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
 }

@@ -410,6 +410,17 @@ export class QuestController {
                 lastCompletedAt: new Date(), // Track when quest was last completed
             };
 
+            // Create completion record for the user who completed the quest
+            await prisma.questCompletion.create({
+                data: {
+                    questId: questId,
+                    userId: quest.claimedBy,
+                    completedAt: quest.completedAt || new Date(),
+                    approvedAt: new Date(),
+                    status: 'APPROVED'
+                }
+            });
+
             // If quest is repeatable, set it to cooldown status instead of available
             if (quest.isRepeatable) {
                 updateData.status = 'COOLDOWN';
@@ -494,13 +505,36 @@ export class QuestController {
                 res.status(400).json({ success: false, error: { message: 'Quest is not completed' } });
                 return;
             }
-            const updatedQuest = await prisma.quest.update({
-                where: { id: questId },
-                data: {
-                    status: 'REJECTED',
-                },
+            if (!quest.claimedBy) {
+                res.status(400).json({ success: false, error: { message: 'Quest has no claimant' } });
+                return;
+            }
+
+            // Use a transaction to ensure data consistency
+            const result = await prisma.$transaction(async (tx) => {
+                // Create completion record for the user who completed the quest
+                // Note: approvedAt is not set for rejected quests
+                await tx.questCompletion.create({
+                    data: {
+                        questId: questId,
+                        userId: quest.claimedBy!, // We already checked that claimedBy is not null above
+                        completedAt: quest.completedAt || new Date(),
+                        status: 'REJECTED'
+                    }
+                });
+
+                // Update quest status to rejected
+                const updatedQuest = await tx.quest.update({
+                    where: { id: questId },
+                    data: {
+                        status: 'REJECTED',
+                    },
+                });
+
+                return updatedQuest;
             });
-            res.json({ success: true, data: updatedQuest } as ApiResponse);
+
+            res.json({ success: true, data: result } as ApiResponse);
         } catch (error) {
             console.error('Error rejecting quest:', error);
             res.status(500).json({ success: false, error: { message: 'Internal server error' } });
@@ -1061,6 +1095,104 @@ export class QuestController {
             } else {
                 res.status(500).json({ success: false, error: { message: 'Internal server error' } });
             }
+        }
+    }
+
+    /**
+     * Get user's completion history (including repeatable quests that have been reset)
+     */
+    static async getMyCompletionHistory(req: Request, res: Response): Promise<void> {
+        try {
+            const userId = (req as any).user?.userId;
+            if (!userId) {
+                res.status(401).json({ success: false, error: { message: 'User not authenticated' } });
+                return;
+            }
+
+            const page = parseInt(req.query['page'] as string) || 1;
+            const limit = parseInt(req.query['limit'] as string) || 10;
+            const search = req.query['search'] as string;
+            const skip = (page - 1) * limit;
+
+            // Get quests that the user has completed from the QuestCompletion table
+            const where: any = {
+                userId: userId
+            };
+
+            if (search) {
+                where.quest = {
+                    OR: [
+                        { title: { contains: search, mode: 'insensitive' } },
+                        { description: { contains: search, mode: 'insensitive' } }
+                    ]
+                };
+            }
+
+            const [completions, total] = await Promise.all([
+                prisma.questCompletion.findMany({
+                    where,
+                    include: {
+                        quest: {
+                            include: {
+                                creator: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        email: true,
+                                        role: true,
+                                    }
+                                },
+                                claimer: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        email: true,
+                                        role: true,
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    orderBy: [
+                        { approvedAt: 'desc' },
+                        { completedAt: 'desc' }
+                    ],
+                    skip,
+                    take: limit,
+                }),
+                prisma.questCompletion.count({ where })
+            ]);
+
+            // Transform completions to quest format for frontend compatibility
+            const processedQuests = completions.map(completion => ({
+                ...completion.quest,
+                // Override status to show completion status
+                status: completion.status,
+                // Use completion dates from the completion record
+                completedAt: completion.completedAt.toISOString(),
+                // Mark as completed for display purposes
+                _displayStatus: 'COMPLETED_HISTORY',
+                _completionDate: completion.completedAt.toISOString(),
+                _approvalStatus: completion.status,
+                _approvedAt: completion.approvedAt?.toISOString(),
+                // Clear any existing completion info to avoid duplication
+                lastCompletedAt: null
+            }));
+
+            const response = {
+                quests: processedQuests,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit)
+                }
+            };
+
+            res.json({ success: true, data: response } as ApiResponse);
+        } catch (error) {
+            console.error('Error getting completion history:', error);
+            res.status(500).json({ success: false, error: { message: 'Internal server error' } });
         }
     }
 }

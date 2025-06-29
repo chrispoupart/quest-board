@@ -34,6 +34,8 @@ const SkillManagement: React.FC = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
   const [selectedUser, setSelectedUser] = useState<number | null>(null);
+  const [skillLevelInputs, setSkillLevelInputs] = useState<{ [key: number]: number }>({});
+  const [updatingSkills, setUpdatingSkills] = useState<{ [key: number]: boolean }>({});
 
   const [formData, setFormData] = useState({
     name: '',
@@ -73,6 +75,13 @@ const SkillManagement: React.FC = () => {
     try {
       const response = await skillService.getUserSkills(userId);
       setUserSkills(response.userSkills);
+
+      // Initialize skill level inputs with current values
+      const initialInputs: { [key: number]: number } = {};
+      response.userSkills.forEach(userSkill => {
+        initialInputs[userSkill.skillId] = userSkill.level;
+      });
+      setSkillLevelInputs(initialInputs);
     } catch (err) {
       console.error('Failed to load user skills:', err);
       setError('Failed to load user skills');
@@ -133,6 +142,9 @@ const SkillManagement: React.FC = () => {
 
   const handleUpdateUserSkill = async (userId: number, skillId: number, level: number) => {
     try {
+      setUpdatingSkills(prev => ({ ...prev, [skillId]: true }));
+      setError(null);
+
       console.log('Updating user skill:', { userId, skillId, level });
       const updatedUserSkill = await skillService.updateUserSkill(userId, skillId, { level });
       console.log('Updated user skill response:', updatedUserSkill);
@@ -150,6 +162,9 @@ const SkillManagement: React.FC = () => {
         return updated;
       });
 
+      // Update the skill level input
+      setSkillLevelInputs(prev => ({ ...prev, [skillId]: level }));
+
       // Show success message
       setSuccess(`Skill level updated to ${level}`);
       setError(null);
@@ -160,12 +175,56 @@ const SkillManagement: React.FC = () => {
       console.error('Failed to update user skill:', err);
       setError('Failed to update user skill');
       setSuccess(null);
+    } finally {
+      setUpdatingSkills(prev => ({ ...prev, [skillId]: false }));
     }
   };
 
   const handleUserSelect = (userId: number) => {
     setSelectedUser(userId);
     loadUserSkills(userId);
+  };
+
+  const handleSkillLevelChange = (skillId: number, level: number) => {
+    setSkillLevelInputs(prev => ({ ...prev, [skillId]: level }));
+  };
+
+  const handleSaveSkillLevel = (userId: number, skillId: number) => {
+    const level = skillLevelInputs[skillId] || 0;
+    if (level >= 0 && level <= 5) {
+      handleUpdateUserSkill(userId, skillId, level);
+    } else {
+      setError('Skill level must be between 0 and 5');
+    }
+  };
+
+  const handleSaveAllSkillLevels = async (userId: number) => {
+    try {
+      setError(null);
+      setSuccess('Updating all skill levels...');
+
+      // Update all skills that have been modified
+      const updatePromises = skills.map(skill => {
+        const newLevel = skillLevelInputs[skill.id] ?? getUserSkillLevel(skill.id);
+        const currentLevel = getUserSkillLevel(skill.id);
+
+        // Only update if the level has changed
+        if (newLevel !== currentLevel && newLevel >= 0 && newLevel <= 5) {
+          return handleUpdateUserSkill(userId, skill.id, newLevel);
+        }
+        return Promise.resolve();
+      });
+
+      await Promise.all(updatePromises);
+      setSuccess('All skill levels updated successfully!');
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error('Failed to update all skill levels:', err);
+      setError('Failed to update all skill levels');
+      setSuccess(null);
+    }
   };
 
   const getUserSkillLevel = (skillId: number): number => {
@@ -331,6 +390,16 @@ const SkillManagement: React.FC = () => {
                     <option key={user.id} value={user.id}>{user.name}</option>
                   ))}
                 </select>
+                {selectedUser && (
+                  <Button
+                    size="sm"
+                    onClick={() => handleSaveAllSkillLevels(selectedUser)}
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Save All
+                  </Button>
+                )}
               </div>
             </CardHeader>
             <CardContent>
@@ -345,10 +414,24 @@ const SkillManagement: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <Input
                           type="number"
-                          defaultValue={getUserSkillLevel(skill.id)}
-                          onBlur={(e) => handleUpdateUserSkill(selectedUser, skill.id, Number(e.target.value))}
+                          min="0"
+                          max="5"
+                          value={skillLevelInputs[skill.id] ?? getUserSkillLevel(skill.id)}
+                          onChange={(e) => handleSkillLevelChange(skill.id, Number(e.target.value))}
                           className="w-20 bg-input border-border"
                         />
+                        <Button
+                          size="sm"
+                          onClick={() => handleSaveSkillLevel(selectedUser, skill.id)}
+                          disabled={updatingSkills[skill.id]}
+                          className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                        >
+                          {updatingSkills[skill.id] ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          ) : (
+                            <Save className="w-4 h-4" />
+                          )}
+                        </Button>
                         <Badge className={`border ${getSkillLevelColor(getUserSkillLevel(skill.id))}`}>
                           Level {getUserSkillLevel(skill.id)}
                         </Badge>
