@@ -135,7 +135,8 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                                 {quest.status === "COMPLETED" ? "Pending Approval" :
                                     quest.status === "COOLDOWN" ? "On Cooldown" :
                                         (quest as any)._displayStatus === 'COMPLETED_REPEATABLE' ? "Completed" :
-                                            quest.status.replace("_", " ")}
+                                            (quest as any)._displayStatus === 'COMPLETED_HISTORY' ? "Completed" :
+                                                quest.status.replace("_", " ")}
                             </Badge>
                             {quest.isRepeatable && (
                                 <Badge className="text-sm font-medium border text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700">
@@ -207,6 +208,25 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                                         <Trophy className="w-4 h-4 text-primary" />
                                         <span className="text-muted-foreground">
                                             <strong>Completed:</strong> {formatDate((quest as any)._completionDate)}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {/* Handle quests from completion history */}
+                                {(quest as any)._displayStatus === 'COMPLETED_HISTORY' && (quest as any)._completionDate && (
+                                    <div className="flex items-center gap-2">
+                                        <Trophy className="w-4 h-4 text-primary" />
+                                        <span className="text-muted-foreground">
+                                            <strong>Completed:</strong> {formatDate((quest as any)._completionDate)}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {(quest as any)._displayStatus === 'COMPLETED_HISTORY' && (quest as any)._approvedAt && (
+                                    <div className="flex items-center gap-2">
+                                        <Check className="w-4 h-4 text-primary" />
+                                        <span className="text-muted-foreground">
+                                            <strong>{(quest as any)._approvalStatus === 'APPROVED' ? 'Approved' : 'Rejected'}:</strong> {formatDate((quest as any)._approvedAt)}
                                         </span>
                                     </div>
                                 )}
@@ -318,6 +338,17 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                                             : "text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700"
                                         }`}>
                                         {quest.status === "APPROVED" ? "✓ Completed" : "✗ Rejected"}
+                                    </Badge>
+                                </div>
+                            )}
+
+                            {(quest as any)._displayStatus === 'COMPLETED_HISTORY' && (
+                                <div className="flex-1 flex items-center justify-center">
+                                    <Badge className={`text-sm font-medium border ${(quest as any)._approvalStatus === "APPROVED"
+                                            ? "text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700"
+                                            : "text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700"
+                                        }`}>
+                                        {(quest as any)._approvalStatus === "APPROVED" ? "✓ Completed" : "✗ Rejected"}
                                     </Badge>
                                 </div>
                             )}
