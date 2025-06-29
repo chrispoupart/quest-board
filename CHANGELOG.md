@@ -1,3 +1,22 @@
+## [2.6.0](https://github.com/chrispoupart/quest-board/compare/v2.5.0...v2.6.0) (2025-06-29)
+
+### Features
+
+* **header:** simplify header UI layout ([fd4858c](https://github.com/chrispoupart/quest-board/commit/fd4858c5a7882cd415fdbbc5a53bc92ec57fa190))
+* **theme:** finish implementing dynamic themes ([c1f6037](https://github.com/chrispoupart/quest-board/commit/c1f6037b1c27445546bd4727af4ecdd43431f833))
+
+### Bug Fixes
+
+* **admin:** 💄 add mobile dropdown for admin tabs ([875d4ed](https://github.com/chrispoupart/quest-board/commit/875d4ed22b2e5da8a5e5541351eb926c6051208d))
+* **CharacterSheet:** 🦺 handle updateUser function safely ([4c13bd1](https://github.com/chrispoupart/quest-board/commit/4c13bd18f4668e1e5b9755594384fbcc08220d3a))
+* **frontend:** 🔒️ update API proxy to include auth and users ([d1bfdd6](https://github.com/chrispoupart/quest-board/commit/d1bfdd68459ba70ddcb926d19f7978c3697d75ef))
+* **frontend:** 🔒️ update nginx config for API proxy handling ([dd45253](https://github.com/chrispoupart/quest-board/commit/dd45253b47b27648d68f428c74a28c3ca3730ffb))
+* **frontend:** 🔥 remove trailing slash from proxy_pass URL ([f2902bf](https://github.com/chrispoupart/quest-board/commit/f2902bf0e49787a23b9c41ec853fa70e2a076ee7))
+* **frontend:** 🔨 exclude /auth/callback from proxying ([492830f](https://github.com/chrispoupart/quest-board/commit/492830f71c47c2b5b50a604e8d3af8ce5a41f1e0))
+* **header:** improve responsive design for navigation ([5936eeb](https://github.com/chrispoupart/quest-board/commit/5936eebdde559ad19bf1bb2857918c7140cb6164))
+* **quest-board:** 💄 update border colour for requirement status ([46e1275](https://github.com/chrispoupart/quest-board/commit/46e12752c703230af52dc84c825ae25778619711))
+* **ui:** Add font styling to TabsTrigger ([0b3ccd6](https://github.com/chrispoupart/quest-board/commit/0b3ccd618f45f17d2ab80b8a388851385c0fcf7c))
+
 ## [2.5.0](https://github.com/chrispoupart/quest-board/compare/v2.4.1...v2.5.0) (2025-06-29)
 
 ### Features
