@@ -755,10 +755,10 @@ const QuestBoard: React.FC = () => {
           {/* Main Content */}
           <div className="lg:col-span-3">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className={`grid w-full ${(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") ? 'grid-cols-4' : 'grid-cols-3'} bg-muted border-border text-muted-foreground`}>
+              <TabsList className={`grid w-full ${(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") ? 'grid-cols-4' : 'grid-cols-3'} bg-muted border border-border text-muted-foreground`}>
                 <TabsTrigger
                   value="available"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium"
                 >
                   Available Quests
                 </TabsTrigger>
