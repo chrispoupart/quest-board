@@ -193,7 +193,7 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                                     </div>
                                 )}
 
-                                {quest.completedAt && (
+                                {quest.completedAt && !(quest as any)._displayStatus && (
                                     <div className="flex items-center gap-2">
                                         <Trophy className="w-4 h-4 text-primary" />
                                         <span className="text-muted-foreground">
@@ -331,7 +331,7 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                                 </div>
                             )}
 
-                            {(quest.status === "APPROVED" || quest.status === "REJECTED") && (
+                            {(quest.status === "APPROVED" || quest.status === "REJECTED") && !(quest as any)._displayStatus && (
                                 <div className="flex-1 flex items-center justify-center">
                                     <Badge className={`text-sm font-medium border ${quest.status === "APPROVED"
                                             ? "text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700"

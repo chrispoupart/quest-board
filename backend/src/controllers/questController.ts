@@ -1161,13 +1161,15 @@ export class QuestController {
                 ...completion.quest,
                 // Override status to show completion status
                 status: completion.status,
-                // Use completion dates
+                // Use completion dates from the completion record
                 completedAt: completion.completedAt.toISOString(),
                 // Mark as completed for display purposes
                 _displayStatus: 'COMPLETED_HISTORY',
                 _completionDate: completion.completedAt.toISOString(),
                 _approvalStatus: completion.status,
-                _approvedAt: completion.approvedAt?.toISOString()
+                _approvedAt: completion.approvedAt?.toISOString(),
+                // Clear any existing completion info to avoid duplication
+                lastCompletedAt: null
             }));
 
             const response = {

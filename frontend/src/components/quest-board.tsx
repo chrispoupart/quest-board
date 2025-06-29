@@ -308,7 +308,7 @@ const QuestCard: React.FC<{
             </div>
           )}
 
-          {quest.completedAt && ["COMPLETED", "APPROVED", "REJECTED"].includes(quest.status) && (
+          {quest.completedAt && ["COMPLETED", "APPROVED", "REJECTED"].includes(quest.status) && !(quest as any)._displayStatus && (
             <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
               <Trophy className="w-3 h-3" />
               <span>Completed: {new Date(quest.completedAt).toLocaleDateString()}</span>
@@ -331,7 +331,7 @@ const QuestCard: React.FC<{
             </div>
           )}
 
-          {quest.status === "APPROVED" && (
+          {quest.status === "APPROVED" && !(quest as any)._displayStatus && (
             <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-medium">
               <Check className="w-3 h-3" />
               <span>Approved - Bounty awarded!</span>
@@ -354,7 +354,7 @@ const QuestCard: React.FC<{
             </div>
           )}
 
-          {(quest as any)._displayStatus === 'COMPLETED_HISTORY' && (quest as any)._approvalStatus === 'REJECTED' && (
+          {quest.status === "REJECTED" && !(quest as any)._displayStatus && (
             <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-medium">
               <X className="w-3 h-3" />
               <span>Rejected</span>
@@ -452,7 +452,7 @@ const QuestCard: React.FC<{
           )}
 
           {/* Show completion status for approved/rejected quests */}
-          {["APPROVED", "REJECTED"].includes(quest.status) && (
+          {["APPROVED", "REJECTED"].includes(quest.status) && !(quest as any)._displayStatus && (
             <div className="flex-1 flex items-center justify-center">
               <Badge className={`text-xs font-medium border ${quest.status === "APPROVED"
                 ? "text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 border-green-200 dark:border-green-700"
