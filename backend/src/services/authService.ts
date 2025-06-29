@@ -17,6 +17,30 @@ const JWT_SECRET = process.env['JWT_SECRET'] || 'your-default-secret-key';
 
 export class AuthService {
     /**
+     * Get and validate refresh token secret
+     */
+    private static getRefreshTokenSecret(): string {
+        // Get refresh token secret with proper validation
+        let secret = process.env['JWT_REFRESH_SECRET'];
+
+        // If no dedicated refresh secret, derive from JWT_SECRET but validate it's not undefined
+        if (!secret) {
+            const baseSecret = process.env['JWT_SECRET'];
+            if (!baseSecret) {
+                throw new Error('JWT_SECRET not configured - cannot use refresh tokens');
+            }
+            secret = baseSecret + '_refresh';
+        }
+
+        // Validate that the secret is not weak or predictable
+        if (!secret || secret === 'undefined_refresh' || secret.length < 32) {
+            throw new Error('JWT refresh secret is weak or not properly configured');
+        }
+
+        return secret;
+    }
+
+    /**
      * Authenticate user with Google OAuth2
      */
     static async authenticateWithGoogle(code: string, redirectUri: string): Promise<AuthUser> {
@@ -146,10 +170,8 @@ export class AuthService {
             type: 'refresh',
         };
 
-        const secret = process.env['JWT_REFRESH_SECRET'] || (process.env['JWT_SECRET'] + '_refresh'); // Use a different secret or derive one
-        if (!secret) {
-            throw new Error('JWT refresh secret not configured');
-        }
+        const secret = this.getRefreshTokenSecret();
+
         // Longer expiry for refresh token
         return jwt.sign(payload, secret, { expiresIn: '30d' } as SignOptions);
     }
@@ -167,13 +189,12 @@ export class AuthService {
         try {
             let secret;
             if (isRefreshToken) {
-                secret = process.env['JWT_REFRESH_SECRET'] || (process.env['JWT_SECRET'] + '_refresh');
+                secret = this.getRefreshTokenSecret();
             } else {
                 secret = process.env['JWT_SECRET'];
-            }
-
-            if (!secret) {
-                throw new Error(`JWT${isRefreshToken ? ' refresh' : ''} secret not configured`);
+                if (!secret) {
+                    throw new Error('JWT secret not configured');
+                }
             }
 
             const decoded = jwt.verify(token, secret) as JwtPayload & { type?: string };
