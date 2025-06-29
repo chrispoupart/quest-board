@@ -136,7 +136,7 @@ export class AuthService {
         }
 
         const expiresIn = process.env['ACCESS_TOKEN_EXPIRY_DURATION'] || '7d';
-        return jwt.sign(payload, secret, { expiresIn });
+        return jwt.sign(payload, secret, { expiresIn } as SignOptions);
     }
 
     static generateRefreshToken(user: AuthUser): string {
@@ -151,7 +151,7 @@ export class AuthService {
             throw new Error('JWT refresh secret not configured');
         }
         // Longer expiry for refresh token
-        return jwt.sign(payload, secret, { expiresIn: '30d' });
+        return jwt.sign(payload, secret, { expiresIn: '30d' } as SignOptions);
     }
 
     static generateTokens(user: AuthUser): { accessToken: string; refreshToken: string } {
