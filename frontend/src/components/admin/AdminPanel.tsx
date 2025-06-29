@@ -62,8 +62,22 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                 </div>
 
                 {/* Admin Tabs */}
+                {/* Mobile Dropdown */}
+                <div className="block md:hidden max-w-4xl mx-auto mb-4">
+                    <select
+                        className="w-full rounded px-3 py-2 border border-border bg-background text-foreground"
+                        value={activeTab}
+                        onChange={e => setActiveTab(e.target.value)}
+                    >
+                        <option value="quests">Quest Management</option>
+                        <option value="approvals">Approvals</option>
+                        <option value="store">Store Management</option>
+                        <option value="skills">Skills</option>
+                        {isAdmin && <option value="users">User Management</option>}
+                    </select>
+                </div>
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                    <TabsList className="grid w-full grid-cols-5 bg-muted border border-border max-w-4xl mx-auto">
+                    <TabsList className="hidden md:grid w-full grid-cols-5 bg-muted border border-border max-w-4xl mx-auto">
                         <TabsTrigger
                             value="quests"
                             className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium flex items-center gap-2"
