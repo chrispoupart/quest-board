@@ -1,3 +1,17 @@
+## [2.8.0](https://github.com/chrispoupart/quest-board/compare/v2.7.0...v2.8.0) (2025-06-29)
+
+### Features
+
+* **backend:** 🗃️ run migrations before starting the app ([b75d81f](https://github.com/chrispoupart/quest-board/commit/b75d81f3945beb7e67f6601b23c9b9de9213975d))
+* **quest-board:** 💄 add mobile dropdown for tab selection ([2bfd476](https://github.com/chrispoupart/quest-board/commit/2bfd47644485fad994618ffa96fe5238a2459a75))
+* **quests:** 💄 handle repeatable quest completion status ([08263e6](https://github.com/chrispoupart/quest-board/commit/08263e622ea2dd4161148f4e45079f2afd309ae6))
+* **quests:** 🗃️ add quest completion tracking and history retrieval ([787c1a2](https://github.com/chrispoupart/quest-board/commit/787c1a2090051a3c3473db6f109d0611e4f210ee))
+* **SkillManagement:** 💄 add skill level inputs and update UI ([9a35e4d](https://github.com/chrispoupart/quest-board/commit/9a35e4d8dcd72ad780f4d87439b65c373796cc8d))
+
+### Bug Fixes
+
+* **quest:** 🩹 prevent duplicate completion display ([376460f](https://github.com/chrispoupart/quest-board/commit/376460ff436f58f7a45a692754a0b1277ccf74ac))
+
 ## [2.7.0](https://github.com/chrispoupart/quest-board/compare/v2.6.0...v2.7.0) (2025-06-29)
 
 ### Features
