@@ -90,9 +90,9 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = () => {
         <div className="space-y-6">
             {/* Error Message */}
             {error && (
-                <Card className="border-2 border-red-200 bg-red-50 shadow-md">
+                <Card className="border-2 border-destructive bg-destructive/10 shadow-md">
                     <CardContent className="p-4">
-                        <div className="flex items-center gap-2 text-red-800">
+                        <div className="flex items-center gap-2 text-destructive">
                             <AlertCircle className="w-5 h-5" />
                             <span className="font-medium">{error}</span>
                         </div>
@@ -102,57 +102,57 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = () => {
 
             {/* Statistics */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
+                <Card className="border-2 border-border bg-card shadow-lg">
                     <CardContent className="p-6 text-center">
-                        <Clock className="w-12 h-12 mx-auto mb-3 text-orange-600" />
-                        <div className="text-2xl font-bold text-amber-900">
+                        <Clock className="w-12 h-12 mx-auto mb-3 text-primary" />
+                        <div className="text-2xl font-bold text-foreground">
                             {completedQuests.length}
                         </div>
-                        <div className="text-sm text-amber-700">Awaiting Approval</div>
+                        <div className="text-sm text-muted-foreground">Awaiting Approval</div>
                     </CardContent>
                 </Card>
 
-                <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
+                <Card className="border-2 border-border bg-card shadow-lg">
                     <CardContent className="p-6 text-center">
-                        <Coins className="w-12 h-12 mx-auto mb-3 text-amber-600" />
-                        <div className="text-2xl font-bold text-amber-900">
+                        <Coins className="w-12 h-12 mx-auto mb-3 text-primary" />
+                        <div className="text-2xl font-bold text-foreground">
                             {completedQuests.reduce((total, quest) => total + quest.bounty, 0)}
                         </div>
-                        <div className="text-sm text-amber-700">Total Pending Bounty</div>
+                        <div className="text-sm text-muted-foreground">Total Pending Bounty</div>
                     </CardContent>
                 </Card>
 
-                <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
+                <Card className="border-2 border-border bg-card shadow-lg">
                     <CardContent className="p-6 text-center">
-                        <CheckCircle className="w-12 h-12 mx-auto mb-3 text-green-600" />
-                        <div className="text-2xl font-bold text-amber-900">Ready</div>
-                        <div className="text-sm text-amber-700">For Review</div>
+                        <CheckCircle className="w-12 h-12 mx-auto mb-3 text-primary" />
+                        <div className="text-2xl font-bold text-foreground">Ready</div>
+                        <div className="text-sm text-muted-foreground">For Review</div>
                     </CardContent>
                 </Card>
             </div>
 
             {/* Completed Quests for Approval */}
             {loading ? (
-                <Card className="border-2 border-amber-200 bg-white shadow-md">
+                <Card className="border-2 border-border bg-card shadow-md">
                     <CardContent className="p-12 text-center">
-                        <Loader2 className="w-16 h-16 animate-spin mx-auto mb-4 text-amber-600" />
-                        <h3 className="text-xl font-bold text-amber-900 mb-2">Loading Completed Quests</h3>
-                        <p className="text-amber-700">Gathering quests awaiting approval...</p>
+                        <Loader2 className="w-16 h-16 animate-spin mx-auto mb-4 text-primary" />
+                        <h3 className="text-xl font-bold text-foreground mb-2">Loading Completed Quests</h3>
+                        <p className="text-muted-foreground">Gathering quests awaiting approval...</p>
                     </CardContent>
                 </Card>
             ) : completedQuests.length === 0 ? (
-                <Card className="border-2 border-amber-200 bg-white shadow-md">
+                <Card className="border-2 border-border bg-card shadow-md">
                     <CardContent className="p-12 text-center">
-                        <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-400" />
-                        <h3 className="text-xl font-bold text-amber-900 mb-2">All Caught Up!</h3>
-                        <p className="text-amber-700">No completed quests are awaiting approval at this time.</p>
+                        <CheckCircle className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                        <h3 className="text-xl font-bold text-foreground mb-2">All Caught Up!</h3>
+                        <p className="text-muted-foreground">No completed quests are awaiting approval at this time.</p>
                     </CardContent>
                 </Card>
             ) : (
                 <div className="space-y-6">
-                    <Card className="border-2 border-amber-200 bg-white shadow-lg">
-                        <CardHeader className="border-b border-amber-200 bg-gradient-to-r from-amber-100 to-yellow-100">
-                            <CardTitle className="flex items-center gap-2 text-amber-900 font-serif">
+                    <Card className="border-2 border-border bg-card shadow-lg">
+                        <CardHeader className="border-b border-border bg-muted/40">
+                            <CardTitle className="flex items-center gap-2 text-foreground font-serif">
                                 <Clock className="w-6 h-6" />
                                 Quests Awaiting Approval ({completedQuests.length})
                             </CardTitle>
@@ -160,26 +160,26 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = () => {
                         <CardContent className="p-6">
                             <div className="space-y-6">
                                 {completedQuests.map((quest) => (
-                                    <div key={quest.id} className="border border-amber-200 rounded-lg p-6 bg-gradient-to-r from-amber-50 to-yellow-50">
+                                    <div key={quest.id} className="border border-border rounded-lg p-6 bg-background">
                                         <div className="flex items-start justify-between mb-4">
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-3 mb-3">
-                                                    <h3 className="text-xl font-bold text-amber-900">{quest.title}</h3>
-                                                    <Badge className="text-xs font-medium border text-purple-700 bg-purple-100 border-purple-300">
+                                                    <h3 className="text-xl font-bold text-foreground">{quest.title}</h3>
+                                                    <Badge className="text-xs font-medium border text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700">
                                                         COMPLETED
                                                     </Badge>
                                                 </div>
 
-                                                <p className="text-amber-800 mb-4">{quest.description}</p>
+                                                <p className="text-muted-foreground mb-4">{quest.description}</p>
 
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                                     <div className="space-y-2">
-                                                        <div className="flex items-center gap-2 text-amber-700">
+                                                        <div className="flex items-center gap-2 text-foreground">
                                                             <Coins className="w-4 h-4" />
                                                             <span className="font-semibold">{quest.bounty} bounty</span>
                                                         </div>
 
-                                                        <div className="flex items-center gap-2 text-amber-600 text-sm">
+                                                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
                                                             <Calendar className="w-4 h-4" />
                                                             <span>Created {formatDate(quest.createdAt)}</span>
                                                         </div>
@@ -187,14 +187,14 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = () => {
 
                                                     <div className="space-y-2">
                                                         {quest.claimedBy && (
-                                                            <div className="flex items-center gap-2 text-amber-700">
+                                                            <div className="flex items-center gap-2 text-foreground">
                                                                 <User className="w-4 h-4" />
                                                                 <span>Claimed by User #{quest.claimedBy}</span>
                                                             </div>
                                                         )}
 
                                                         {quest.completedAt && (
-                                                            <div className="flex items-center gap-2 text-amber-600 text-sm">
+                                                            <div className="flex items-center gap-2 text-muted-foreground text-sm">
                                                                 <CheckCircle className="w-4 h-4" />
                                                                 <span>Completed {formatTime(quest.completedAt)}</span>
                                                             </div>
@@ -205,11 +205,11 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = () => {
                                         </div>
 
                                         {/* Approval Actions */}
-                                        <div className="border-t border-amber-200 pt-4">
+                                        <div className="border-t border-border pt-4">
                                             <div className="flex flex-col gap-4">
                                                 {/* Rejection Reason Input */}
                                                 <div>
-                                                    <label className="block text-sm font-medium text-amber-900 mb-2">
+                                                    <label className="block text-sm font-medium text-foreground mb-2">
                                                         Rejection Reason (if applicable)
                                                     </label>
                                                     <textarea
@@ -219,7 +219,7 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = () => {
                                                             [quest.id]: e.target.value
                                                         })}
                                                         placeholder="Provide a reason if rejecting this quest..."
-                                                        className="w-full p-3 border border-amber-300 rounded-md focus:border-amber-500 focus:ring-amber-500 focus:ring-1 text-sm"
+                                                        className="w-full p-3 border border-border rounded-md bg-background focus:border-primary focus:ring-primary focus:ring-1 text-sm"
                                                         rows={2}
                                                     />
                                                 </div>
@@ -242,8 +242,8 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = () => {
                                                     <Button
                                                         onClick={() => handleRejectQuest(quest.id)}
                                                         disabled={processingQuestId === quest.id}
-                                                        variant="outline"
-                                                        className="border-red-300 text-red-700 hover:bg-red-50 flex items-center gap-2"
+                                                        variant="destructive"
+                                                        className="flex items-center gap-2"
                                                     >
                                                         {processingQuestId === quest.id ? (
                                                             <Loader2 className="w-4 h-4 animate-spin" />

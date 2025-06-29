@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { storeService } from '../../services/storeService';
 import { StoreItem, StoreTransaction } from '../../types';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 
 export const StoreManagement: React.FC = () => {
     const [storeItems, setStoreItems] = useState<StoreItem[]>([]);
@@ -170,16 +170,18 @@ export const StoreManagement: React.FC = () => {
     }
 
     return (
-        <div className="container mx-auto p-6">
+        <div className="container mx-auto p-6 bg-background text-foreground">
             <div className="mb-6">
                 <h1 className="text-3xl font-bold mb-2">🏪 Store Management</h1>
-                <p className="text-gray-600">Manage store items and approve purchase requests</p>
+                <p className="text-muted-foreground">Manage store items and approve purchase requests</p>
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="items">Store Items</TabsTrigger>
-                    <TabsTrigger value="transactions">
+                <TabsList className="grid w-full grid-cols-2 bg-muted border-border">
+                    <TabsTrigger value="items" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                        Store Items
+                    </TabsTrigger>
+                    <TabsTrigger value="transactions" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                         Pending Transactions ({pendingTransactions.length})
                     </TabsTrigger>
                 </TabsList>
@@ -187,31 +189,29 @@ export const StoreManagement: React.FC = () => {
                 <TabsContent value="items" className="mt-6">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-xl font-semibold">Store Items</h2>
-                        <Button onClick={handleCreateItem}>
+                        <Button onClick={handleCreateItem} className="bg-primary hover:bg-primary/90 text-primary-foreground">
                             Add New Item
                         </Button>
                     </div>
 
                     {storeItems.length === 0 ? (
                         <div className="text-center py-12">
-                            <p className="text-gray-500">No store items available.</p>
+                            <p className="text-muted-foreground">No store items available.</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {storeItems.map((item) => (
-                                <Card key={item.id} className="hover:shadow-lg transition-shadow">
+                                <Card key={item.id} className="hover:shadow-lg transition-shadow bg-card border-border">
                                     <CardHeader>
                                         <div className="flex justify-between items-start">
                                             <div>
-                                                <CardTitle className="text-lg">{item.name}</CardTitle>
-                                                <CardDescription className="mt-2">
+                                                <CardTitle className="text-lg text-foreground">{item.name}</CardTitle>
+                                                <CardDescription className="mt-2 text-muted-foreground">
                                                     {item.description || 'No description available'}
                                                 </CardDescription>
                                             </div>
                                             <div className="flex flex-col items-end gap-2">
-                                                <Badge variant="outline">
-                                                    {item.cost} pts
-                                                </Badge>
+                                                <Badge variant="outline" className="border-border text-foreground">{item.cost} pts</Badge>
                                                 <Badge variant={item.isActive ? "default" : "secondary"}>
                                                     {item.isActive ? "Active" : "Inactive"}
                                                 </Badge>
@@ -220,7 +220,7 @@ export const StoreManagement: React.FC = () => {
                                     </CardHeader>
                                     <CardContent>
                                         <div className="flex justify-between items-center">
-                                            <div className="text-sm text-gray-500">
+                                            <div className="text-sm text-muted-foreground">
                                                 Added by {item.creator?.name || 'Unknown'}
                                             </div>
                                             <div className="flex gap-2">
@@ -228,6 +228,7 @@ export const StoreManagement: React.FC = () => {
                                                     variant="outline"
                                                     size="sm"
                                                     onClick={() => handleEditItem(item)}
+                                                    className="border-border text-foreground hover:bg-muted"
                                                 >
                                                     Edit
                                                 </Button>
@@ -248,51 +249,45 @@ export const StoreManagement: React.FC = () => {
                 </TabsContent>
 
                 <TabsContent value="transactions" className="mt-6">
-                    <h2 className="text-xl font-semibold mb-6">Pending Purchase Requests</h2>
+                    <h2 className="text-xl font-semibold mb-6">Pending Transactions</h2>
 
                     {pendingTransactions.length === 0 ? (
                         <div className="text-center py-12">
-                            <p className="text-gray-500">No pending transactions.</p>
+                            <p className="text-muted-foreground">No pending transactions.</p>
                         </div>
                     ) : (
-                        <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {pendingTransactions.map((transaction) => (
-                                <Card key={transaction.id}>
-                                    <CardContent className="pt-6">
-                                        <div className="flex justify-between items-start">
-                                            <div className="flex-1">
-                                                <h3 className="font-semibold text-lg">{transaction.item?.name}</h3>
-                                                <p className="text-sm text-gray-600 mt-1">
-                                                    {transaction.item?.description}
-                                                </p>
-                                                <div className="flex items-center gap-4 mt-2">
-                                                    <span className="text-sm text-gray-500">
-                                                        Cost: {transaction.item?.cost} points
-                                                    </span>
-                                                    <span className="text-sm text-gray-500">
-                                                        Requested by: {transaction.buyer?.name}
-                                                    </span>
-                                                    <span className="text-sm text-gray-500">
-                                                        Date: {formatDate(transaction.createdAt)}
-                                                    </span>
-                                                </div>
+                                <Card key={transaction.id} className="bg-card border-border">
+                                    <CardHeader>
+                                        <CardTitle className="text-foreground">{transaction.item?.name || 'N/A'}</CardTitle>
+                                        <CardDescription className="text-muted-foreground">
+                                            Requested by {transaction.buyer?.name || 'N/A'}
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="flex justify-between items-center">
+                                            <div className="text-sm text-muted-foreground">
+                                                {formatDate(transaction.createdAt)}
                                             </div>
-                                            <div className="flex gap-2 ml-4">
-                                                <Button
-                                                    variant="default"
-                                                    size="sm"
-                                                    onClick={() => handleTransactionAction(transaction, 'APPROVED')}
-                                                >
-                                                    Approve
-                                                </Button>
-                                                <Button
-                                                    variant="destructive"
-                                                    size="sm"
-                                                    onClick={() => handleTransactionAction(transaction, 'REJECTED')}
-                                                >
-                                                    Reject
-                                                </Button>
-                                            </div>
+                                            <Badge variant="outline" className="border-border text-foreground">{transaction.item?.cost || 0} pts</Badge>
+                                        </div>
+                                        <div className="flex gap-2 mt-4">
+                                            <Button
+                                                variant="default"
+                                                size="sm"
+                                                onClick={() => handleTransactionAction(transaction, 'APPROVED')}
+                                                className="bg-green-600 hover:bg-green-700 text-white"
+                                            >
+                                                Approve
+                                            </Button>
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                onClick={() => handleTransactionAction(transaction, 'REJECTED')}
+                                            >
+                                                Reject
+                                            </Button>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -302,117 +297,93 @@ export const StoreManagement: React.FC = () => {
                 </TabsContent>
             </Tabs>
 
-            {/* Item Management Dialog */}
             <Dialog open={itemDialogOpen} onOpenChange={setItemDialogOpen}>
-                <DialogContent>
+                <DialogContent className="sm:max-w-[425px] bg-card border-border">
                     <DialogHeader>
-                        <DialogTitle>
-                            {editingItem ? 'Edit Store Item' : 'Create New Store Item'}
-                        </DialogTitle>
-                        <DialogDescription>
-                            {editingItem ? 'Update the store item details.' : 'Add a new item to the store.'}
-                        </DialogDescription>
+                        <DialogTitle className="text-foreground">{editingItem ? 'Edit Item' : 'Add New Item'}</DialogTitle>
                     </DialogHeader>
-                    <div className="space-y-4">
-                        <div>
-                            <label htmlFor="name">Name *</label>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <label htmlFor="name" className="text-right text-foreground">
+                                Name
+                            </label>
                             <Input
                                 id="name"
                                 value={itemForm.name}
                                 onChange={(e) => setItemForm({ ...itemForm, name: e.target.value })}
-                                placeholder="Enter item name"
+                                className="col-span-3 bg-background border-border"
                             />
                         </div>
-                        <div>
-                            <label htmlFor="description">Description</label>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <label htmlFor="description" className="text-right text-foreground">
+                                Description
+                            </label>
                             <Textarea
                                 id="description"
                                 value={itemForm.description}
                                 onChange={(e) => setItemForm({ ...itemForm, description: e.target.value })}
-                                placeholder="Enter item description"
-                                rows={3}
+                                className="col-span-3 bg-background border-border"
                             />
                         </div>
-                        <div>
-                            <label htmlFor="cost">Cost (points) *</label>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <label htmlFor="cost" className="text-right text-foreground">
+                                Cost
+                            </label>
                             <Input
                                 id="cost"
                                 type="number"
-                                min="1"
                                 value={itemForm.cost}
                                 onChange={(e) => setItemForm({ ...itemForm, cost: parseInt(e.target.value) || 0 })}
-                                placeholder="Enter cost in points"
+                                className="col-span-3 bg-background border-border"
                             />
                         </div>
-                        {editingItem && (
-                            <div className="flex items-center space-x-2">
-                                <input
-                                    id="isActive"
-                                    type="checkbox"
-                                    checked={itemForm.isActive}
-                                    onChange={(e) => setItemForm({ ...itemForm, isActive: e.target.checked })}
-                                />
-                                <label htmlFor="isActive">Active</label>
-                            </div>
-                        )}
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <label htmlFor="isActive" className="text-right text-foreground">
+                                Active
+                            </label>
+                            <input
+                                id="isActive"
+                                type="checkbox"
+                                checked={itemForm.isActive}
+                                onChange={(e) => setItemForm({ ...itemForm, isActive: e.target.checked })}
+                                className="col-span-3"
+                            />
+                        </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setItemDialogOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button onClick={handleSaveItem}>
-                            {editingItem ? 'Update' : 'Create'}
-                        </Button>
+                        <Button onClick={handleSaveItem} className="bg-primary hover:bg-primary/90 text-primary-foreground">Save</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
 
-            {/* Transaction Action Dialog */}
             <Dialog open={transactionDialogOpen} onOpenChange={setTransactionDialogOpen}>
-                <DialogContent>
+                <DialogContent className="sm:max-w-[425px] bg-card border-border">
                     <DialogHeader>
-                        <DialogTitle>
-                            {transactionAction === 'APPROVED' ? 'Approve' : 'Reject'} Purchase Request
+                        <DialogTitle className="text-foreground">
+                            Confirm Transaction: {transactionAction === 'APPROVED' ? 'Approve' : 'Reject'}
                         </DialogTitle>
                         <DialogDescription>
-                            {transactionAction === 'APPROVED'
-                                ? 'Approve this purchase request. The user will receive their reward.'
-                                : 'Reject this purchase request. The user will be refunded their bounty points.'
-                            }
+                            {transactionAction === 'REJECTED' && 'Please provide a reason for rejection.'}
                         </DialogDescription>
                     </DialogHeader>
-                    {selectedTransaction && (
-                        <div className="py-4">
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                                <h3 className="font-semibold">{selectedTransaction.item?.name}</h3>
-                                <p className="text-sm text-gray-600 mt-1">
-                                    Requested by: {selectedTransaction.buyer?.name}
-                                </p>
-                                <p className="text-sm text-gray-600">
-                                    Cost: {selectedTransaction.item?.cost} points
-                                </p>
-                            </div>
-                            <div className="mt-4">
-                                <label htmlFor="notes">Notes (optional)</label>
+                    {transactionAction === 'REJECTED' && (
+                        <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <label htmlFor="notes" className="text-right text-foreground">
+                                    Notes
+                                </label>
                                 <Textarea
                                     id="notes"
                                     value={transactionNotes}
                                     onChange={(e) => setTransactionNotes(e.target.value)}
-                                    placeholder="Add any notes about this decision..."
-                                    rows={3}
+                                    className="col-span-3 bg-background border-border"
                                 />
                             </div>
                         </div>
                     )}
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setTransactionDialogOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button
-                            variant={transactionAction === 'APPROVED' ? 'default' : 'destructive'}
-                            onClick={confirmTransactionAction}
-                        >
-                            {transactionAction === 'APPROVED' ? 'Approve' : 'Reject'}
+                        <Button onClick={confirmTransactionAction} className={transactionAction === 'APPROVED' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'}>
+                            Confirm
                         </Button>
                     </DialogFooter>
                 </DialogContent>

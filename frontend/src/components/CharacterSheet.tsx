@@ -3,8 +3,6 @@ import {
   User,
   Star,
   Crown,
-  Palette,
-  ArrowLeft,
   Upload,
   CheckCircle,
   AlertCircle,
@@ -30,10 +28,9 @@ import { skillService } from '../services/skillService';
 import { Skill, UserSkill } from '../types';
 
 interface CharacterSheetProps {
-  onBack?: () => void;
 }
 
-const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
+const CharacterSheet: React.FC<CharacterSheetProps> = () => {
   const { user, updateUser, isAuthenticated } = useAuth();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -293,6 +290,8 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
   };
 
   const handleSave = async () => {
+    if (!user) return;
+
     try {
       setSaving(true);
       setError(null);
@@ -307,28 +306,14 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
         avatarUrl: formData.avatarUrl
       });
 
-      // Update the auth context
-      if (updateUser) {
-        updateUser(updatedUser);
-      }
-
-      // Clean up the previous avatar URL after successful save
-      if (previousAvatarUrl && previousAvatarUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(previousAvatarUrl);
-        setPreviousAvatarUrl(null);
-      }
-
+      updateUser(updatedUser);
       setSuccess('Character sheet updated successfully!');
     } catch (err) {
       console.error('Failed to update character sheet:', err);
-      setError(err instanceof Error ? err.message : 'Failed to update character sheet');
+      setError('Failed to update character sheet');
     } finally {
       setSaving(false);
     }
-  };
-
-  const getCharacterClassInfo = (className: string) => {
-    return characterClasses.find(c => c.value === className);
   };
 
   const getRoleTitle = (role: string) => {
@@ -358,338 +343,215 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          {onBack && (
-            <Button
-              onClick={onBack}
-              variant="outline"
-              className="border-border text-muted-foreground hover:bg-muted"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-          )}
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-              <User className="w-8 h-8 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold text-foreground font-serif">Character Sheet</h1>
-              <p className="text-muted-foreground">Customize your adventurer's identity</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Error/Success Messages */}
-        {error && (
-          <Card className="border-2 border-destructive bg-destructive/10 shadow-md mb-6">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-destructive">
-                <AlertCircle className="w-5 h-5" />
-                <span className="font-medium">Error: {error}</span>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {success && (
-          <Card className="border-2 border-green-500 dark:border-green-700 bg-green-50 dark:bg-green-900/30 shadow-md mb-6">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
-                <CheckCircle className="w-5 h-5" />
-                <span className="font-medium">{success}</span>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Character Preview */}
-          <div className="lg:col-span-1">
-            <Card className="border-2 border-border bg-card shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-foreground font-serif">Character Preview</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Avatar */}
-                <div className="text-center">
-                  <Avatar className="w-24 h-24 mx-auto border-4 border-primary/50">
-                    {uploadingAvatar ? (
-                      <div className="w-full h-full flex items-center justify-center bg-muted">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                      </div>
-                    ) : (
-                      <AvatarImage src={formData.avatarUrl || user.avatarUrl} alt="Character Avatar" />
-                    )}
-                    <AvatarFallback className="bg-muted text-muted-foreground font-bold text-2xl">
-                      {formData.characterName ? formData.characterName.charAt(0).toUpperCase() : user.name.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {uploadingAvatar ? 'Processing...' : 'Avatar Preview'}
+        <Card className="border-2 border-border bg-card shadow-lg">
+          <CardHeader className="border-b border-border bg-muted/40">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                  <User className="w-8 h-8 text-primary-foreground" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-foreground font-serif">Character Sheet</h1>
+                  <p className="text-muted-foreground">
+                    Welcome, <span className="font-semibold">{getRoleTitle(user?.role || '')} {user?.name}</span>
                   </p>
                 </div>
+              </div>
+              <Button
+                onClick={handleSave}
+                disabled={saving || uploadingAvatar}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {saving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </CardHeader>
 
-                {/* Character Info */}
-                <div className="space-y-3">
+          <CardContent className="p-6">
+            {/* Success and Error Messages */}
+            {success && (
+              <div className="mb-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md" role="alert">
+                <div className="flex">
+                  <CheckCircle className="h-5 w-5 mr-3" />
                   <div>
-                    <h3 className="font-bold text-foreground text-lg">
-                      {formData.characterName || 'Unnamed Character'}
-                    </h3>
-                    <p className="text-muted-foreground text-sm">{user.email}</p>
+                    <p className="font-bold">Success</p>
+                    <p>{success}</p>
                   </div>
-
-                  {formData.characterClass && (
-                    <div className="flex items-center gap-2">
-                      {getCharacterClassInfo(formData.characterClass)?.icon}
-                      <Badge className={`text-xs font-medium border ${getCharacterClassInfo(formData.characterClass)?.color}`}>
-                        {getCharacterClassInfo(formData.characterClass)?.label}
-                      </Badge>
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-primary" />
-                    <span className="text-muted-foreground">Level {user.level || 1}</span>
-                  </div>
-
-                  {user.experience !== undefined && (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-primary rounded-full flex items-center justify-center">
-                        <span className="text-primary-foreground text-xs font-bold">XP</span>
-                      </div>
-                      <span className="text-muted-foreground text-sm">{user.experience} Experience</span>
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-2">
-                    <Crown className="w-4 h-4 text-primary" />
-                    <span className="text-muted-foreground">{getRoleTitle(user.role)}</span>
-                  </div>
-
-                  {formData.favoriteColor && (
-                    <div className="flex items-center gap-2">
-                      <Palette className="w-4 h-4 text-primary" />
-                      <span className="text-muted-foreground">Favorite: {formData.favoriteColor}</span>
-                    </div>
-                  )}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Character Form and Skills */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Character Form */}
-            <Card className="border-2 border-border bg-card shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-foreground font-serif">Character Details</CardTitle>
-                <p className="text-muted-foreground">Customize your character's identity and appearance</p>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Character Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="characterName" className="text-foreground font-medium">
-                    Character Name *
-                  </Label>
-                  <Input
-                    id="characterName"
-                    placeholder="Enter your character's name (not your real name)"
-                    value={formData.characterName}
-                    onChange={(e) => handleInputChange('characterName', e.target.value)}
-                    className="bg-background border-border focus:border-ring focus:ring-ring"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Choose a unique name for your character. This will be displayed to other guild members.
-                  </p>
+              </div>
+            )}
+            {error && (
+              <div className="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
+                <div className="flex">
+                  <AlertCircle className="h-5 w-5 mr-3" />
+                  <div>
+                    <p className="font-bold">Error</p>
+                    <p>{error}</p>
+                  </div>
                 </div>
+              </div>
+            )}
 
-                {/* Avatar Upload */}
-                <div className="space-y-2">
-                  <Label className="text-foreground font-medium">Character Avatar</Label>
-                  <div className="flex items-center gap-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => document.getElementById('avatar-upload')?.click()}
-                      disabled={uploadingAvatar}
-                      className="border-border text-muted-foreground hover:bg-muted disabled:opacity-50"
-                    >
-                      {uploadingAvatar ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
-                          Processing...
-                        </>
-                      ) : (
-                        <>
+            <div className="grid lg:grid-cols-3 gap-8">
+              {/* Left Column - Character Details */}
+              <div className="lg:col-span-1 space-y-6">
+                <Card className="border-border bg-background">
+                  <CardHeader>
+                    <CardTitle>Avatar</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex flex-col items-center space-y-4">
+                    <Avatar className="w-32 h-32 border-4 border-primary shadow-lg">
+                      <AvatarImage src={formData.avatarUrl || user?.avatarUrl || ''} alt="User Avatar" />
+                      <AvatarFallback className="text-4xl">
+                        {user?.name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+
+                    <div className="flex gap-2 w-full">
+                      <Button
+                        className="w-full justify-between bg-card border-border text-foreground hover:bg-accent"
+                      >
+                        <label htmlFor="avatar-upload" className="flex items-center justify-center">
                           <Upload className="w-4 h-4 mr-2" />
-                          Upload Image
-                        </>
-                      )}
-                    </Button>
-                    {(formData.avatarUrl || user.avatarUrl) && (
+                          {uploadingAvatar ? 'Uploading...' : 'Upload'}
+                          <Input
+                            id="avatar-upload"
+                            type="file"
+                            className="hidden"
+                            onChange={handleAvatarUpload}
+                            accept="image/jpeg,image/png,image/webp"
+                            disabled={uploadingAvatar}
+                          />
+                        </label>
+                      </Button>
                       <Button
-                        variant="outline"
+                        variant="destructive"
                         onClick={handleClearAvatar}
-                        disabled={uploadingAvatar}
-                        className="border-destructive text-destructive hover:bg-destructive/10 disabled:opacity-50"
+                        disabled={!formData.avatarUrl || uploadingAvatar}
                       >
-                        <X className="w-4 h-4 mr-2" />
-                        Remove
+                        <X className="w-4 h-4" />
                       </Button>
-                    )}
-                    <input
-                      id="avatar-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAvatarUpload}
-                      className="hidden"
-                      disabled={uploadingAvatar}
-                    />
-                    <span className="text-sm text-muted-foreground">
-                      {uploadingAvatar ? 'Processing image...' : 'Recommended: Square image, 200x200px or larger'}
-                    </span>
-                  </div>
-                </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
-                {/* Character Class */}
-                <div className="space-y-2">
-                  <Label className="text-foreground font-medium">Character Class</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {characterClasses.map((charClass) => (
-                      <Button
-                        key={charClass.value}
-                        variant={formData.characterClass === charClass.value ? "default" : "outline"}
-                        onClick={() => handleInputChange('characterClass', charClass.value)}
-                        className={`h-auto p-3 flex flex-col items-center gap-2 ${
-                          formData.characterClass === charClass.value
-                            ? 'bg-primary text-primary-foreground'
-                            : 'border-border text-muted-foreground hover:bg-muted'
-                        }`}
-                      >
-                        {charClass.icon}
-                        <span className="text-xs">{charClass.label}</span>
-                      </Button>
-                    ))}
-                  </div>
-                </div>
+                <Card className="border-border bg-background">
+                  <CardHeader>
+                    <CardTitle>Character Info</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="characterName" className="text-foreground font-medium">Character Name</Label>
+                      <Input
+                        id="characterName"
+                        value={formData.characterName}
+                        onChange={(e) => handleInputChange('characterName', e.target.value)}
+                        placeholder="E.g., Alistair Ironhand"
+                        className="bg-input"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-foreground font-medium">Character Class</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {characterClasses.map((charClass) => (
+                          <Button
+                            key={charClass.value}
+                            variant={formData.characterClass === charClass.value ? "default" : "outline"}
+                            onClick={() => handleInputChange('characterClass', charClass.value)}
+                            className="h-auto p-2 flex items-center gap-2 justify-start"
+                          >
+                            {charClass.icon}
+                            <span className="truncate">{charClass.label}</span>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
 
-                {/* Preferred Pronouns */}
-                <div className="space-y-2">
-                  <Label className="text-foreground font-medium">Preferred Pronouns</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {pronounOptions.map((pronoun) => (
-                      <Button
-                        key={pronoun.value}
-                        variant={formData.preferredPronouns === pronoun.value ? "default" : "outline"}
-                        onClick={() => handleInputChange('preferredPronouns', pronoun.value)}
-                        className={`h-auto p-2 ${
-                          formData.preferredPronouns === pronoun.value
-                            ? 'bg-primary text-primary-foreground'
-                            : 'border-border text-muted-foreground hover:bg-muted'
-                        }`}
-                      >
-                        {pronoun.label}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
+              {/* Right Column - Customization and Skills */}
+              <div className="lg:col-span-2 space-y-6">
+                <Card className="border-border bg-background">
+                  <CardHeader>
+                    <CardTitle>Customization</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-2">
+                      <Label className="text-foreground font-medium">Character Bio</Label>
+                      <Textarea
+                        value={formData.characterBio}
+                        onChange={(e) => handleInputChange('characterBio', e.target.value)}
+                        placeholder="Tell us about your character's backstory, motivations, and personality."
+                        className="bg-input h-32"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-foreground font-medium">Preferred Pronouns</Label>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {pronounOptions.map((pronoun) => (
+                          <Button
+                            key={pronoun.value}
+                            variant={formData.preferredPronouns === pronoun.value ? "default" : "outline"}
+                            onClick={() => handleInputChange('preferredPronouns', pronoun.value)}
+                            className={`h-auto p-2 ${
+                              formData.preferredPronouns === pronoun.value
+                                ? 'bg-primary text-primary-foreground'
+                                : 'border-border text-muted-foreground hover:bg-muted'
+                            }`}
+                          >
+                            {pronoun.label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-foreground font-medium">Favorite Color</Label>
+                      <div className="grid grid-cols-5 gap-2">
+                        {colorOptions.map((color) => (
+                          <Button
+                            key={color.value}
+                            variant="outline"
+                            onClick={() => handleInputChange('favoriteColor', color.value)}
+                            className={`h-12 p-0 relative ${
+                              formData.favoriteColor === color.value
+                                ? 'ring-2 ring-primary'
+                                : 'border-border hover:bg-muted'
+                            }`}
+                          >
+                            <div className={`w-full h-full ${color.color} rounded`}></div>
+                            {formData.favoriteColor === color.value && (
+                              <CheckCircle className="w-4 h-4 text-primary-foreground absolute top-1 right-1" />
+                            )}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
-                {/* Favorite Color */}
-                <div className="space-y-2">
-                  <Label className="text-foreground font-medium">Favorite Color</Label>
-                  <div className="grid grid-cols-5 gap-2">
-                    {colorOptions.map((color) => (
-                      <Button
-                        key={color.value}
-                        variant={formData.favoriteColor === color.value ? "default" : "outline"}
-                        onClick={() => handleInputChange('favoriteColor', color.value)}
-                        className={`h-12 p-0 relative ${
-                          formData.favoriteColor === color.value
-                            ? 'ring-2 ring-ring' // Use theme ring
-                            : 'border-border hover:bg-muted'
-                        }`}
-                      >
-                        <div className={`w-full h-full ${color.color} rounded`}></div>
-                        {formData.favoriteColor === color.value && (
-                          <CheckCircle className="w-4 h-4 text-primary-foreground absolute top-1 right-1" /> // Ensure contrast
-                        )}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Character Bio */}
-                <div className="space-y-2">
-                  <Label htmlFor="characterBio" className="text-foreground font-medium">
-                    Character Bio
-                  </Label>
-                  <Textarea
-                    id="characterBio"
-                    placeholder="Tell us about your character's backstory, personality, or any interesting details..."
-                    value={formData.characterBio}
-                    onChange={(e) => handleInputChange('characterBio', e.target.value)}
-                    className="bg-background border-border focus:border-ring focus:ring-ring min-h-[100px]"
-                    maxLength={500}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    {formData.characterBio.length}/500 characters
-                  </p>
-                </div>
-
-                {/* Save Button */}
-                <div className="flex justify-end pt-4">
-                  <Button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground px-8"
-                  >
-                    {saving ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground mr-2"></div>
-                        Saving...
-                      </>
+                <Card className="border-border bg-background">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Target className="w-6 h-6" />
+                      Skills
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {loadingSkills ? (
+                      <p>Loading skills...</p>
                     ) : (
-                      <>
-                        <Save className="w-4 h-4 mr-2" />
-                        Save Character
-                      </>
+                      <div className="space-y-3">
+                        {allSkills.map((skill) => renderSkillLevel(skill))}
+                      </div>
                     )}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Skills Section */}
-            <Card className="border-2 border-border bg-card shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-foreground font-serif flex items-center gap-2">
-                  <Target className="w-5 h-5 text-primary" />
-                  Skills & Abilities
-                </CardTitle>
-                <p className="text-muted-foreground">
-                  Manage your character's skills. Guild Masters can adjust skill levels based on your performance.
-                </p>
-              </CardHeader>
-              <CardContent>
-                {loadingSkills ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                    <span className="ml-3 text-muted-foreground">Loading skills...</span>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {allSkills.length === 0 ? (
-                      <p className="text-muted-foreground text-center py-8">No skills available yet.</p>
-                    ) : (
-                      allSkills.map(renderSkillLevel)
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
