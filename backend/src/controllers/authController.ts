@@ -6,8 +6,8 @@ import { getLevel } from '../utils/leveling';
 
 const GOOGLE_CLIENT_ID = process.env['GOOGLE_CLIENT_ID'];
 const GOOGLE_CLIENT_SECRET = process.env['GOOGLE_CLIENT_SECRET'];
-const GOOGLE_CALLBACK_URL = process.env['GOOGLE_CALLBACK_URL'] || 'http://localhost:5001/api/auth/google/callback';
-const FRONTEND_URL = process.env['FRONTEND_URL'] || 'http://localhost:8080';
+const GOOGLE_CALLBACK_URL = process.env['GOOGLE_CALLBACK_URL'] || 'http://localhost:8000/auth/google/callback';
+const FRONTEND_URL = process.env['FRONTEND_URL'] || 'http://localhost:3000';
 
 if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
   throw new Error('Google OAuth client ID or secret is not defined in environment variables.');

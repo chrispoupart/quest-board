@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { User, ApiResponse } from '../types';
 
-// In production, always use relative paths. In development, use localhost:8000
-const API_BASE_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000');
+// In production, always use relative paths. In development, use the proxy.
+const API_BASE_URL = import.meta.env.PROD ? '' : '';
 
 // Create axios instance with base configuration
 const api = axios.create({
@@ -38,7 +38,7 @@ api.interceptors.response.use(
             try {
                 const refreshToken = localStorage.getItem('refreshToken');
                 if (refreshToken) {
-                    const response = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {
+                    const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
                         refreshToken,
                     });
 

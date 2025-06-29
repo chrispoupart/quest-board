@@ -10,13 +10,12 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
     Plus,
     Pencil,
-    Trash2,
     Search,
     Coins,
     Calendar,
     AlertCircle,
     Loader2,
-    X
+    Trash2
 } from 'lucide-react';
 import { Pagination } from '@/components/ui/pagination';
 
@@ -245,228 +244,158 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
         <div className="space-y-6">
             {/* Error Message */}
             {error && (
-                <Card className="border-2 border-red-200 bg-red-50 shadow-md">
+                <Card className="border-2 border-destructive bg-destructive/10 shadow-md">
                     <CardContent className="p-4">
-                        <div className="flex items-center gap-2 text-red-800">
+                        <div className="flex items-center gap-2 text-destructive">
                             <AlertCircle className="w-5 h-5" />
-                            <span className="font-medium">{error}</span>
+                            <span className="font-medium">Error: {error}</span>
                         </div>
-                        {error.includes('Authentication') && (
-                            <div className="mt-3">
-                                <Button
-                                    onClick={() => window.location.href = '/login'}
-                                    variant="outline"
-                                    className="border-red-300 text-red-700 hover:bg-red-50"
-                                    size="sm"
-                                >
-                                    Go to Login
-                                </Button>
-                            </div>
-                        )}
                     </CardContent>
                 </Card>
             )}
 
-            {/* Action Bar */}
-            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-                <div className="flex items-center gap-4 w-full sm:w-auto">
-                    <div className="relative flex-1 sm:flex-none">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-600 w-4 h-4" />
-                        <Input
-                            placeholder="Search quests..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 border-amber-300 focus:border-amber-500 focus:ring-amber-500 min-w-[300px]"
-                        />
-                    </div>
+            {/* Toolbar */}
+            <div className="flex justify-between items-center">
+                <div className="relative w-full max-w-sm">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Input
+                        placeholder="Search quests..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 bg-background border-border"
+                    />
                 </div>
-
                 <Button
-                    onClick={() => setShowCreateForm(true)}
-                    className="bg-amber-600 hover:bg-amber-700 text-white flex items-center gap-2"
+                    onClick={() => {
+                        setShowCreateForm(true);
+                        setEditingQuest(null);
+                        setFormData({ title: '', description: '', bounty: 0, isRepeatable: false });
+                        setSkillRequirements([]);
+                    }}
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-4 h-4 mr-2" />
                     Create New Quest
                 </Button>
             </div>
 
-            {/* Create/Edit Quest Form */}
+            {/* Create/Edit Form */}
             {showCreateForm && (
-                <Card className="border-2 border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 shadow-lg">
-                    <CardHeader className="border-b border-amber-200">
-                        <CardTitle className="text-amber-900 font-serif">
+                <Card className="border-2 border-border bg-card shadow-lg">
+                    <CardHeader>
+                        <CardTitle className="font-serif text-foreground">
                             {editingQuest ? 'Edit Quest' : 'Create New Quest'}
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-6">
-                        <form onSubmit={editingQuest ? handleUpdateQuest : handleCreateQuest} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-amber-900 mb-2">
-                                    Quest Title *
-                                </label>
-                                <Input
-                                    type="text"
-                                    value={formData.title}
-                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    placeholder="Enter quest title..."
-                                    className="border-amber-300 focus:border-amber-500 focus:ring-amber-500"
-                                    required
-                                />
+                    <CardContent>
+                        <form onSubmit={editingQuest ? handleUpdateQuest : handleCreateQuest} className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label htmlFor="title" className="font-medium text-foreground">Title *</label>
+                                    <Input
+                                        id="title"
+                                        value={formData.title}
+                                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                        placeholder="E.g., The Lost Artifact of Eldoria"
+                                        required
+                                        className="bg-background border-border"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label htmlFor="bounty" className="font-medium text-foreground">Bounty *</label>
+                                    <Input
+                                        id="bounty"
+                                        type="number"
+                                        value={formData.bounty}
+                                        onChange={(e) => setFormData({ ...formData, bounty: Number(e.target.value) })}
+                                        placeholder="E.g., 100"
+                                        required
+                                        className="bg-background border-border"
+                                    />
+                                </div>
                             </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-amber-900 mb-2">
-                                    Description
-                                </label>
+                            <div className="space-y-2">
+                                <label htmlFor="description" className="font-medium text-foreground">Description</label>
                                 <textarea
+                                    id="description"
                                     value={formData.description}
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    placeholder="Describe the quest details..."
-                                    className="w-full min-h-[100px] p-3 border border-amber-300 rounded-md focus:border-amber-500 focus:ring-amber-500 focus:ring-1"
-                                    rows={4}
+                                    placeholder="Describe the quest in detail..."
+                                    className="w-full p-2 border rounded-md bg-background border-border min-h-[100px]"
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-amber-900 mb-2">
-                                    Bounty Amount *
-                                </label>
-                                <Input
-                                    type="number"
-                                    value={formData.bounty}
-                                    onChange={(e) => setFormData({ ...formData, bounty: parseInt(e.target.value) || 0 })}
-                                    placeholder="Enter bounty amount..."
-                                    className="border-amber-300 focus:border-amber-500 focus:ring-amber-500"
-                                    min="1"
-                                    required
-                                />
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                                <input
-                                    type="checkbox"
-                                    id="isRepeatable"
-                                    checked={formData.isRepeatable}
-                                    onChange={(e) => setFormData({
-                                        ...formData,
-                                        isRepeatable: e.target.checked,
-                                        cooldownDays: e.target.checked ? formData.cooldownDays : undefined
-                                    })}
-                                    className="w-4 h-4 text-amber-600 border-amber-300 rounded focus:ring-amber-500"
-                                />
-                                <label htmlFor="isRepeatable" className="text-sm font-medium text-amber-900">
-                                    Repeatable Quest
-                                </label>
-                            </div>
-
-                            {formData.isRepeatable && (
-                                <div>
-                                    <label className="block text-sm font-medium text-amber-900 mb-2">
-                                        Cooldown Period (days) *
-                                    </label>
-                                    <Input
-                                        type="number"
-                                        value={formData.cooldownDays || ''}
-                                        onChange={(e) => setFormData({ ...formData, cooldownDays: parseInt(e.target.value) || undefined })}
-                                        placeholder="Enter cooldown days (e.g., 14 for 2 weeks)..."
-                                        className="border-amber-300 focus:border-amber-500 focus:ring-amber-500"
-                                        min="1"
-                                        required
+                            <div className="flex items-center space-x-4">
+                                <div className="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        id="isRepeatable"
+                                        checked={formData.isRepeatable}
+                                        onChange={(e) => setFormData({ ...formData, isRepeatable: e.target.checked })}
+                                        className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
                                     />
-                                    <p className="text-xs text-amber-600 mt-1">
-                                        Number of days before this quest can be repeated
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Skill Requirements Section */}
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <label className="block text-sm font-medium text-amber-900">
-                                        Required Skills
-                                    </label>
-                                    <Button
-                                        type="button"
-                                        onClick={addSkillRequirement}
-                                        variant="outline"
-                                        size="sm"
-                                        className="border-amber-300 text-amber-700 hover:bg-amber-50"
-                                    >
-                                        <Plus className="w-4 h-4 mr-1" />
-                                        Add Skill
-                                    </Button>
+                                    <label htmlFor="isRepeatable" className="font-medium text-foreground">Is Repeatable?</label>
                                 </div>
 
-                                {skillRequirements.length === 0 ? (
-                                    <p className="text-sm text-amber-600 italic">No skill requirements set</p>
-                                ) : (
-                                    <div className="space-y-2">
-                                        {skillRequirements.map((skillReq, index) => (
-                                            <div key={index} className="flex items-center gap-2 p-3 border border-amber-200 rounded-lg bg-white">
-                                                <div className="flex-1">
-                                                    <select
-                                                        value={skillReq.skillId}
-                                                        onChange={(e) => updateSkillRequirement(index, 'skillId', parseInt(e.target.value))}
-                                                        className="w-full p-2 border border-amber-300 rounded-md focus:border-amber-500 focus:ring-amber-500 text-sm"
-                                                    >
-                                                        <option value={0}>Select a skill...</option>
-                                                        {skills.map((skill) => (
-                                                            <option key={skill.id} value={skill.id}>
-                                                                {skill.name}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                </div>
-                                                <div className="w-24">
-                                                    <Input
-                                                        type="number"
-                                                        value={skillReq.minLevel}
-                                                        onChange={(e) => updateSkillRequirement(index, 'minLevel', parseInt(e.target.value) || 1)}
-                                                        placeholder="Level"
-                                                        className="border-amber-300 focus:border-amber-500 focus:ring-amber-500 text-sm"
-                                                        min="1"
-                                                        max="5"
-                                                    />
-                                                </div>
-                                                <Button
-                                                    type="button"
-                                                    onClick={() => removeSkillRequirement(index)}
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="border-red-300 text-red-700 hover:bg-red-50"
-                                                >
-                                                    <X className="w-4 h-4" />
-                                                </Button>
-                                            </div>
-                                        ))}
+                                {formData.isRepeatable && (
+                                    <div className="space-y-2 flex-1">
+                                        <label htmlFor="cooldownDays" className="font-medium text-foreground">Cooldown (Days)</label>
+                                        <Input
+                                            id="cooldownDays"
+                                            type="number"
+                                            value={formData.cooldownDays}
+                                            onChange={(e) => setFormData({ ...formData, cooldownDays: Number(e.target.value) || undefined })}
+                                            placeholder="E.g., 7"
+                                            className="bg-background border-border"
+                                        />
                                     </div>
                                 )}
-                                <p className="text-xs text-amber-600">
-                                    Players must meet the minimum skill level requirements to claim this quest
-                                </p>
                             </div>
 
-                            <div className="flex gap-3 pt-4">
-                                <Button
-                                    type="submit"
-                                    disabled={submitting}
-                                    className="bg-amber-600 hover:bg-amber-700 text-white flex items-center gap-2"
-                                >
-                                    {submitting ? (
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                    ) : (
-                                        <Plus className="w-4 h-4" />
-                                    )}
-                                    {editingQuest ? 'Update Quest' : 'Create Quest'}
+                            <div className="space-y-4">
+                                <h3 className="font-medium text-foreground">Skill Requirements</h3>
+                                {skillRequirements.map((req, index) => (
+                                    <div key={index} className="flex items-center gap-4 p-3 border rounded-lg bg-background border-border">
+                                        <select
+                                            value={req.skillId}
+                                            onChange={(e) => updateSkillRequirement(index, 'skillId', Number(e.target.value))}
+                                            className="p-2 border rounded-md bg-background border-border"
+                                        >
+                                            <option value={0} disabled>Select a skill</option>
+                                            {skills.map(skill => (
+                                                <option key={skill.id} value={skill.id}>{skill.name}</option>
+                                            ))}
+                                        </select>
+                                        <Input
+                                            type="number"
+                                            value={req.minLevel}
+                                            onChange={(e) => updateSkillRequirement(index, 'minLevel', Number(e.target.value))}
+                                            placeholder="Min Level"
+                                            className="w-32 bg-background border-border"
+                                        />
+                                        <Button type="button" variant="destructive" onClick={() => removeSkillRequirement(index)}>
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+                                <Button type="button" variant="outline" onClick={addSkillRequirement}>
+                                    Add Skill Requirement
                                 </Button>
+                            </div>
 
-                                <Button
-                                    type="button"
-                                    onClick={handleCancelEdit}
-                                    variant="outline"
-                                    className="border-amber-300 text-amber-700 hover:bg-amber-50"
-                                >
+                            <div className="flex justify-end gap-4">
+                                <Button type="button" variant="ghost" onClick={handleCancelEdit}>
                                     Cancel
+                                </Button>
+                                <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                                    {submitting ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        editingQuest ? 'Save Changes' : 'Create Quest'
+                                    )}
                                 </Button>
                             </div>
                         </form>
@@ -474,110 +403,61 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                 </Card>
             )}
 
-            {/* Quest List */}
+            {/* Quests List */}
             {loading ? (
-                <Card className="border-2 border-amber-200 bg-white shadow-md">
-                    <CardContent className="p-12 text-center">
-                        <Loader2 className="w-16 h-16 animate-spin mx-auto mb-4 text-amber-600" />
-                        <h3 className="text-xl font-bold text-amber-900 mb-2">Loading Quests</h3>
-                        <p className="text-amber-700">Gathering quest information...</p>
-                    </CardContent>
-                </Card>
-            ) : quests.length === 0 ? (
-                <Card className="border-2 border-amber-200 bg-white shadow-md">
-                    <CardContent className="p-12 text-center">
-                        <AlertCircle className="w-16 h-16 mx-auto mb-4 text-amber-400" />
-                        <h3 className="text-xl font-bold text-amber-900 mb-2">No Quests Found</h3>
-                        <p className="text-amber-700">
-                            {searchTerm ? 'Try adjusting your search terms.' : 'Create your first quest to get started.'}
-                        </p>
-                    </CardContent>
-                </Card>
+                <div className="text-center py-12">
+                    <Loader2 className="w-8 h-8 mx-auto animate-spin text-primary" />
+                    <p className="mt-2 text-muted-foreground">Loading quests...</p>
+                </div>
             ) : (
-                <div className="grid gap-6">
+                <div className="space-y-4">
                     {quests.map((quest) => (
-                        <Card key={quest.id} className="border-2 border-amber-200 bg-white shadow-lg hover:shadow-xl transition-all duration-300">
-                            <CardContent className="p-6">
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="flex-1">
-                                        <h3 className="text-xl font-bold text-amber-900 mb-2">{quest.title}</h3>
-                                        <p className="text-amber-800 mb-3">{quest.description}</p>
-
-                                        <div className="flex items-center gap-4 mb-3">
-                                            <div className="flex items-center gap-1 text-amber-700 font-bold">
-                                                <Coins className="w-4 h-4" />
-                                                <span>{quest.bounty} bounty</span>
-                                            </div>
-
-                                            <Badge className={`text-xs font-medium border ${getStatusColor(quest.status)}`}>
-                                                {quest.status}
-                                            </Badge>
-
-                                            {quest.isRepeatable && (
-                                                <Badge className="text-xs font-medium border text-purple-600 bg-purple-50 border-purple-200">
-                                                    🔄 Repeatable
-                                                </Badge>
-                                            )}
-
-                                            <div className="flex items-center gap-1 text-amber-600 text-sm">
-                                                <Calendar className="w-4 h-4" />
-                                                <span>Created {formatDate(quest.createdAt)}</span>
-                                            </div>
+                        <Card key={quest.id} className="border-2 border-border bg-card shadow-md">
+                            <CardContent className="p-4 flex justify-between items-center">
+                                <div className="space-y-1">
+                                    <h3 className="font-bold text-foreground text-lg">{quest.title}</h3>
+                                    <p className="text-sm text-muted-foreground">{quest.description}</p>
+                                    <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
+                                        <div className="flex items-center gap-1">
+                                            <Coins className="w-3 h-3" />
+                                            <span>{quest.bounty} Bounty</span>
                                         </div>
-
-                                        {quest.isRepeatable && quest.cooldownDays && (
-                                            <div className="text-sm text-purple-600 bg-purple-50 p-2 rounded mb-3">
-                                                <strong>Cooldown:</strong> {quest.cooldownDays} days
-                                                {quest.lastCompletedAt && (
-                                                    <span className="ml-2">
-                                                        • Last completed: {formatDate(quest.lastCompletedAt)}
-                                                    </span>
-                                                )}
-                                            </div>
+                                        <div className="flex items-center gap-1">
+                                            <Calendar className="w-3 h-3" />
+                                            <span>Created: {formatDate(quest.createdAt)}</span>
+                                        </div>
+                                        <Badge className={`text-xs font-medium border ${getStatusColor(quest.status)}`}>
+                                            {quest.status.replace('_', ' ')}
+                                        </Badge>
+                                        {quest.isRepeatable && (
+                                            <Badge className="text-xs font-medium border text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700">
+                                                Repeatable {quest.cooldownDays ? `(${quest.cooldownDays}d)` : ''}
+                                            </Badge>
                                         )}
                                     </div>
-
-                                    <div className="flex items-center gap-2 ml-4">
-                                        <Button
-                                            onClick={() => handleEditQuest(quest)}
-                                            variant="outline"
-                                            size="sm"
-                                            className="border-amber-300 text-amber-700 hover:bg-amber-50"
-                                        >
-                                            <Pencil className="w-4 h-4" />
-                                        </Button>
-
-                                        <Button
-                                            onClick={() => handleDeleteQuest(quest.id)}
-                                            variant="outline"
-                                            size="sm"
-                                            className="border-red-300 text-red-700 hover:bg-red-50"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                    </div>
                                 </div>
-
-                                {quest.claimedBy && (
-                                    <div className="text-sm text-amber-600 bg-amber-50 p-2 rounded">
-                                        Claimed by User #{quest.claimedBy}
-                                        {quest.claimedAt && ` on ${formatDate(quest.claimedAt)}`}
-                                    </div>
-                                )}
+                                <div className="flex gap-2">
+                                    <Button variant="outline" size="sm" onClick={() => handleEditQuest(quest)}>
+                                        <Pencil className="w-4 h-4" />
+                                    </Button>
+                                    <Button variant="destructive" size="sm" onClick={() => handleDeleteQuest(quest.id)}>
+                                        <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                </div>
                             </CardContent>
                         </Card>
                     ))}
+
+                    {totalPages > 1 && (
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={handlePageChange}
+                            className="mt-6"
+                        />
+                    )}
                 </div>
             )}
-
-            {/* Pagination */}
-            <div className="flex justify-center mt-4">
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={handlePageChange}
-                />
-            </div>
         </div>
     );
 };

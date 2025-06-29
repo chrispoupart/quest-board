@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { ApiResponse, DashboardData, AdminDashboardData, UserStats } from '../types';
 
-// In production, always use relative paths. In development, use localhost:8000
-const API_BASE_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000');
+// In production, always use relative paths. In development, use the proxy.
+const API_BASE_URL = import.meta.env.PROD ? '' : '';
 
 // Create axios instance with base configuration
 const api = axios.create({
@@ -57,7 +57,7 @@ export const dashboardService = {
      * Get user dashboard stats
      */
     async getUserStats(): Promise<UserStats> {
-        const response = await api.get<ApiResponse<UserStats>>('/api/users/me/stats');
+        const response = await api.get<ApiResponse<UserStats>>('/users/me/stats');
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch user stats');

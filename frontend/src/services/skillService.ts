@@ -12,8 +12,8 @@ import {
     ApiResponse
 } from '../types';
 
-// In production, always use relative paths. In development, use localhost:8000
-const API_BASE_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000');
+// In production, always use relative paths. In development, use the proxy.
+const API_BASE_URL = import.meta.env.PROD ? '' : '';
 
 class SkillService {
     private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {

@@ -43,30 +43,31 @@ const getDifficultyFromBounty = (bounty: number): "EASY" | "MEDIUM" | "HARD" => 
 }
 
 const getDifficultyColor = (difficulty: "EASY" | "MEDIUM" | "HARD") => {
+  // Using more theme-neutral colors for now, can be customized further in index.css if needed
   switch (difficulty) {
     case "EASY":
-      return "text-emerald-600 bg-emerald-50 border-emerald-200"
+      return "text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700"
     case "MEDIUM":
-      return "text-amber-600 bg-amber-50 border-amber-200"
+      return "text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 border-yellow-300 dark:border-yellow-700"
     case "HARD":
-      return "text-red-600 bg-red-50 border-red-200"
+      return "text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700"
   }
 }
 
 const getStatusColor = (status: Quest["status"]) => {
   switch (status) {
     case "AVAILABLE":
-      return "text-blue-700 bg-blue-100 border-blue-300"
+      return "text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700"
     case "CLAIMED":
-      return "text-orange-700 bg-orange-100 border-orange-300"
+      return "text-orange-700 dark:text-orange-400 bg-orange-100 dark:bg-orange-900 border-orange-300 dark:border-orange-700"
     case "COMPLETED":
-      return "text-purple-700 bg-purple-100 border-purple-300"
+      return "text-purple-700 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700"
     case "APPROVED":
-      return "text-green-700 bg-green-100 border-green-300"
+      return "text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700"
     case "REJECTED":
-      return "text-red-700 bg-red-100 border-red-300"
+      return "text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700"
     case "COOLDOWN":
-      return "text-purple-700 bg-purple-100 border-purple-300"
+      return "text-gray-700 dark:text-gray-400 bg-gray-100 dark:bg-gray-900 border-gray-300 dark:border-gray-700"
   }
 }
 
@@ -189,7 +190,7 @@ const QuestCard: React.FC<{
       meetsRequirement,
       userLevel,
       requiredLevel: requiredSkill.minLevel,
-      color: meetsRequirement ? 'text-green-600 bg-green-50 border-green-200' : 'text-red-600 bg-red-50 border-red-200'
+      color: meetsRequirement ? 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700' : 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700'
     };
   };
 
@@ -230,7 +231,7 @@ const QuestCard: React.FC<{
                 quest.status.replace("_", " ")}
           </Badge>
           {quest.isRepeatable && (
-            <Badge className="text-xs font-medium border text-purple-600 bg-purple-50 border-purple-200">
+            <Badge className="text-xs font-medium border text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700">
               🔄 Repeatable
             </Badge>
           )}
@@ -258,9 +259,9 @@ const QuestCard: React.FC<{
                         Level {status.userLevel}/{status.requiredLevel}
                       </Badge>
                       {status.meetsRequirement ? (
-                        <Check className="w-3 h-3 text-green-600" />
+                        <Check className="w-3 h-3 text-green-600 dark:text-green-400" />
                       ) : (
-                        <X className="w-3 h-3 text-red-600" />
+                        <X className="w-3 h-3 text-red-600 dark:text-red-400" />
                       )}
                     </div>
                   </div>
@@ -297,7 +298,7 @@ const QuestCard: React.FC<{
           )}
 
           {quest.claimedAt && quest.status === "CLAIMED" && (
-            <div className={`flex items-center gap-2 ${isOverdue ? "text-red-600 font-bold" : ""}`}>
+            <div className={`flex items-center gap-2 ${isOverdue ? "text-red-600 dark:text-red-400 font-bold" : ""}`}>
               <Clock className="w-3 h-3" />
               <span>
                 {isOverdue ? "Overdue!" : `${formatTimeRemaining(quest.claimedAt, timeLimit)} remaining`}
@@ -306,21 +307,21 @@ const QuestCard: React.FC<{
           )}
 
           {quest.completedAt && ["COMPLETED", "APPROVED", "REJECTED"].includes(quest.status) && (
-            <div className="flex items-center gap-2 text-green-600">
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
               <Trophy className="w-3 h-3" />
               <span>Completed: {new Date(quest.completedAt).toLocaleDateString()}</span>
             </div>
           )}
 
           {quest.status === "APPROVED" && (
-            <div className="flex items-center gap-2 text-green-600 font-medium">
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-medium">
               <Check className="w-3 h-3" />
               <span>Approved - Bounty awarded!</span>
             </div>
           )}
 
           {quest.status === "REJECTED" && (
-            <div className="flex items-center gap-2 text-red-600 font-medium">
+            <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-medium">
               <X className="w-3 h-3" />
               <span>Rejected</span>
             </div>
@@ -336,13 +337,13 @@ const QuestCard: React.FC<{
                 </div>
               )}
               {quest.status === 'COOLDOWN' && (
-                <div className="flex items-center gap-2 text-red-600 font-medium">
+                <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-medium">
                   <Clock className="w-3 h-3" />
                   <span>Available in: {getCooldownTimeRemaining(quest)}</span>
                 </div>
               )}
               {quest.status === 'AVAILABLE' && quest.lastCompletedAt && (
-                <div className="flex items-center gap-2 text-green-600 font-medium">
+                <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-medium">
                   <Check className="w-3 h-3" />
                   <span>Ready to repeat!</span>
                 </div>
@@ -359,7 +360,7 @@ const QuestCard: React.FC<{
               className={`flex-1 font-medium ${
                 canClaimQuest()
                   ? "bg-primary hover:bg-primary/90 text-primary-foreground"
-                  : "bg-gray-400 text-gray-500 cursor-not-allowed"
+                  : "bg-muted text-muted-foreground cursor-not-allowed"
               }`}
               size="sm"
             >
@@ -372,7 +373,7 @@ const QuestCard: React.FC<{
           {quest.status === "COOLDOWN" && (
             <Button
               disabled={true}
-              className="flex-1 bg-gray-400 text-gray-500 font-medium cursor-not-allowed"
+              className="flex-1 bg-muted text-muted-foreground font-medium cursor-not-allowed"
               size="sm"
             >
               <Clock className="w-4 h-4 mr-1" />
@@ -384,7 +385,7 @@ const QuestCard: React.FC<{
             <Button
               onClick={() => handleAction("complete")}
               disabled={actionLoading === "complete"}
-              className="flex-1 bg-green-600 hover:bg-green-700 text-green-100 font-medium"
+              className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 text-white dark:text-green-100 font-medium"
               size="sm"
             >
               <Trophy className="w-4 h-4 mr-1" />
@@ -398,7 +399,7 @@ const QuestCard: React.FC<{
               <Button
                 onClick={() => handleAction("approve")}
                 disabled={actionLoading === "approve"}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-green-100 font-medium"
+                className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 text-white dark:text-green-100 font-medium"
                 size="sm"
               >
                 <Check className="w-4 h-4" />
@@ -407,7 +408,7 @@ const QuestCard: React.FC<{
               <Button
                 onClick={() => handleAction("reject")}
                 disabled={actionLoading === "reject"}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-red-100 font-medium"
+                className="flex-1 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 text-white dark:text-red-100 font-medium"
                 size="sm"
               >
                 <X className="w-4 h-4" />
@@ -420,8 +421,8 @@ const QuestCard: React.FC<{
           {["APPROVED", "REJECTED"].includes(quest.status) && (
             <div className="flex-1 flex items-center justify-center">
               <Badge className={`text-xs font-medium border ${quest.status === "APPROVED"
-                ? "text-green-600 bg-green-50 border-green-200"
-                : "text-red-600 bg-red-50 border-red-200"
+                ? "text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 border-green-200 dark:border-green-700"
+                : "text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border-red-200 dark:border-red-700"
                 }`}>
                 {quest.status === "APPROVED" ? "✓ Completed" : "✗ Rejected"}
               </Badge>
@@ -431,7 +432,7 @@ const QuestCard: React.FC<{
           <Button
             onClick={() => handleAction("view")}
             variant="outline"
-            className="bg-gray-100 border-border text-muted-foreground hover:bg-gray-200"
+            className="bg-muted/50 hover:bg-muted" // Adjusted for subtle background in both modes
             size="sm"
             title="View Quest Details"
           >
@@ -466,26 +467,26 @@ const UserDashboard: React.FC<{ user: UserStats }> = ({ user }) => {
         </div>
 
         <div className="grid grid-cols-3 gap-4">
-          <div className="text-center p-3 bg-white rounded-lg border border-border">
+          <div className="text-center p-3 bg-background rounded-lg border border-border">
             <Trophy className="w-6 h-6 mx-auto mb-1 text-primary" />
             <div className="text-lg font-bold text-foreground">{user.completedQuests}</div>
             <div className="text-xs text-muted-foreground">Completed</div>
           </div>
-          <div className="text-center p-3 bg-white rounded-lg border border-border">
+          <div className="text-center p-3 bg-background rounded-lg border border-border">
             <Coins className="w-6 h-6 mx-auto mb-1 text-primary" />
             <div className="text-lg font-bold text-foreground">{user.totalBounty}</div>
             <div className="text-xs text-muted-foreground">Total Bounty</div>
           </div>
-          <div className="text-center p-3 bg-white rounded-lg border border-border">
+          <div className="text-center p-3 bg-background rounded-lg border border-border">
             <Shield className="w-6 h-6 mx-auto mb-1 text-primary" />
             <div className="text-lg font-bold text-foreground">{user.currentClaimed}</div>
             <div className="text-xs text-muted-foreground">Active Quests</div>
           </div>
         </div>
 
-        <div className="mt-4 p-3 bg-white rounded-lg border border-border">
+        <div className="mt-4 p-3 bg-background rounded-lg border border-border">
           <h3 className="text-sm font-bold text-foreground mb-2">Level {levelInfo.level}</h3>
-          <div className="w-full bg-primary rounded-full h-2 mb-2">
+          <div className="w-full bg-muted rounded-full h-2 mb-2">
             <div
               className="bg-primary h-2 rounded-full transition-all duration-300"
               style={{ width: `${(levelInfo.progressToNext * 100)}%` }}
@@ -739,12 +740,12 @@ const QuestBoard: React.FC = () => {
             <Card className="border-2 border-border bg-card shadow-md">
               <CardContent className="p-4">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary w-4 h-4" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
                     placeholder="Search quests..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 border-border focus:border-ring focus:ring-ring"
+                    className="pl-10 bg-background border-border focus:border-ring focus:ring-ring"
                   />
                 </div>
               </CardContent>
@@ -754,7 +755,7 @@ const QuestBoard: React.FC = () => {
           {/* Main Content */}
           <div className="lg:col-span-3">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className={`grid w-full ${(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") ? 'grid-cols-4' : 'grid-cols-3'} bg-muted border border-border`}>
+              <TabsList className={`grid w-full ${(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") ? 'grid-cols-4' : 'grid-cols-3'} bg-muted border border-border text-muted-foreground`}>
                 <TabsTrigger
                   value="available"
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium"

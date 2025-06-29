@@ -3,8 +3,6 @@ import {
   User,
   Star,
   Crown,
-  Palette,
-  ArrowLeft,
   Upload,
   CheckCircle,
   AlertCircle,
@@ -30,10 +28,9 @@ import { skillService } from '../services/skillService';
 import { Skill, UserSkill } from '../types';
 
 interface CharacterSheetProps {
-  onBack?: () => void;
 }
 
-const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
+const CharacterSheet: React.FC<CharacterSheetProps> = () => {
   const { user, updateUser, isAuthenticated } = useAuth();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,14 +60,14 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
 
   // Character class options
   const characterClasses = [
-    { value: 'warrior', label: 'Warrior', icon: <Sword className="w-4 h-4" />, color: 'text-red-600 bg-red-50 border-red-200' },
-    { value: 'mage', label: 'Mage', icon: <Wand2 className="w-4 h-4" />, color: 'text-purple-600 bg-purple-50 border-purple-200' },
-    { value: 'rogue', label: 'Rogue', icon: <Shield className="w-4 h-4" />, color: 'text-green-600 bg-green-50 border-green-200' },
-    { value: 'cleric', label: 'Cleric', icon: <Heart className="w-4 h-4" />, color: 'text-blue-600 bg-blue-50 border-blue-200' },
-    { value: 'ranger', label: 'Ranger', icon: <Star className="w-4 h-4" />, color: 'text-amber-600 bg-amber-50 border-amber-200' },
-    { value: 'bard', label: 'Bard', icon: <Scroll className="w-4 h-4" />, color: 'text-pink-600 bg-pink-50 border-pink-200' },
-    { value: 'paladin', label: 'Paladin', icon: <Crown className="w-4 h-4" />, color: 'text-yellow-600 bg-yellow-50 border-yellow-200' },
-    { value: 'wizard', label: 'Wizard', icon: <Wand2 className="w-4 h-4" />, color: 'text-indigo-600 bg-indigo-50 border-indigo-200' },
+    { value: 'warrior', label: 'Warrior', icon: <Sword className="w-4 h-4" />, color: 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700' },
+    { value: 'mage', label: 'Mage', icon: <Wand2 className="w-4 h-4" />, color: 'text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700' },
+    { value: 'rogue', label: 'Rogue', icon: <Shield className="w-4 h-4" />, color: 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700' },
+    { value: 'cleric', label: 'Cleric', icon: <Heart className="w-4 h-4" />, color: 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700' },
+    { value: 'ranger', label: 'Ranger', icon: <Star className="w-4 h-4" />, color: 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 border-yellow-300 dark:border-yellow-700' },
+    { value: 'bard', label: 'Bard', icon: <Scroll className="w-4 h-4" />, color: 'text-pink-600 dark:text-pink-400 bg-pink-100 dark:bg-pink-900 border-pink-300 dark:border-pink-700' },
+    { value: 'paladin', label: 'Paladin', icon: <Crown className="w-4 h-4" />, color: 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900 border-orange-300 dark:border-orange-700' }, // Changed yellow to orange for better contrast potentially
+    { value: 'wizard', label: 'Wizard', icon: <Wand2 className="w-4 h-4" />, color: 'text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900 border-indigo-300 dark:border-indigo-700' },
   ];
 
   // Pronoun options
@@ -153,10 +150,10 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
   };
 
   const getSkillLevelColor = (level: number): string => {
-    if (level >= 4) return 'text-green-600 bg-green-50 border-green-200';
-    if (level >= 3) return 'text-blue-600 bg-blue-50 border-blue-200';
-    if (level >= 2) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-    return 'text-gray-600 bg-gray-50 border-gray-200';
+    if (level >= 4) return 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700';
+    if (level >= 3) return 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700';
+    if (level >= 2) return 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 border-yellow-300 dark:border-yellow-700';
+    return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700';
   };
 
   const renderSkillLevel = (skill: Skill) => {
@@ -164,11 +161,12 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
     const levelColor = getSkillLevelColor(level);
 
     return (
-      <div key={skill.id} className="flex items-center justify-between p-3 border border-amber-200 rounded-lg bg-white">
+      // Removed bg-white, assuming this will be inside a Card component which provides bg-card
+      <div key={skill.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
         <div className="flex-1">
-          <h4 className="font-medium text-amber-900">{skill.name}</h4>
+          <h4 className="font-medium text-foreground">{skill.name}</h4>
           {skill.description && (
-            <p className="text-sm text-amber-600 mt-1">{skill.description}</p>
+            <p className="text-sm text-muted-foreground mt-1">{skill.description}</p>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -292,6 +290,8 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
   };
 
   const handleSave = async () => {
+    if (!user) return;
+
     try {
       setSaving(true);
       setError(null);
@@ -306,17 +306,14 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
         avatarUrl: formData.avatarUrl
       });
 
-      // Update the auth context
-      if (updateUser) {
+      if (typeof updateUser === 'function') {
         updateUser(updatedUser);
       }
-
       // Clean up the previous avatar URL after successful save
       if (previousAvatarUrl && previousAvatarUrl.startsWith('blob:')) {
         URL.revokeObjectURL(previousAvatarUrl);
         setPreviousAvatarUrl(null);
       }
-
       setSuccess('Character sheet updated successfully!');
     } catch (err) {
       console.error('Failed to update character sheet:', err);
@@ -324,10 +321,6 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
     } finally {
       setSaving(false);
     }
-  };
-
-  const getCharacterClassInfo = (className: string) => {
-    return characterClasses.find(c => c.value === className);
   };
 
   const getRoleTitle = (role: string) => {
@@ -345,350 +338,227 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ onBack }) => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto"></div>
-          <p className="mt-4 text-amber-600">Loading character sheet...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading character sheet...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          {onBack && (
-            <Button
-              onClick={onBack}
-              variant="outline"
-              className="border-amber-300 text-amber-700 hover:bg-amber-50"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-          )}
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-amber-600 rounded-full flex items-center justify-center">
-              <User className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold text-amber-900 font-serif">Character Sheet</h1>
-              <p className="text-amber-700">Customize your adventurer's identity</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Error/Success Messages */}
-        {error && (
-          <Card className="border-2 border-red-200 bg-red-50 shadow-md mb-6">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-red-800">
-                <AlertCircle className="w-5 h-5" />
-                <span className="font-medium">Error: {error}</span>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {success && (
-          <Card className="border-2 border-green-200 bg-green-50 shadow-md mb-6">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-green-800">
-                <CheckCircle className="w-5 h-5" />
-                <span className="font-medium">{success}</span>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Character Preview */}
-          <div className="lg:col-span-1">
-            <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-amber-900 font-serif">Character Preview</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Avatar */}
-                <div className="text-center">
-                  <Avatar className="w-24 h-24 mx-auto border-4 border-amber-300">
-                    {uploadingAvatar ? (
-                      <div className="w-full h-full flex items-center justify-center bg-amber-100">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
-                      </div>
-                    ) : (
-                      <AvatarImage src={formData.avatarUrl || user.avatarUrl} alt="Character Avatar" />
-                    )}
-                    <AvatarFallback className="bg-amber-200 text-amber-800 font-bold text-2xl">
-                      {formData.characterName ? formData.characterName.charAt(0).toUpperCase() : user.name.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <p className="text-sm text-amber-600 mt-2">
-                    {uploadingAvatar ? 'Processing...' : 'Avatar Preview'}
+        <Card className="border-2 border-border bg-card shadow-lg">
+          <CardHeader className="border-b border-border bg-muted/40">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                  <User className="w-8 h-8 text-primary-foreground" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-foreground font-serif">Character Sheet</h1>
+                  <p className="text-muted-foreground">
+                    Welcome, <span className="font-semibold">{getRoleTitle(user?.role || '')} {user?.name}</span>
                   </p>
                 </div>
+              </div>
+              <Button
+                onClick={handleSave}
+                disabled={saving || uploadingAvatar}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {saving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </CardHeader>
 
-                {/* Character Info */}
-                <div className="space-y-3">
+          <CardContent className="p-6">
+            {/* Success and Error Messages */}
+            {success && (
+              <div className="mb-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md" role="alert">
+                <div className="flex">
+                  <CheckCircle className="h-5 w-5 mr-3" />
                   <div>
-                    <h3 className="font-bold text-amber-900 text-lg">
-                      {formData.characterName || 'Unnamed Character'}
-                    </h3>
-                    <p className="text-amber-700 text-sm">{user.email}</p>
+                    <p className="font-bold">Success</p>
+                    <p>{success}</p>
                   </div>
-
-                  {formData.characterClass && (
-                    <div className="flex items-center gap-2">
-                      {getCharacterClassInfo(formData.characterClass)?.icon}
-                      <Badge className={`text-xs font-medium border ${getCharacterClassInfo(formData.characterClass)?.color}`}>
-                        {getCharacterClassInfo(formData.characterClass)?.label}
-                      </Badge>
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-amber-600" />
-                    <span className="text-amber-700">Level {user.level || 1}</span>
-                  </div>
-
-                  {user.experience !== undefined && (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-amber-600 rounded-full flex items-center justify-center">
-                        <span className="text-white text-xs font-bold">XP</span>
-                      </div>
-                      <span className="text-amber-700 text-sm">{user.experience} Experience</span>
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-2">
-                    <Crown className="w-4 h-4 text-amber-600" />
-                    <span className="text-amber-700">{getRoleTitle(user.role)}</span>
-                  </div>
-
-                  {formData.favoriteColor && (
-                    <div className="flex items-center gap-2">
-                      <Palette className="w-4 h-4 text-amber-600" />
-                      <span className="text-amber-700">Favorite: {formData.favoriteColor}</span>
-                    </div>
-                  )}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Character Form and Skills */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Character Form */}
-            <Card className="border-2 border-amber-200 bg-white shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-amber-900 font-serif">Character Details</CardTitle>
-                <p className="text-amber-700">Customize your character's identity and appearance</p>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Character Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="characterName" className="text-amber-900 font-medium">
-                    Character Name *
-                  </Label>
-                  <Input
-                    id="characterName"
-                    placeholder="Enter your character's name (not your real name)"
-                    value={formData.characterName}
-                    onChange={(e) => handleInputChange('characterName', e.target.value)}
-                    className="border-amber-300 focus:border-amber-500 focus:ring-amber-500"
-                  />
-                  <p className="text-xs text-amber-600">
-                    Choose a unique name for your character. This will be displayed to other guild members.
-                  </p>
+              </div>
+            )}
+            {error && (
+              <div className="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
+                <div className="flex">
+                  <AlertCircle className="h-5 w-5 mr-3" />
+                  <div>
+                    <p className="font-bold">Error</p>
+                    <p>{error}</p>
+                  </div>
                 </div>
+              </div>
+            )}
 
-                {/* Avatar Upload */}
-                <div className="space-y-2">
-                  <Label className="text-amber-900 font-medium">Character Avatar</Label>
-                  <div className="flex items-center gap-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => document.getElementById('avatar-upload')?.click()}
-                      disabled={uploadingAvatar}
-                      className="border-amber-300 text-amber-700 hover:bg-amber-50 disabled:opacity-50"
-                    >
-                      {uploadingAvatar ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-amber-600 mr-2"></div>
-                          Processing...
-                        </>
-                      ) : (
-                        <>
+            <div className="grid lg:grid-cols-3 gap-8">
+              {/* Left Column - Character Details */}
+              <div className="lg:col-span-1 space-y-6">
+                <Card className="border-border bg-background">
+                  <CardHeader>
+                    <CardTitle>Avatar</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex flex-col items-center space-y-4">
+                    <Avatar className="w-32 h-32 border-4 border-primary shadow-lg">
+                      <AvatarImage src={formData.avatarUrl || user?.avatarUrl || ''} alt="User Avatar" />
+                      <AvatarFallback className="text-4xl">
+                        {user?.name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+
+                    <div className="flex gap-2 w-full">
+                      <Button
+                        className="w-full justify-between bg-card border-border text-foreground hover:bg-accent"
+                      >
+                        <label htmlFor="avatar-upload" className="flex items-center justify-center">
                           <Upload className="w-4 h-4 mr-2" />
-                          Upload Image
-                        </>
-                      )}
-                    </Button>
-                    {(formData.avatarUrl || user.avatarUrl) && (
+                          {uploadingAvatar ? 'Uploading...' : 'Upload'}
+                          <Input
+                            id="avatar-upload"
+                            type="file"
+                            className="hidden"
+                            onChange={handleAvatarUpload}
+                            accept="image/jpeg,image/png,image/webp"
+                            disabled={uploadingAvatar}
+                          />
+                        </label>
+                      </Button>
                       <Button
-                        variant="outline"
+                        variant="destructive"
                         onClick={handleClearAvatar}
-                        disabled={uploadingAvatar}
-                        className="border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50"
+                        disabled={!formData.avatarUrl || uploadingAvatar}
                       >
-                        <X className="w-4 h-4 mr-2" />
-                        Remove
+                        <X className="w-4 h-4" />
                       </Button>
-                    )}
-                    <input
-                      id="avatar-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAvatarUpload}
-                      className="hidden"
-                      disabled={uploadingAvatar}
-                    />
-                    <span className="text-sm text-amber-600">
-                      {uploadingAvatar ? 'Processing image...' : 'Recommended: Square image, 200x200px or larger'}
-                    </span>
-                  </div>
-                </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
-                {/* Character Class */}
-                <div className="space-y-2">
-                  <Label className="text-amber-900 font-medium">Character Class</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {characterClasses.map((charClass) => (
-                      <Button
-                        key={charClass.value}
-                        variant={formData.characterClass === charClass.value ? "default" : "outline"}
-                        onClick={() => handleInputChange('characterClass', charClass.value)}
-                        className={`h-auto p-3 flex flex-col items-center gap-2 ${
-                          formData.characterClass === charClass.value
-                            ? 'bg-amber-600 text-white'
-                            : 'border-amber-300 text-amber-700 hover:bg-amber-50'
-                        }`}
-                      >
-                        {charClass.icon}
-                        <span className="text-xs">{charClass.label}</span>
-                      </Button>
-                    ))}
-                  </div>
-                </div>
+                <Card className="border-border bg-background">
+                  <CardHeader>
+                    <CardTitle>Character Info</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="characterName" className="text-foreground font-medium">Character Name</Label>
+                      <Input
+                        id="characterName"
+                        value={formData.characterName}
+                        onChange={(e) => handleInputChange('characterName', e.target.value)}
+                        placeholder="E.g., Alistair Ironhand"
+                        className="bg-input"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-foreground font-medium">Character Class</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {characterClasses.map((charClass) => (
+                          <Button
+                            key={charClass.value}
+                            variant={formData.characterClass === charClass.value ? "default" : "outline"}
+                            onClick={() => handleInputChange('characterClass', charClass.value)}
+                            className="h-auto p-2 flex items-center gap-2 justify-start"
+                          >
+                            {charClass.icon}
+                            <span className="truncate">{charClass.label}</span>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
 
-                {/* Preferred Pronouns */}
-                <div className="space-y-2">
-                  <Label className="text-amber-900 font-medium">Preferred Pronouns</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {pronounOptions.map((pronoun) => (
-                      <Button
-                        key={pronoun.value}
-                        variant={formData.preferredPronouns === pronoun.value ? "default" : "outline"}
-                        onClick={() => handleInputChange('preferredPronouns', pronoun.value)}
-                        className={`h-auto p-2 ${
-                          formData.preferredPronouns === pronoun.value
-                            ? 'bg-amber-600 text-white'
-                            : 'border-amber-300 text-amber-700 hover:bg-amber-50'
-                        }`}
-                      >
-                        {pronoun.label}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
+              {/* Right Column - Customization and Skills */}
+              <div className="lg:col-span-2 space-y-6">
+                <Card className="border-border bg-background">
+                  <CardHeader>
+                    <CardTitle>Customization</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-2">
+                      <Label className="text-foreground font-medium">Character Bio</Label>
+                      <Textarea
+                        value={formData.characterBio}
+                        onChange={(e) => handleInputChange('characterBio', e.target.value)}
+                        placeholder="Tell us about your character's backstory, motivations, and personality."
+                        className="bg-input h-32"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-foreground font-medium">Preferred Pronouns</Label>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {pronounOptions.map((pronoun) => (
+                          <Button
+                            key={pronoun.value}
+                            variant={formData.preferredPronouns === pronoun.value ? "default" : "outline"}
+                            onClick={() => handleInputChange('preferredPronouns', pronoun.value)}
+                            className={`h-auto p-2 ${
+                              formData.preferredPronouns === pronoun.value
+                                ? 'bg-primary text-primary-foreground'
+                                : 'border-border text-muted-foreground hover:bg-muted'
+                            }`}
+                          >
+                            {pronoun.label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-foreground font-medium">Favorite Color</Label>
+                      <div className="grid grid-cols-5 gap-2">
+                        {colorOptions.map((color) => (
+                          <Button
+                            key={color.value}
+                            variant="outline"
+                            onClick={() => handleInputChange('favoriteColor', color.value)}
+                            className={`h-12 p-0 relative ${
+                              formData.favoriteColor === color.value
+                                ? 'ring-2 ring-primary'
+                                : 'border-border hover:bg-muted'
+                            }`}
+                          >
+                            <div className={`w-full h-full ${color.color} rounded`}></div>
+                            {formData.favoriteColor === color.value && (
+                              <CheckCircle className="w-4 h-4 text-primary-foreground absolute top-1 right-1" />
+                            )}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
-                {/* Favorite Color */}
-                <div className="space-y-2">
-                  <Label className="text-amber-900 font-medium">Favorite Color</Label>
-                  <div className="grid grid-cols-5 gap-2">
-                    {colorOptions.map((color) => (
-                      <Button
-                        key={color.value}
-                        variant={formData.favoriteColor === color.value ? "default" : "outline"}
-                        onClick={() => handleInputChange('favoriteColor', color.value)}
-                        className={`h-12 p-0 relative ${
-                          formData.favoriteColor === color.value
-                            ? 'ring-2 ring-amber-600'
-                            : 'border-amber-300 hover:bg-amber-50'
-                        }`}
-                      >
-                        <div className={`w-full h-full ${color.color} rounded`}></div>
-                        {formData.favoriteColor === color.value && (
-                          <CheckCircle className="w-4 h-4 text-white absolute top-1 right-1" />
-                        )}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Character Bio */}
-                <div className="space-y-2">
-                  <Label htmlFor="characterBio" className="text-amber-900 font-medium">
-                    Character Bio
-                  </Label>
-                  <Textarea
-                    id="characterBio"
-                    placeholder="Tell us about your character's backstory, personality, or any interesting details..."
-                    value={formData.characterBio}
-                    onChange={(e) => handleInputChange('characterBio', e.target.value)}
-                    className="border-amber-300 focus:border-amber-500 focus:ring-amber-500 min-h-[100px]"
-                    maxLength={500}
-                  />
-                  <p className="text-xs text-amber-600">
-                    {formData.characterBio.length}/500 characters
-                  </p>
-                </div>
-
-                {/* Save Button */}
-                <div className="flex justify-end pt-4">
-                  <Button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="bg-amber-600 hover:bg-amber-700 text-white px-8"
-                  >
-                    {saving ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Saving...
-                      </>
+                <Card className="border-border bg-background">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Target className="w-6 h-6" />
+                      Skills
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {loadingSkills ? (
+                      <p>Loading skills...</p>
                     ) : (
-                      <>
-                        <Save className="w-4 h-4 mr-2" />
-                        Save Character
-                      </>
+                      <div className="space-y-3">
+                        {allSkills.map((skill) => renderSkillLevel(skill))}
+                      </div>
                     )}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Skills Section */}
-            <Card className="border-2 border-amber-200 bg-white shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-amber-900 font-serif flex items-center gap-2">
-                  <Target className="w-5 h-5" />
-                  Skills & Abilities
-                </CardTitle>
-                <p className="text-amber-700">
-                  Manage your character's skills. Guild Masters can adjust skill levels based on your performance.
-                </p>
-              </CardHeader>
-              <CardContent>
-                {loadingSkills ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
-                    <span className="ml-3 text-amber-600">Loading skills...</span>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {allSkills.length === 0 ? (
-                      <p className="text-amber-600 text-center py-8">No skills available yet.</p>
-                    ) : (
-                      allSkills.map(renderSkillLevel)
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

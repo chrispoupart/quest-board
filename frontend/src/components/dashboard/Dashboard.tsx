@@ -131,65 +131,65 @@ const Dashboard: React.FC<DashboardProps> = () => {
     const { stats, currentQuests, recentCreatedQuests } = dashboardData;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
+        <div className="min-h-screen bg-background text-foreground">
             <div className="container mx-auto px-4 py-8">
                 {/* Header Section */}
                 <div className="text-center mb-8">
                     <div className="flex items-center justify-center gap-3 mb-4">
-                        <div className="w-12 h-12 bg-amber-600 rounded-full flex items-center justify-center">
-                            <Crown className="w-8 h-8 text-white" />
+                        <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                            <Crown className="w-8 h-8 text-primary-foreground" />
                         </div>
-                        <h1 className="text-4xl font-bold text-amber-900 font-serif">Adventurer's Chronicle</h1>
+                        <h1 className="text-4xl font-bold text-foreground font-serif">Adventurer's Chronicle</h1>
                     </div>
-                    <p className="text-amber-700 text-lg">
+                    <p className="text-muted-foreground text-lg">
                         Welcome back, <span className="font-semibold">{getRoleTitle(user.role)} {user.characterName || user.name}</span>
                     </p>
                 </div>
 
                 {/* Stats Overview */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <Card className="border-2 border-border bg-card shadow-lg hover:shadow-xl transition-all duration-300">
                         <CardContent className="p-6 text-center">
-                            <Trophy className="w-12 h-12 mx-auto mb-3 text-amber-600" />
-                            <div className="text-3xl font-bold text-amber-900">{stats.completedQuests}</div>
-                            <div className="text-sm text-amber-700">Completed Quests</div>
-                            <div className="text-xs text-amber-600 mt-1">Glory earned</div>
+                            <Trophy className="w-12 h-12 mx-auto mb-3 text-primary" />
+                            <div className="text-3xl font-bold text-foreground">{stats.completedQuests}</div>
+                            <div className="text-sm text-muted-foreground">Completed Quests</div>
+                            <div className="text-xs text-muted-foreground mt-1">Glory earned</div>
                         </CardContent>
                     </Card>
 
-                    <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <Card className="border-2 border-border bg-card shadow-lg hover:shadow-xl transition-all duration-300">
                         <CardContent className="p-6 text-center">
-                            <Coins className="w-12 h-12 mx-auto mb-3 text-amber-600" />
-                            <div className="text-3xl font-bold text-amber-900">{stats.totalBounty}</div>
-                            <div className="text-sm text-amber-700">Total Bounty</div>
-                            <div className="text-xs text-amber-600 mt-1">Gold earned</div>
+                            <Coins className="w-12 h-12 mx-auto mb-3 text-primary" />
+                            <div className="text-3xl font-bold text-foreground">{stats.totalBounty}</div>
+                            <div className="text-sm text-muted-foreground">Total Bounty</div>
+                            <div className="text-xs text-muted-foreground mt-1">Gold earned</div>
                         </CardContent>
                     </Card>
 
-                    <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <Card className="border-2 border-border bg-card shadow-lg hover:shadow-xl transition-all duration-300">
                         <CardContent className="p-6 text-center">
-                            <Shield className="w-12 h-12 mx-auto mb-3 text-amber-600" />
-                            <div className="text-3xl font-bold text-amber-900">{stats.currentQuests}</div>
-                            <div className="text-sm text-amber-700">Active Quests</div>
-                            <div className="text-xs text-amber-600 mt-1">In progress</div>
+                            <Shield className="w-12 h-12 mx-auto mb-3 text-primary" />
+                            <div className="text-3xl font-bold text-foreground">{stats.currentQuests}</div>
+                            <div className="text-sm text-muted-foreground">Active Quests</div>
+                            <div className="text-xs text-muted-foreground mt-1">In progress</div>
                         </CardContent>
                     </Card>
 
-                    <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <Card className="border-2 border-border bg-card shadow-lg hover:shadow-xl transition-all duration-300">
                         <CardContent className="p-6 text-center">
-                            <Scroll className="w-12 h-12 mx-auto mb-3 text-amber-600" />
-                            <div className="text-3xl font-bold text-amber-900">{stats.totalQuests}</div>
-                            <div className="text-sm text-amber-700">Quests Created</div>
-                            <div className="text-xs text-amber-600 mt-1">Leadership</div>
+                            <Scroll className="w-12 h-12 mx-auto mb-3 text-primary" />
+                            <div className="text-3xl font-bold text-foreground">{stats.totalQuests}</div>
+                            <div className="text-sm text-muted-foreground">Quests Created</div>
+                            <div className="text-xs text-muted-foreground mt-1">Leadership</div>
                         </CardContent>
                     </Card>
                 </div>
 
                 <div className="grid lg:grid-cols-2 gap-8">
                     {/* Current Active Quests */}
-                    <Card className="border-2 border-amber-200 bg-white shadow-lg">
-                        <CardHeader className="border-b border-amber-200 bg-gradient-to-r from-amber-100 to-yellow-100">
-                            <CardTitle className="flex items-center gap-2 text-amber-900 font-serif">
+                    <Card className="border-2 border-border bg-card shadow-lg">
+                        <CardHeader className="border-b border-border bg-muted/40">
+                            <CardTitle className="flex items-center gap-2 text-foreground font-serif">
                                 <Sword className="w-6 h-6" />
                                 Active Adventures
                             </CardTitle>
@@ -197,12 +197,12 @@ const Dashboard: React.FC<DashboardProps> = () => {
                         <CardContent className="p-6">
                             {currentQuests.length === 0 ? (
                                 <div className="text-center py-8">
-                                    <MapPin className="w-16 h-16 mx-auto mb-4 text-amber-400" />
-                                    <h3 className="text-lg font-semibold text-amber-900 mb-2">No Active Quests</h3>
-                                    <p className="text-amber-700 mb-4">Ready for your next adventure?</p>
+                                    <MapPin className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                                    <h3 className="text-lg font-semibold text-foreground mb-2">No Active Quests</h3>
+                                    <p className="text-muted-foreground mb-4">Ready for your next adventure?</p>
                                     <Button
                                         onClick={() => window.location.href = '/quests'}
-                                        className="bg-amber-600 hover:bg-amber-700 text-white"
+                                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
                                     >
                                         <Sword className="w-4 h-4 mr-2" />
                                         Find Quests
@@ -211,20 +211,20 @@ const Dashboard: React.FC<DashboardProps> = () => {
                             ) : (
                                 <div className="space-y-4">
                                     {currentQuests.map((quest) => (
-                                        <div key={quest.id} className="border border-amber-200 rounded-lg p-4 bg-gradient-to-r from-amber-50 to-yellow-50">
+                                        <div key={quest.id} className="border border-border rounded-lg p-4 bg-background">
                                             <div className="flex items-start justify-between mb-2">
-                                                <h3 className="font-semibold text-amber-900 leading-tight">{quest.title}</h3>
-                                                <div className="flex items-center gap-1 text-amber-700 font-bold">
+                                                <h3 className="font-semibold text-foreground leading-tight">{quest.title}</h3>
+                                                <div className="flex items-center gap-1 text-muted-foreground font-bold">
                                                     <Coins className="w-4 h-4" />
                                                     <span>{quest.bounty}</span>
                                                 </div>
                                             </div>
-                                            <p className="text-sm text-amber-800 mb-3 line-clamp-2">{quest.description}</p>
+                                            <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{quest.description}</p>
                                             <div className="flex items-center justify-between">
                                                 <Badge className={`text-xs font-medium border ${getStatusColor(quest.status)}`}>
                                                     {quest.status === 'COMPLETED' ? 'Pending Approval' : quest.status.replace('_', ' ')}
                                                 </Badge>
-                                                <div className="flex items-center gap-2 text-xs text-amber-600">
+                                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                                     <Clock className="w-3 h-3" />
                                                     <span>Claimed {formatTimeAgo(quest.claimedAt || quest.createdAt)}</span>
                                                 </div>
@@ -235,7 +235,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                                         <Button
                                             onClick={() => window.location.href = '/quests?tab=claimed'}
                                             variant="outline"
-                                            className="w-full border-amber-300 text-amber-700 hover:bg-amber-50"
+                                            className="w-full border-border text-foreground hover:bg-muted"
                                         >
                                             <Eye className="w-4 h-4 mr-2" />
                                             View All Active Quests
@@ -247,66 +247,49 @@ const Dashboard: React.FC<DashboardProps> = () => {
                     </Card>
 
                     {/* Recent Created Quests */}
-                    <Card className="border-2 border-amber-200 bg-white shadow-lg">
-                        <CardHeader className="border-b border-amber-200 bg-gradient-to-r from-amber-100 to-yellow-100">
-                            <CardTitle className="flex items-center gap-2 text-amber-900 font-serif">
-                                <Star className="w-6 h-6" />
-                                {user.role === 'PLAYER' ? 'Quest History' : 'Recent Creations'}
+                    <Card className="border-2 border-border bg-card shadow-lg">
+                        <CardHeader className="border-b border-border bg-muted/40">
+                            <CardTitle className="flex items-center gap-2 text-foreground font-serif">
+                                <TrendingUp className="w-6 h-6" />
+                                Recently Created
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-6">
                             {recentCreatedQuests.length === 0 ? (
                                 <div className="text-center py-8">
-                                    <Scroll className="w-16 h-16 mx-auto mb-4 text-amber-400" />
-                                    <h3 className="text-lg font-semibold text-amber-900 mb-2">
-                                        {user.role === 'PLAYER' ? 'No Quest History' : 'No Quests Created'}
-                                    </h3>
-                                    <p className="text-amber-700 mb-4">
-                                        {user.role === 'PLAYER'
-                                            ? 'Start your adventure by claiming a quest!'
-                                            : 'Ready to create your first quest?'}
-                                    </p>
-                                    {(user.role === 'ADMIN' || user.role === 'EDITOR') && (
-                                        <Button
-                                            onClick={() => window.location.href = '/admin'}
-                                            className="bg-amber-600 hover:bg-amber-700 text-white"
-                                        >
-                                            <Star className="w-4 h-4 mr-2" />
-                                            Create Quest
-                                        </Button>
-                                    )}
+                                    <Scroll className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                                    <h3 className="text-lg font-semibold text-foreground mb-2">No Quests Created Yet</h3>
+                                    <p className="text-muted-foreground mb-4">Time to create some new adventures!</p>
+                                    <Button
+                                        onClick={() => window.location.href = '/admin'}
+                                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                                    >
+                                        <Crown className="w-4 h-4 mr-2" />
+                                        Go to Admin Panel
+                                    </Button>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
                                     {recentCreatedQuests.map((quest) => (
-                                        <div key={quest.id} className="border border-amber-200 rounded-lg p-4 bg-gradient-to-r from-amber-50 to-yellow-50">
+                                        <div key={quest.id} className="border border-border rounded-lg p-4 bg-background">
                                             <div className="flex items-start justify-between mb-2">
-                                                <h3 className="font-semibold text-amber-900 leading-tight">{quest.title}</h3>
-                                                <div className="flex items-center gap-1 text-amber-700 font-bold">
+                                                <h3 className="font-semibold text-foreground leading-tight">{quest.title}</h3>
+                                                <div className="flex items-center gap-1 text-muted-foreground font-bold">
                                                     <Coins className="w-4 h-4" />
                                                     <span>{quest.bounty}</span>
                                                 </div>
                                             </div>
-                                            <p className="text-sm text-amber-800 mb-3 line-clamp-2">{quest.description}</p>
-                                            <div className="flex items-center justify-between">
-                                                <Badge className={`text-xs font-medium border ${getStatusColor(quest.status)}`}>
-                                                    {quest.status === 'COMPLETED' ? 'Pending Approval' : quest.status.replace('_', ' ')}
-                                                </Badge>
-                                                <div className="flex items-center gap-2 text-xs text-amber-600">
+                                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                                <div className="flex items-center gap-2">
                                                     <Calendar className="w-3 h-3" />
                                                     <span>Created {formatTimeAgo(quest.createdAt)}</span>
                                                 </div>
+                                                <Badge className={`text-xs font-medium border ${getStatusColor(quest.status)}`}>
+                                                    {quest.status.replace('_', ' ')}
+                                                </Badge>
                                             </div>
                                         </div>
                                     ))}
-                                    <Button
-                                        onClick={() => window.location.href = '/quests'}
-                                        variant="outline"
-                                        className="w-full border-amber-300 text-amber-700 hover:bg-amber-50"
-                                    >
-                                        <Scroll className="w-4 h-4 mr-2" />
-                                        View All Quests
-                                    </Button>
                                 </div>
                             )}
                         </CardContent>
@@ -315,9 +298,9 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
                 {/* Quick Actions */}
                 <div className="mt-8">
-                    <Card className="border-2 border-amber-200 bg-gradient-to-r from-amber-100 to-yellow-100 shadow-lg">
+                    <Card className="border-2 border-border bg-card shadow-lg">
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-amber-900 font-serif">
+                            <CardTitle className="flex items-center gap-2 text-foreground font-serif">
                                 <TrendingUp className="w-6 h-6" />
                                 Quick Actions
                             </CardTitle>
@@ -345,7 +328,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                                 <Button
                                     onClick={() => window.location.href = '/profile'}
                                     variant="outline"
-                                    className="border-amber-300 text-amber-700 hover:bg-amber-50 flex items-center justify-center gap-2 h-12"
+                                    className="border-border text-foreground hover:bg-muted flex items-center justify-center gap-2 h-12"
                                 >
                                     <Shield className="w-5 h-5" />
                                     Character Sheet
