@@ -510,24 +510,31 @@ export class QuestController {
                 return;
             }
 
-            // Create completion record for the user who completed the quest
-            await prisma.questCompletion.create({
-                data: {
-                    questId: questId,
-                    userId: quest.claimedBy,
-                    completedAt: quest.completedAt || new Date(),
-                    approvedAt: new Date(),
-                    status: 'REJECTED'
-                }
+            // Use a transaction to ensure data consistency
+            const result = await prisma.$transaction(async (tx) => {
+                // Create completion record for the user who completed the quest
+                // Note: approvedAt is not set for rejected quests
+                await tx.questCompletion.create({
+                    data: {
+                        questId: questId,
+                        userId: quest.claimedBy!, // We already checked that claimedBy is not null above
+                        completedAt: quest.completedAt || new Date(),
+                        status: 'REJECTED'
+                    }
+                });
+
+                // Update quest status to rejected
+                const updatedQuest = await tx.quest.update({
+                    where: { id: questId },
+                    data: {
+                        status: 'REJECTED',
+                    },
+                });
+
+                return updatedQuest;
             });
 
-            const updatedQuest = await prisma.quest.update({
-                where: { id: questId },
-                data: {
-                    status: 'REJECTED',
-                },
-            });
-            res.json({ success: true, data: updatedQuest } as ApiResponse);
+            res.json({ success: true, data: result } as ApiResponse);
         } catch (error) {
             console.error('Error rejecting quest:', error);
             res.status(500).json({ success: false, error: { message: 'Internal server error' } });
