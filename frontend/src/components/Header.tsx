@@ -51,7 +51,7 @@ const Header: React.FC = () => {
                             Store
                         </Link>
                         <Link
-                            to="/character"
+                            to="/profile"
                             className="text-foreground hover:text-primary font-medium transition-colors"
                         >
                             Character
@@ -96,7 +96,7 @@ const Header: React.FC = () => {
                                             <Menu.Item>
                                                 {({ active }) => (
                                                     <Link
-                                                        to="/character"
+                                                        to="/profile"
                                                         className={`${
                                                             active ? 'bg-muted text-foreground' : 'text-muted-foreground'
                                                         } flex items-center px-4 py-2 text-sm`}
