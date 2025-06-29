@@ -69,10 +69,10 @@ const AuthCallback: React.FC = () => {
   }, [navigate, searchParams, refreshUser]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Processing authentication...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto"></div>
+        <p className="mt-4 text-amber-700">Processing authentication...</p>
       </div>
     </div>
   );
