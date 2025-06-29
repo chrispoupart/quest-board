@@ -33,7 +33,7 @@ const Header: React.FC = () => {
                     {/* Navigation */}
                     <nav className="hidden md:flex items-center space-x-6">
                         <Link
-                            to="/"
+                            to="/quests"
                             className="text-foreground hover:text-primary font-medium transition-colors"
                         >
                             Quests
