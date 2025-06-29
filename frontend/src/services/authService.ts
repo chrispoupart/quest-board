@@ -38,11 +38,14 @@ api.interceptors.response.use(
             try {
                 const refreshToken = localStorage.getItem('refreshToken');
                 if (refreshToken) {
-                    const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+                    // Use the api instance to ensure proper configuration and avoid infinite loops
+                    const response = await api.post<ApiResponse<{ accessToken: string }>>('/api/auth/refresh', {
                         refreshToken,
-                    });
+                    }, {
+                        _retry: true, // Flag to prevent infinite loops
+                    } as any);
 
-                    const { accessToken } = response.data.data;
+                    const { accessToken } = response.data.data!;
                     localStorage.setItem('accessToken', accessToken);
 
                     // Retry the original request
@@ -154,15 +157,13 @@ export const authService = {
             throw new Error('No refresh token available');
         }
 
-        // The interceptor itself will use this endpoint structure.
+        // Use the api instance to ensure proper configuration and avoid infinite loops
         // This standalone function is used by AuthContext during startup.
-        const response = await axios.post<ApiResponse<{ accessToken: string }>>(`${API_BASE_URL}/api/auth/refresh`, {
+        const response = await api.post<ApiResponse<{ accessToken: string }>>('/api/auth/refresh', {
             refreshToken: refreshTokenValue,
         }, {
-           // Ensure this call doesn't get intercepted infinitely if refresh token itself is invalid
-          _retry: true, // Adding a flag to prevent potential interceptor loops if not already handled
+            _retry: true, // Flag to prevent infinite loops
         } as any);
-
 
         if (!response.data.success || !response.data.data?.accessToken) {
             throw new Error(response.data.error?.message || 'Token refresh failed');
