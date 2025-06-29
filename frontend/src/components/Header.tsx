@@ -1,116 +1,88 @@
 import React, { Fragment, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, Transition } from '@headlessui/react';
-import { Scroll, Shield, Crown, Settings, LogOut, Coins, Store, Menu as MenuIcon, X } from 'lucide-react';
+import { Crown, Settings, LogOut, Menu as MenuIcon, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { ThemeToggle } from './ui/theme-toggle';
 
 const Header: React.FC = () => {
-    const { user, logout, isEditorOrAdmin } = useAuth();
+    const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const handleLogout = async () => {
-        await logout();
-        navigate('/login');
-    };
-
-    const getRoleTitle = (role: string) => {
-        switch (role) {
-            case 'ADMIN':
-                return 'Guild Master';
-            case 'EDITOR':
-                return 'Quest Giver';
-            case 'PLAYER':
-                return 'Adventurer';
-            default:
-                return role;
+        try {
+            await logout();
+            navigate('/login');
+        } catch (error) {
+            console.error('Logout failed:', error);
         }
     };
-
-    const getRoleIcon = (role: string) => {
-        switch (role) {
-            case 'ADMIN':
-                return <Crown className="h-4 w-4 text-amber-600" />;
-            case 'EDITOR':
-                return <Scroll className="h-4 w-4 text-amber-600" />;
-            case 'PLAYER':
-                return <Shield className="h-4 w-4 text-amber-600" />;
-            default:
-                return <Shield className="h-4 w-4 text-amber-600" />;
-        }
-    };
-
-    const navigationLinks = [
-        { to: '/dashboard', label: 'Dashboard', icon: null },
-        { to: '/quests', label: 'Quest Board', icon: null },
-        { to: '/store', label: 'Guild Store', icon: <Store className="w-4 h-4" /> },
-        ...(isEditorOrAdmin ? [{ to: '/admin', label: 'Guild Hall', icon: <Crown className="w-4 h-4" /> }] : [])
-    ];
 
     return (
-        <header className="border-b-4 border-amber-300 bg-gradient-to-r from-amber-200 to-yellow-200 shadow-lg">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <header className="bg-gradient-to-r from-primary/20 to-primary/10 border-b-2 border-border shadow-lg">
+            <div className="container mx-auto px-4">
                 <div className="flex justify-between items-center h-16">
-                    {/* Logo and Desktop Navigation */}
-                    <div className="flex items-center">
-                        <Link to="/dashboard" className="flex items-center group">
-                            <div className="shrink-0">
-                                <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center group-hover:bg-amber-700 transition-colors">
-                                    <Scroll className="w-6 h-6 text-white" />
-                                </div>
-                            </div>
-                            <span className="ml-3 text-xl sm:text-2xl font-bold text-amber-900 font-serif group-hover:text-amber-800 transition-colors">
-                                Quest Board
-                            </span>
+                    {/* Logo */}
+                    <Link to="/" className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                            <Crown className="w-6 h-6 text-primary-foreground" />
+                        </div>
+                        <span className="text-xl font-bold text-foreground font-serif">Quest Board</span>
+                    </Link>
+
+                    {/* Desktop Navigation */}
+                    <nav className="hidden md:flex items-center space-x-6">
+                        <Link
+                            to="/quests"
+                            className="text-foreground hover:text-primary font-medium transition-colors"
+                        >
+                            Quests
                         </Link>
+                        <Link
+                            to="/dashboard"
+                            className="text-foreground hover:text-primary font-medium transition-colors"
+                        >
+                            Dashboard
+                        </Link>
+                        <Link
+                            to="/store"
+                            className="text-foreground hover:text-primary font-medium transition-colors"
+                        >
+                            Store
+                        </Link>
+                        <Link
+                            to="/profile"
+                            className="text-foreground hover:text-primary font-medium transition-colors"
+                        >
+                            Character
+                        </Link>
+                        {(user?.role === "ADMIN" || user?.role === "EDITOR") && (
+                            <Link
+                                to="/admin"
+                                className="text-foreground hover:text-primary font-medium transition-colors"
+                            >
+                                Admin
+                            </Link>
+                        )}
+                    </nav>
 
-                        {/* Desktop Navigation */}
-                        <nav className="hidden md:flex ml-10 space-x-6">
-                            {navigationLinks.map((link) => (
-                                <Link
-                                    key={link.to}
-                                    to={link.to}
-                                    className="text-amber-700 hover:text-amber-900 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-amber-100 border border-transparent hover:border-amber-300 flex items-center gap-1"
-                                >
-                                    {link.icon}
-                                    {link.label}
-                                </Link>
-                            ))}
-                        </nav>
-                    </div>
-
-                    {/* User Menu */}
+                    {/* User Menu and Mobile Menu Button */}
                     <div className="flex items-center">
+                        {/* Theme Toggle */}
+                        <ThemeToggle />
+
                         {user && (
                             <Menu as="div" className="ml-3 relative">
-                                <div>
-                                    <Menu.Button className="flex items-center bg-white border-2 border-amber-300 rounded-lg px-2 sm:px-3 py-2 hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200">
-                                        <div className="flex items-center space-x-2 sm:space-x-3">
-                                            <div className="text-right hidden sm:block">
-                                                <div className="text-amber-900 font-medium text-sm">
-                                                    {user.characterName || user.name}
-                                                </div>
-                                                <div className="text-amber-700 text-xs flex items-center gap-1">
-                                                    {getRoleIcon(user.role)}
-                                                    {getRoleTitle(user.role)}
-                                                </div>
-                                            </div>
-                                            <div className="w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center overflow-hidden">
-                                                {user.avatarUrl ? (
-                                                    <img
-                                                        src={user.avatarUrl}
-                                                        alt="Avatar"
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                ) : (
-                                                    <span className="text-white font-bold text-sm">
-                                                        {(user.characterName || user.name).split(' ').map(n => n[0]).join('')}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </Menu.Button>
-                                </div>
+                                <Menu.Button className="flex items-center space-x-2 text-foreground hover:text-primary transition-colors">
+                                    <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                                        <span className="text-sm font-bold text-primary-foreground">
+                                            {user.name.charAt(0).toUpperCase()}
+                                        </span>
+                                    </div>
+                                    <span className="hidden md:block text-sm font-medium">{user.name}</span>
+                                </Menu.Button>
+
                                 <Transition
                                     as={Fragment}
                                     enter="transition ease-out duration-100"
@@ -120,51 +92,35 @@ const Header: React.FC = () => {
                                     leaveFrom="transform opacity-100 scale-100"
                                     leaveTo="transform opacity-0 scale-95"
                                 >
-                                    <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-lg shadow-lg py-2 bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 focus:outline-none z-50">
-                                        <Menu.Item>
-                                            {() => (
-                                                <div className="px-4 py-3 border-b border-amber-200">
-                                                    <div className="font-medium text-amber-900 font-serif">
-                                                        {user.characterName || user.name}
-                                                    </div>
-                                                    <div className="text-amber-700 text-sm">{user.email}</div>
-                                                    <div className="flex items-center gap-2 mt-2">
-                                                        <div className="flex items-center text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded border border-amber-300">
-                                                            {getRoleIcon(user.role)}
-                                                            <span className="ml-1">{getRoleTitle(user.role)}</span>
-                                                        </div>
-                                                        <div className="flex items-center text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded border border-amber-300">
-                                                            <Coins className="w-3 h-3 mr-1" />
-                                                            {user.bountyBalance || 0} gold
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </Menu.Item>
-                                        <Menu.Item>
-                                            {({ active }) => (
-                                                <Link
-                                                    to="/profile"
-                                                    className={`${active ? 'bg-amber-100' : ''
-                                                        } flex items-center px-4 py-2 text-sm text-amber-900 hover:bg-amber-100 transition-colors`}
-                                                >
-                                                    <Settings className="mr-3 h-4 w-4" />
-                                                    Character Sheet
-                                                </Link>
-                                            )}
-                                        </Menu.Item>
-                                        <Menu.Item>
-                                            {({ active }) => (
-                                                <button
-                                                    onClick={handleLogout}
-                                                    className={`${active ? 'bg-amber-100' : ''
-                                                        } flex items-center w-full px-4 py-2 text-sm text-amber-900 hover:bg-amber-100 transition-colors`}
-                                                >
-                                                    <LogOut className="mr-3 h-4 w-4" />
-                                                    Leave Guild
-                                                </button>
-                                            )}
-                                        </Menu.Item>
+                                    <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right bg-card border border-border rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+                                        <div className="py-1">
+                                            <Menu.Item>
+                                                {({ active }) => (
+                                                    <Link
+                                                        to="/profile"
+                                                        className={`${
+                                                            active ? 'bg-muted text-foreground' : 'text-muted-foreground'
+                                                        } flex items-center px-4 py-2 text-sm`}
+                                                    >
+                                                        <Settings className="mr-3 h-4 w-4" />
+                                                        Character Sheet
+                                                    </Link>
+                                                )}
+                                            </Menu.Item>
+                                            <Menu.Item>
+                                                {({ active }) => (
+                                                    <button
+                                                        onClick={handleLogout}
+                                                        className={`${
+                                                            active ? 'bg-muted text-foreground' : 'text-muted-foreground'
+                                                        } flex w-full items-center px-4 py-2 text-sm`}
+                                                    >
+                                                        <LogOut className="mr-3 h-4 w-4" />
+                                                        Sign Out
+                                                    </button>
+                                                )}
+                                            </Menu.Item>
+                                        </div>
                                     </Menu.Items>
                                 </Transition>
                             </Menu>
@@ -173,7 +129,7 @@ const Header: React.FC = () => {
                         {/* Mobile menu button */}
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className="md:hidden ml-3 p-2 rounded-lg text-amber-700 hover:text-amber-900 hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200"
+                            className="md:hidden ml-3 p-2 rounded-lg text-foreground hover:text-primary hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
                         >
                             {isMobileMenuOpen ? (
                                 <X className="w-6 h-6" />
@@ -187,18 +143,44 @@ const Header: React.FC = () => {
                 {/* Mobile Navigation Menu */}
                 {isMobileMenuOpen && (
                     <div className="md:hidden">
-                        <div className="px-2 pt-2 pb-3 space-y-1 bg-gradient-to-b from-amber-100 to-yellow-100 border-t border-amber-300">
-                            {navigationLinks.map((link) => (
+                        <div className="px-2 pt-2 pb-3 space-y-1 bg-card border-t border-border">
+                            <Link
+                                to="/quests"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="text-foreground hover:text-primary px-3 py-2 rounded-lg text-base font-medium transition-all duration-200 hover:bg-muted border border-transparent hover:border-border flex items-center gap-2"
+                            >
+                                Quests
+                            </Link>
+                            <Link
+                                to="/dashboard"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="text-foreground hover:text-primary px-3 py-2 rounded-lg text-base font-medium transition-all duration-200 hover:bg-muted border border-transparent hover:border-border flex items-center gap-2"
+                            >
+                                Dashboard
+                            </Link>
+                            <Link
+                                to="/store"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="text-foreground hover:text-primary px-3 py-2 rounded-lg text-base font-medium transition-all duration-200 hover:bg-muted border border-transparent hover:border-border flex items-center gap-2"
+                            >
+                                Store
+                            </Link>
+                            <Link
+                                to="/profile"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="text-foreground hover:text-primary px-3 py-2 rounded-lg text-base font-medium transition-all duration-200 hover:bg-muted border border-transparent hover:border-border flex items-center gap-2"
+                            >
+                                Character
+                            </Link>
+                            {(user?.role === "ADMIN" || user?.role === "EDITOR") && (
                                 <Link
-                                    key={link.to}
-                                    to={link.to}
+                                    to="/admin"
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="text-amber-700 hover:text-amber-900 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200 hover:bg-amber-200 border border-transparent hover:border-amber-300 flex items-center gap-2"
+                                    className="text-foreground hover:text-primary px-3 py-2 rounded-lg text-base font-medium transition-all duration-200 hover:bg-muted border border-transparent hover:border-border flex items-center gap-2"
                                 >
-                                    {link.icon}
-                                    {link.label}
+                                    Admin
                                 </Link>
-                            ))}
+                            )}
                         </div>
                     </div>
                 )}

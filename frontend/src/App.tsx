@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Header from './components/Header';
 import LoginPage from './pages/LoginPage';
@@ -81,91 +82,93 @@ const AuthCallback: React.FC = () => {
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <Router>
-        <div className="min-h-screen">
-          <Toaster position="top-right" richColors />
-          <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
+      <ThemeProvider>
+        <Router>
+          <div className="min-h-screen">
+            <Toaster position="top-right" richColors />
+            <Routes>
+              {/* Public routes */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
 
-            {/* Protected routes */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <div>
-                    <Header />
-                    <main>
-                      <Dashboard />
-                    </main>
-                  </div>
-                </ProtectedRoute>
-              }
-            />
+              {/* Protected routes */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <div>
+                      <Header />
+                      <main>
+                        <Dashboard />
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/quests"
-              element={
-                <ProtectedRoute>
-                  <div>
-                    <Header />
-                    <main>
-                      <QuestsPage />
-                    </main>
-                  </div>
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/quests"
+                element={
+                  <ProtectedRoute>
+                    <div>
+                      <Header />
+                      <main>
+                        <QuestsPage />
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/store"
-              element={
-                <ProtectedRoute>
-                  <div>
-                    <Header />
-                    <main>
-                      <StorePage />
-                    </main>
-                  </div>
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/store"
+                element={
+                  <ProtectedRoute>
+                    <div>
+                      <Header />
+                      <main>
+                        <StorePage />
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute requireEditorOrAdmin>
-                  <div>
-                    <Header />
-                    <main>
-                      <AdminPanel />
-                    </main>
-                  </div>
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute requireEditorOrAdmin>
+                    <div>
+                      <Header />
+                      <main>
+                        <AdminPanel />
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <div>
-                    <Header />
-                    <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                      <ProfilePage />
-                    </main>
-                  </div>
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <div>
+                      <Header />
+                      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                        <ProfilePage />
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Default redirect */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </div>
-      </Router>
+              {/* Default redirect */}
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </div>
+        </Router>
+      </ThemeProvider>
     </AuthProvider>
   );
 };

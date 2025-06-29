@@ -204,17 +204,17 @@ const QuestCard: React.FC<{
   };
 
   return (
-    <Card className="relative overflow-hidden border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+    <Card className="relative overflow-hidden border-2 border-border bg-card shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
       {/* Decorative corner elements */}
-      <div className="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-amber-400 opacity-60"></div>
-      <div className="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-amber-400 opacity-60"></div>
-      <div className="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-amber-400 opacity-60"></div>
-      <div className="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-amber-400 opacity-60"></div>
+      <div className="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-primary opacity-60"></div>
+      <div className="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-primary opacity-60"></div>
+      <div className="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-primary opacity-60"></div>
+      <div className="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-primary opacity-60"></div>
 
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start gap-2">
-          <CardTitle className="text-lg font-bold text-amber-900 leading-tight font-serif">{quest.title}</CardTitle>
-          <div className="flex items-center gap-1 text-amber-700 font-bold">
+          <CardTitle className="text-lg font-bold text-foreground leading-tight font-serif">{quest.title}</CardTitle>
+          <div className="flex items-center gap-1 text-muted-foreground font-bold">
             <Coins className="w-4 h-4" />
             <span>{quest.bounty}</span>
           </div>
@@ -238,12 +238,12 @@ const QuestCard: React.FC<{
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <p className="text-sm text-amber-800 leading-relaxed">{quest.description}</p>
+        <p className="text-sm text-foreground leading-relaxed">{quest.description}</p>
 
         {/* Skill Requirements */}
         {requiredSkills.length > 0 && (
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm font-medium text-amber-900">
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
               <Target className="w-4 h-4" />
               <span>Required Skills:</span>
             </div>
@@ -252,7 +252,7 @@ const QuestCard: React.FC<{
                 const status = getSkillRequirementStatus(requiredSkill);
                 return (
                   <div key={requiredSkill.skillId} className="flex items-center justify-between text-xs">
-                    <span className="text-amber-700">{requiredSkill.skill?.name || `Skill ${requiredSkill.skillId}`}</span>
+                    <span className="text-muted-foreground">{requiredSkill.skill?.name || `Skill ${requiredSkill.skillId}`}</span>
                     <div className="flex items-center gap-2">
                       <Badge className={`text-xs font-medium border ${status.color}`}>
                         Level {status.userLevel}/{status.requiredLevel}
@@ -272,18 +272,18 @@ const QuestCard: React.FC<{
 
         {!skillRequirementsLoaded && quest.status === 'AVAILABLE' && (
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm font-medium text-amber-900">
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
               <Target className="w-4 h-4" />
               <span>Checking Requirements...</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-amber-600"></div>
-              <span className="text-xs text-amber-600">Loading skill requirements</span>
+              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary"></div>
+              <span className="text-xs text-primary">Loading skill requirements</span>
             </div>
           </div>
         )}
 
-        <div className="space-y-2 text-xs text-amber-700">
+        <div className="space-y-2 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
             <Scroll className="w-3 h-3" />
             <span>Created by {quest.creatorName || `User ${quest.createdBy}`}</span>
@@ -358,8 +358,8 @@ const QuestCard: React.FC<{
               disabled={actionLoading === "claim" || !canClaimQuest()}
               className={`flex-1 font-medium ${
                 canClaimQuest()
-                  ? "bg-amber-600 hover:bg-amber-700 text-white"
-                  : "bg-gray-400 text-white cursor-not-allowed"
+                  ? "bg-primary hover:bg-primary/90 text-primary-foreground"
+                  : "bg-gray-400 text-gray-500 cursor-not-allowed"
               }`}
               size="sm"
             >
@@ -372,7 +372,7 @@ const QuestCard: React.FC<{
           {quest.status === "COOLDOWN" && (
             <Button
               disabled={true}
-              className="flex-1 bg-gray-400 text-white font-medium cursor-not-allowed"
+              className="flex-1 bg-gray-400 text-gray-500 font-medium cursor-not-allowed"
               size="sm"
             >
               <Clock className="w-4 h-4 mr-1" />
@@ -384,7 +384,7 @@ const QuestCard: React.FC<{
             <Button
               onClick={() => handleAction("complete")}
               disabled={actionLoading === "complete"}
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium"
+              className="flex-1 bg-green-600 hover:bg-green-700 text-green-100 font-medium"
               size="sm"
             >
               <Trophy className="w-4 h-4 mr-1" />
@@ -392,23 +392,26 @@ const QuestCard: React.FC<{
             </Button>
           )}
 
-          {quest.status === "COMPLETED" && currentUser.role !== "PLAYER" && (
+          {/* Admin/Editor approval buttons for completed quests */}
+          {quest.status === "COMPLETED" && (currentUser.role === "ADMIN" || currentUser.role === "EDITOR") && (
             <div className="flex gap-1 flex-1">
               <Button
                 onClick={() => handleAction("approve")}
                 disabled={actionLoading === "approve"}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium"
+                className="flex-1 bg-green-600 hover:bg-green-700 text-green-100 font-medium"
                 size="sm"
               >
                 <Check className="w-4 h-4" />
+                {actionLoading === "approve" ? "Approving..." : "Approve"}
               </Button>
               <Button
                 onClick={() => handleAction("reject")}
                 disabled={actionLoading === "reject"}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium"
+                className="flex-1 bg-red-600 hover:bg-red-700 text-red-100 font-medium"
                 size="sm"
               >
                 <X className="w-4 h-4" />
+                {actionLoading === "reject" ? "Rejecting..." : "Reject"}
               </Button>
             </div>
           )}
@@ -428,7 +431,7 @@ const QuestCard: React.FC<{
           <Button
             onClick={() => handleAction("view")}
             variant="outline"
-            className="bg-white border-amber-300 text-amber-700 hover:bg-amber-50"
+            className="bg-gray-100 border-border text-muted-foreground hover:bg-gray-200"
             size="sm"
             title="View Quest Details"
           >
@@ -444,12 +447,12 @@ const UserDashboard: React.FC<{ user: UserStats }> = ({ user }) => {
   const levelInfo = getLevelInfo(user.experience || 0)
 
   return (
-    <Card className="border-2 border-amber-300 bg-gradient-to-r from-amber-100 to-yellow-100 shadow-lg">
+    <Card className="border-2 border-border bg-card shadow-lg">
       <CardContent className="p-6">
         <div className="flex items-center gap-4 mb-4">
-          <Avatar className="w-16 h-16 border-2 border-amber-400">
+          <Avatar className="w-16 h-16 border-2 border-primary">
             <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
-            <AvatarFallback className="bg-amber-200 text-amber-800 font-bold text-lg">
+            <AvatarFallback className="bg-primary text-primary-foreground font-bold text-lg">
               {user.name
                 .split(" ")
                 .map((n) => n[0])
@@ -457,38 +460,38 @@ const UserDashboard: React.FC<{ user: UserStats }> = ({ user }) => {
             </AvatarFallback>
           </Avatar>
           <div>
-            <h2 className="text-xl font-bold text-amber-900 font-serif">{user.name}</h2>
-            <p className="text-amber-700 font-medium">{getRoleTitle(user.role)}</p>
+            <h2 className="text-xl font-bold text-foreground font-serif">{user.name}</h2>
+            <p className="text-muted-foreground font-medium">{getRoleTitle(user.role)}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-4">
-          <div className="text-center p-3 bg-white rounded-lg border border-amber-200">
-            <Trophy className="w-6 h-6 mx-auto mb-1 text-amber-600" />
-            <div className="text-lg font-bold text-amber-900">{user.completedQuests}</div>
-            <div className="text-xs text-amber-700">Completed</div>
+          <div className="text-center p-3 bg-white rounded-lg border border-border">
+            <Trophy className="w-6 h-6 mx-auto mb-1 text-primary" />
+            <div className="text-lg font-bold text-foreground">{user.completedQuests}</div>
+            <div className="text-xs text-muted-foreground">Completed</div>
           </div>
-          <div className="text-center p-3 bg-white rounded-lg border border-amber-200">
-            <Coins className="w-6 h-6 mx-auto mb-1 text-amber-600" />
-            <div className="text-lg font-bold text-amber-900">{user.totalBounty}</div>
-            <div className="text-xs text-amber-700">Total Bounty</div>
+          <div className="text-center p-3 bg-white rounded-lg border border-border">
+            <Coins className="w-6 h-6 mx-auto mb-1 text-primary" />
+            <div className="text-lg font-bold text-foreground">{user.totalBounty}</div>
+            <div className="text-xs text-muted-foreground">Total Bounty</div>
           </div>
-          <div className="text-center p-3 bg-white rounded-lg border border-amber-200">
-            <Shield className="w-6 h-6 mx-auto mb-1 text-amber-600" />
-            <div className="text-lg font-bold text-amber-900">{user.currentClaimed}</div>
-            <div className="text-xs text-amber-700">Active Quests</div>
+          <div className="text-center p-3 bg-white rounded-lg border border-border">
+            <Shield className="w-6 h-6 mx-auto mb-1 text-primary" />
+            <div className="text-lg font-bold text-foreground">{user.currentClaimed}</div>
+            <div className="text-xs text-muted-foreground">Active Quests</div>
           </div>
         </div>
 
-        <div className="mt-4 p-3 bg-white rounded-lg border border-amber-200">
-          <h3 className="text-sm font-bold text-amber-900 mb-2">Level {levelInfo.level}</h3>
-          <div className="w-full bg-amber-200 rounded-full h-2 mb-2">
+        <div className="mt-4 p-3 bg-white rounded-lg border border-border">
+          <h3 className="text-sm font-bold text-foreground mb-2">Level {levelInfo.level}</h3>
+          <div className="w-full bg-primary rounded-full h-2 mb-2">
             <div
-              className="bg-amber-600 h-2 rounded-full transition-all duration-300"
+              className="bg-primary h-2 rounded-full transition-all duration-300"
               style={{ width: `${(levelInfo.progressToNext * 100)}%` }}
             ></div>
           </div>
-          <p className="text-xs text-amber-700">
+          <p className="text-xs text-muted-foreground">
             {levelInfo.experience} / {levelInfo.experience + levelInfo.experienceToNext} XP
           </p>
         </div>
@@ -555,6 +558,13 @@ const QuestBoard: React.FC = () => {
           // Get claimed quests AND completed quests (pending approval) for current user
           questData = await questService.getMyClaimedQuests({
             status: "CLAIMED,COMPLETED",
+            ...params
+          })
+          break
+        case "pending":
+          // Get quests pending approval (for admins/editors)
+          questData = await questService.getQuests({
+            status: "COMPLETED",
             ...params
           })
           break
@@ -693,27 +703,27 @@ const QuestBoard: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto"></div>
-          <p className="mt-4 text-amber-600">Loading your adventure...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-foreground">Loading your adventure...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         {/* Page Title */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-amber-600 rounded-full flex items-center justify-center">
-              <Scroll className="w-8 h-8 text-white" />
+            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+              <Scroll className="w-8 h-8 text-primary-foreground" />
             </div>
-            <h1 className="text-4xl font-bold text-amber-900 font-serif">Quest Board</h1>
+            <h1 className="text-4xl font-bold text-foreground font-serif">Quest Board</h1>
           </div>
-          <p className="text-amber-700 text-lg">
+          <p className="text-muted-foreground text-lg">
             {currentUser.role === "ADMIN" || currentUser.role === "EDITOR"
               ? "Manage and oversee guild adventures"
               : "Choose your next adventure"}
@@ -726,15 +736,15 @@ const QuestBoard: React.FC = () => {
             <UserDashboard user={currentUser} />
 
             {/* Search */}
-            <Card className="border-2 border-amber-200 bg-white shadow-md">
+            <Card className="border-2 border-border bg-card shadow-md">
               <CardContent className="p-4">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-600 w-4 h-4" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary w-4 h-4" />
                   <Input
                     placeholder="Search quests..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 border-amber-300 focus:border-amber-500 focus:ring-amber-500"
+                    className="pl-10 border-border focus:border-ring focus:ring-ring"
                   />
                 </div>
               </CardContent>
@@ -744,22 +754,30 @@ const QuestBoard: React.FC = () => {
           {/* Main Content */}
           <div className="lg:col-span-3">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-3 bg-amber-100 border border-amber-300">
+              <TabsList className={`grid w-full ${(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") ? 'grid-cols-4' : 'grid-cols-3'} bg-muted border border-border`}>
                 <TabsTrigger
                   value="available"
-                  className="data-[state=active]:bg-amber-600 data-[state=active]:text-white font-medium"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium"
                 >
                   Available Quests
                 </TabsTrigger>
                 <TabsTrigger
                   value="claimed"
-                  className="data-[state=active]:bg-amber-600 data-[state=active]:text-white font-medium"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium"
                 >
                   My Quests
                 </TabsTrigger>
+                {(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") && (
+                  <TabsTrigger
+                    value="pending"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium"
+                  >
+                    Pending Approval
+                  </TabsTrigger>
+                )}
                 <TabsTrigger
                   value="completed"
-                  className="data-[state=active]:bg-amber-600 data-[state=active]:text-white font-medium"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium"
                 >
                   Completed
                 </TabsTrigger>
@@ -768,28 +786,28 @@ const QuestBoard: React.FC = () => {
               <TabsContent value={activeTab} className="space-y-6">
                 {/* Error Message */}
                 {error && (
-                  <Card className="border-2 border-red-200 bg-red-50 shadow-md">
+                  <Card className="border-2 border-destructive bg-destructive/10 shadow-md">
                     <CardContent className="p-4">
-                      <div className="text-red-800 font-medium">Error: {error}</div>
+                      <div className="text-destructive font-medium">Error: {error}</div>
                     </CardContent>
                   </Card>
                 )}
 
                 {/* Loading State */}
                 {loading ? (
-                  <Card className="border-2 border-amber-200 bg-white shadow-md">
+                  <Card className="border-2 border-border bg-card shadow-md">
                     <CardContent className="p-12 text-center">
-                      <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-amber-600 mx-auto mb-4"></div>
-                      <h3 className="text-xl font-bold text-amber-900 mb-2">Loading Quests</h3>
-                      <p className="text-amber-700">Gathering available adventures...</p>
+                      <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+                      <h3 className="text-xl font-bold text-foreground mb-2">Loading Quests</h3>
+                      <p className="text-muted-foreground">Gathering available adventures...</p>
                     </CardContent>
                   </Card>
                 ) : quests.length === 0 ? (
-                  <Card className="border-2 border-amber-200 bg-white shadow-md">
+                  <Card className="border-2 border-border bg-card shadow-md">
                     <CardContent className="p-12 text-center">
-                      <Scroll className="w-16 h-16 mx-auto mb-4 text-amber-400" />
-                      <h3 className="text-xl font-bold text-amber-900 mb-2">No Quests Found</h3>
-                      <p className="text-amber-700">
+                      <Scroll className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                      <h3 className="text-xl font-bold text-foreground mb-2">No Quests Found</h3>
+                      <p className="text-muted-foreground">
                         {searchTerm ? "Try adjusting your search terms." : "No quests available in this category."}
                       </p>
                     </CardContent>
@@ -798,7 +816,7 @@ const QuestBoard: React.FC = () => {
                   <>
                     {/* Quest Count */}
                     <div className="flex justify-between items-center mb-4">
-                      <p className="text-amber-700 font-medium">
+                      <p className="text-muted-foreground font-medium">
                         Showing {quests.length} of {totalQuests} quests
                       </p>
                     </div>
