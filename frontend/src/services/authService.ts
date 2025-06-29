@@ -160,8 +160,8 @@ export const authService = {
             refreshToken: refreshTokenValue,
         }, {
            // Ensure this call doesn't get intercepted infinitely if refresh token itself is invalid
-          _isRetry: true, // Adding a flag to prevent potential interceptor loops if not already handled
-        });
+          _retry: true, // Adding a flag to prevent potential interceptor loops if not already handled
+        } as any);
 
 
         if (!response.data.success || !response.data.data?.accessToken) {

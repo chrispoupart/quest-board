@@ -80,8 +80,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // This login function stub might be for a different auth method (e.g. username/password)
     // or needs to be adapted if it's intended for post-OAuth callback processing.
     // For now, ensuring token storage is handled correctly upon redirect is key.
-    const login = async (code: string, redirectUri: string) => {
-        // This function's role might need re-evaluation based on actual usage.
+    const login = async (_code: string, _redirectUri: string) => {
+        // TODO: This function's role might need re-evaluation based on actual usage.
         // The primary "login" action for Google OAuth is the redirect to Google,
         // and then handling the callback where tokens are received.
         // If this function is called from a callback page, it would make more sense.
