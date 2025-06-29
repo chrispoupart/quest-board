@@ -306,11 +306,18 @@ const CharacterSheet: React.FC<CharacterSheetProps> = () => {
         avatarUrl: formData.avatarUrl
       });
 
-      updateUser(updatedUser);
+      if (typeof updateUser === 'function') {
+        updateUser(updatedUser);
+      }
+      // Clean up the previous avatar URL after successful save
+      if (previousAvatarUrl && previousAvatarUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(previousAvatarUrl);
+        setPreviousAvatarUrl(null);
+      }
       setSuccess('Character sheet updated successfully!');
     } catch (err) {
       console.error('Failed to update character sheet:', err);
-      setError('Failed to update character sheet');
+      setError(err instanceof Error ? err.message : 'Failed to update character sheet');
     } finally {
       setSaving(false);
     }
