@@ -20,13 +20,13 @@ const Header: React.FC = () => {
     };
 
     return (
-        <header className="bg-gradient-to-r from-primary/20 to-primary/10 border-b-2 border-border shadow-lg">
+        <header className="bg-gradient-to-r from-primary/20 to-primary/10 border-b-2 border-border shadow-lg relative">
             <div className="container mx-auto px-4 py-6">
                 <div className="flex justify-between items-center">
                     <Link to="/" className="text-foreground hover:text-primary font-bold text-xl">
                         Quest Board
                     </Link>
-                    <nav className="flex items-center space-x-4">
+                    <nav className="hidden md:flex items-center space-x-4">
                         <Link to="/quests" className="text-foreground hover:text-primary font-medium transition-colors">
                             Quests
                         </Link>
@@ -107,7 +107,7 @@ const Header: React.FC = () => {
                         {/* Mobile menu button */}
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className="md:hidden ml-3 p-2 rounded-lg text-foreground hover:text-primary hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
+                            className="flex md:hidden ml-3 p-2 rounded-lg text-foreground hover:text-primary hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
                         >
                             {isMobileMenuOpen ? (
                                 <X className="w-6 h-6" />
@@ -120,8 +120,8 @@ const Header: React.FC = () => {
 
                 {/* Mobile Navigation Menu */}
                 {isMobileMenuOpen && (
-                    <div className="md:hidden">
-                        <div className="px-2 pt-2 pb-3 space-y-1 bg-card border-t border-border">
+                    <div className="md:hidden absolute top-full left-0 right-0 z-50">
+                        <div className="px-2 pt-2 pb-3 space-y-1 bg-card border-t border-border shadow-lg">
                             <Link
                                 to="/quests"
                                 onClick={() => setIsMobileMenuOpen(false)}
