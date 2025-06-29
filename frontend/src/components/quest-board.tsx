@@ -755,7 +755,22 @@ const QuestBoard: React.FC = () => {
           {/* Main Content */}
           <div className="lg:col-span-3">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className={`grid w-full ${(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") ? 'grid-cols-4' : 'grid-cols-3'} bg-muted border border-border text-muted-foreground`}>
+              {/* Mobile Dropdown */}
+              <div className="block md:hidden mb-4">
+                <select
+                  className="w-full rounded px-3 py-2 border border-border bg-background text-foreground"
+                  value={activeTab}
+                  onChange={e => setActiveTab(e.target.value)}
+                >
+                  <option value="available">Available Quests</option>
+                  <option value="claimed">My Quests</option>
+                  {(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") && (
+                    <option value="pending">Pending Approval</option>
+                  )}
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+              <TabsList className={`hidden md:grid w-full ${(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") ? 'grid-cols-4' : 'grid-cols-3'} bg-muted border border-border text-muted-foreground`}>
                 <TabsTrigger
                   value="available"
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium"
