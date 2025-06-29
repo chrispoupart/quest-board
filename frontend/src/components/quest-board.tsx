@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Pagination } from "@/components/ui/pagination"
 import QuestDetailsModal from "./QuestDetailsModal"
 import { getLevelInfo } from "../utils/leveling"
 import { skillService } from "../services/skillService"
@@ -504,6 +505,12 @@ const QuestBoard: React.FC = () => {
   const [activeTab, setActiveTab] = useState("available")
   const [error, setError] = useState<string | null>(null)
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalQuests, setTotalQuests] = useState(0)
+  const [pageSize] = useState(12) // Show 12 quests per page (3 columns x 4 rows)
+
   // Modal state
   const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -521,30 +528,45 @@ const QuestBoard: React.FC = () => {
   }), [user])
 
   // Fetch quests from API
-  const fetchQuests = async () => {
+  const fetchQuests = async (page: number = 1) => {
     try {
       setLoading(true)
       setError(null)
 
       let questData: QuestListingResponse
 
-      console.log('Fetching quests for tab:', activeTab)
+      console.log('Fetching quests for tab:', activeTab, 'page:', page, 'search:', searchTerm)
+
+      const params = {
+        page,
+        limit: pageSize,
+        ...(searchTerm && { search: searchTerm })
+      }
 
       switch (activeTab) {
         case "available":
           // Get all available quests including repeatable ones
-          questData = await questService.getQuests({ status: "AVAILABLE,COOLDOWN" })
+          questData = await questService.getQuests({
+            status: "AVAILABLE,COOLDOWN",
+            ...params
+          })
           break
         case "claimed":
           // Get claimed quests AND completed quests (pending approval) for current user
-          questData = await questService.getMyClaimedQuests({ status: "CLAIMED,COMPLETED" })
+          questData = await questService.getMyClaimedQuests({
+            status: "CLAIMED,COMPLETED",
+            ...params
+          })
           break
         case "completed":
           // Show user's own completed quests (approved/rejected)
-          questData = await questService.getMyClaimedQuests({ status: "APPROVED,REJECTED" })
+          questData = await questService.getMyClaimedQuests({
+            status: "APPROVED,REJECTED",
+            ...params
+          })
           break
         default:
-          questData = await questService.getQuests()
+          questData = await questService.getQuests(params)
       }
 
       console.log('Received quest data:', questData)
@@ -579,6 +601,13 @@ const QuestBoard: React.FC = () => {
 
       console.log('Transformed quests:', transformedQuests)
       setQuests(transformedQuests)
+
+      // Update pagination state
+      if (questData.pagination) {
+        setCurrentPage(questData.pagination.page)
+        setTotalPages(questData.pagination.totalPages)
+        setTotalQuests(questData.pagination.total)
+      }
     } catch (err) {
       console.error('Failed to fetch quests:', err)
       setError(err instanceof Error ? err.message : 'Failed to fetch quests')
@@ -589,16 +618,25 @@ const QuestBoard: React.FC = () => {
 
   // Fetch quests on component mount and tab change
   useEffect(() => {
-    fetchQuests()
+    setCurrentPage(1) // Reset to first page when tab changes
+    fetchQuests(1)
   }, [activeTab])
 
-  const filteredQuests = useMemo(() => {
-    return quests.filter(
-      (quest) =>
-        quest.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (quest.description && quest.description.toLowerCase().includes(searchTerm.toLowerCase())),
-    )
-  }, [quests, searchTerm])
+  // Debounced search effect
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setCurrentPage(1) // Reset to first page when searching
+      fetchQuests(1)
+    }, 500) // 500ms delay
+
+    return () => clearTimeout(timeoutId)
+  }, [searchTerm])
+
+  // Handle page changes
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    fetchQuests(page)
+  }
 
   const handleQuestAction = async (questId: number, action: string) => {
     try {
@@ -630,7 +668,7 @@ const QuestBoard: React.FC = () => {
       }
 
       // Refresh quests after action
-      await fetchQuests()
+      await fetchQuests(currentPage)
     } catch (err) {
       console.error(`Failed to ${action} quest:`, err)
       setError(err instanceof Error ? err.message : `Failed to ${action} quest`)
@@ -746,7 +784,7 @@ const QuestBoard: React.FC = () => {
                       <p className="text-amber-700">Gathering available adventures...</p>
                     </CardContent>
                   </Card>
-                ) : filteredQuests.length === 0 ? (
+                ) : quests.length === 0 ? (
                   <Card className="border-2 border-amber-200 bg-white shadow-md">
                     <CardContent className="p-12 text-center">
                       <Scroll className="w-16 h-16 mx-auto mb-4 text-amber-400" />
@@ -757,16 +795,34 @@ const QuestBoard: React.FC = () => {
                     </CardContent>
                   </Card>
                 ) : (
-                  <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {filteredQuests.map((quest) => (
-                      <QuestCard
-                        key={quest.id}
-                        quest={quest}
-                        onAction={handleQuestAction}
-                        currentUser={currentUser}
-                      />
-                    ))}
-                  </div>
+                  <>
+                    {/* Quest Count */}
+                    <div className="flex justify-between items-center mb-4">
+                      <p className="text-amber-700 font-medium">
+                        Showing {quests.length} of {totalQuests} quests
+                      </p>
+                    </div>
+
+                    {/* Quest Cards Grid */}
+                    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+                      {quests.map((quest) => (
+                        <QuestCard
+                          key={quest.id}
+                          quest={quest}
+                          onAction={handleQuestAction}
+                          currentUser={currentUser}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Pagination */}
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={handlePageChange}
+                      className="mt-8"
+                    />
+                  </>
                 )}
               </TabsContent>
             </Tabs>

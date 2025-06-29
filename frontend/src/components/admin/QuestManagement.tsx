@@ -18,6 +18,7 @@ import {
     Loader2,
     X
 } from 'lucide-react';
+import { Pagination } from '@/components/ui/pagination';
 
 interface QuestManagementProps { }
 
@@ -39,9 +40,11 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
     });
     const [skillRequirements, setSkillRequirements] = useState<CreateQuestRequiredSkillRequest[]>([]);
     const [submitting, setSubmitting] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     // Fetch all quests and skills for management
-    const fetchData = async () => {
+    const fetchData = async (page: number = 1) => {
         if (!isAuthenticated || !user) {
             setError('Authentication required');
             setLoading(false);
@@ -51,12 +54,19 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
         try {
             setLoading(true);
             setError(null);
+            const params = {
+                limit: 20,
+                page,
+                ...(searchTerm && { search: searchTerm })
+            };
             const [questsResponse, skillsResponse] = await Promise.all([
-                questService.getQuests(),
+                questService.getQuests(params),
                 skillService.getAllSkills()
             ]);
             setQuests(questsResponse.quests);
             setSkills(skillsResponse);
+            setTotalPages(questsResponse.pagination.totalPages);
+            setCurrentPage(page);
         } catch (err) {
             console.error('QuestManagement: Failed to fetch data:', err);
             if (err instanceof Error && err.message.includes('401')) {
@@ -72,9 +82,18 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
 
     useEffect(() => {
         if (isAuthenticated && user) {
-            fetchData();
+            fetchData(1);
         }
     }, [isAuthenticated, user]);
+
+    // Debounced search effect
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            fetchData(1);
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm]);
 
     const handleCreateQuest = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -96,7 +115,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             setFormData({ title: '', description: '', bounty: 0, isRepeatable: false, cooldownDays: undefined });
             setSkillRequirements([]);
             setShowCreateForm(false);
-            await fetchData();
+            await fetchData(currentPage);
         } catch (err) {
             console.error('Failed to create quest:', err);
             setError(err instanceof Error ? err.message : 'Failed to create quest');
@@ -125,7 +144,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             setEditingQuest(null);
             setFormData({ title: '', description: '', bounty: 0, isRepeatable: false, cooldownDays: undefined });
             setSkillRequirements([]);
-            await fetchData();
+            await fetchData(currentPage);
         } catch (err) {
             console.error('Failed to update quest:', err);
             setError(err instanceof Error ? err.message : 'Failed to update quest');
@@ -142,7 +161,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
         try {
             setError(null);
             await questService.deleteQuest(questId);
-            await fetchData();
+            await fetchData(currentPage);
         } catch (err) {
             console.error('Failed to delete quest:', err);
             setError(err instanceof Error ? err.message : 'Failed to delete quest');
@@ -218,10 +237,9 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
         return new Date(dateString).toLocaleDateString();
     };
 
-    const filteredQuests = quests.filter(quest =>
-        quest.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (quest.description && quest.description.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    const handlePageChange = (page: number) => {
+        fetchData(page);
+    };
 
     return (
         <div className="space-y-6">
@@ -465,7 +483,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                         <p className="text-amber-700">Gathering quest information...</p>
                     </CardContent>
                 </Card>
-            ) : filteredQuests.length === 0 ? (
+            ) : quests.length === 0 ? (
                 <Card className="border-2 border-amber-200 bg-white shadow-md">
                     <CardContent className="p-12 text-center">
                         <AlertCircle className="w-16 h-16 mx-auto mb-4 text-amber-400" />
@@ -477,7 +495,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                 </Card>
             ) : (
                 <div className="grid gap-6">
-                    {filteredQuests.map((quest) => (
+                    {quests.map((quest) => (
                         <Card key={quest.id} className="border-2 border-amber-200 bg-white shadow-lg hover:shadow-xl transition-all duration-300">
                             <CardContent className="p-6">
                                 <div className="flex items-start justify-between mb-4">
@@ -551,6 +569,15 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                     ))}
                 </div>
             )}
+
+            {/* Pagination */}
+            <div className="flex justify-center mt-4">
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                />
+            </div>
         </div>
     );
 };

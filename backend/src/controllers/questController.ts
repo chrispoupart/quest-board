@@ -521,6 +521,7 @@ export class QuestController {
             const page = parseInt(req.query['page'] as string) || 1;
             const limit = parseInt(req.query['limit'] as string) || 10;
             const status = req.query['status'] as string;
+            const search = req.query['search'] as string;
             const skip = (page - 1) * limit;
 
             const where: any = { createdBy: userId };
@@ -530,6 +531,13 @@ export class QuestController {
                 } else {
                     where.status = status;
                 }
+            }
+
+            if (search) {
+                where.OR = [
+                    { title: { contains: search, mode: 'insensitive' } },
+                    { description: { contains: search, mode: 'insensitive' } }
+                ];
             }
 
             const [quests, total] = await Promise.all([
@@ -591,6 +599,7 @@ export class QuestController {
             const page = parseInt(req.query['page'] as string) || 1;
             const limit = parseInt(req.query['limit'] as string) || 10;
             const status = req.query['status'] as string;
+            const search = req.query['search'] as string;
             const skip = (page - 1) * limit;
 
             const where: any = { claimedBy: userId };
@@ -600,6 +609,13 @@ export class QuestController {
                 } else {
                     where.status = status;
                 }
+            }
+
+            if (search) {
+                where.OR = [
+                    { title: { contains: search, mode: 'insensitive' } },
+                    { description: { contains: search, mode: 'insensitive' } }
+                ];
             }
 
             const [quests, total] = await Promise.all([
