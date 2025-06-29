@@ -392,6 +392,30 @@ const QuestCard: React.FC<{
             </Button>
           )}
 
+          {/* Admin/Editor approval buttons for completed quests */}
+          {quest.status === "COMPLETED" && (currentUser.role === "ADMIN" || currentUser.role === "EDITOR") && (
+            <div className="flex gap-1 flex-1">
+              <Button
+                onClick={() => handleAction("approve")}
+                disabled={actionLoading === "approve"}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-green-100 font-medium"
+                size="sm"
+              >
+                <Check className="w-4 h-4" />
+                {actionLoading === "approve" ? "Approving..." : "Approve"}
+              </Button>
+              <Button
+                onClick={() => handleAction("reject")}
+                disabled={actionLoading === "reject"}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-red-100 font-medium"
+                size="sm"
+              >
+                <X className="w-4 h-4" />
+                {actionLoading === "reject" ? "Rejecting..." : "Reject"}
+              </Button>
+            </div>
+          )}
+
           {/* Show completion status for approved/rejected quests */}
           {["APPROVED", "REJECTED"].includes(quest.status) && (
             <div className="flex-1 flex items-center justify-center">
@@ -534,6 +558,13 @@ const QuestBoard: React.FC = () => {
           // Get claimed quests AND completed quests (pending approval) for current user
           questData = await questService.getMyClaimedQuests({
             status: "CLAIMED,COMPLETED",
+            ...params
+          })
+          break
+        case "pending":
+          // Get quests pending approval (for admins/editors)
+          questData = await questService.getQuests({
+            status: "COMPLETED",
             ...params
           })
           break
@@ -723,7 +754,7 @@ const QuestBoard: React.FC = () => {
           {/* Main Content */}
           <div className="lg:col-span-3">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-3 bg-muted border border-border">
+              <TabsList className={`grid w-full ${(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") ? 'grid-cols-4' : 'grid-cols-3'} bg-muted border border-border`}>
                 <TabsTrigger
                   value="available"
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium"
@@ -736,6 +767,14 @@ const QuestBoard: React.FC = () => {
                 >
                   My Quests
                 </TabsTrigger>
+                {(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") && (
+                  <TabsTrigger
+                    value="pending"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium"
+                  >
+                    Pending Approval
+                  </TabsTrigger>
+                )}
                 <TabsTrigger
                   value="completed"
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium"
