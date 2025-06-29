@@ -127,7 +127,7 @@ export const Store: React.FC<StoreProps> = ({ user }) => {
                     </p>
                     <div className="mt-4 p-4 bg-muted rounded-lg border-2 border-border max-w-md mx-auto">
                         <p className="text-sm text-foreground font-medium">
-                            Your Balance: <span className="text-primary font-bold">{user?.experience || 0} points</span>
+                            Your Balance: <span className="text-primary font-bold">{user?.bountyBalance || 0} points</span>
                         </p>
                     </div>
                 </div>
@@ -172,11 +172,11 @@ export const Store: React.FC<StoreProps> = ({ user }) => {
                                         <CardContent>
                                             <Button
                                                 onClick={() => handlePurchase(item)}
-                                                disabled={!user || (user.experience || 0) < item.cost}
+                                                disabled={!user || (user.bountyBalance || 0) < item.cost}
                                                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                                             >
                                                 {!user ? 'Login Required' :
-                                                 (user.experience || 0) < item.cost ? 'Insufficient Points' : 'Purchase'}
+                                                 (user.bountyBalance || 0) < item.cost ? 'Insufficient Points' : 'Purchase'}
                                             </Button>
                                         </CardContent>
                                     </Card>
@@ -245,7 +245,7 @@ export const Store: React.FC<StoreProps> = ({ user }) => {
                                     </p>
                                     <div className="mt-2 flex justify-between items-center">
                                         <span className="text-sm text-muted-foreground">Cost: {selectedItem.cost} points</span>
-                                        <span className="text-sm text-muted-foreground">Your balance: {user?.experience || 0} points</span>
+                                        <span className="text-sm text-muted-foreground">Your balance: {user?.bountyBalance || 0} points</span>
                                     </div>
                                 </div>
                             </div>
@@ -253,14 +253,14 @@ export const Store: React.FC<StoreProps> = ({ user }) => {
                         <DialogFooter>
                             <Button
                                 variant="outline"
-                                onClick={() => setSelectedItem(null)}
+                                onClick={() => setPurchaseDialogOpen(false)}
                                 className="border-border text-muted-foreground hover:bg-muted"
                             >
                                 Cancel
                             </Button>
                             <Button
                                 onClick={confirmPurchase}
-                                disabled={purchaseLoading || !user || (user.experience || 0) < (selectedItem?.cost || 0)}
+                                disabled={purchaseLoading || !user || (user.bountyBalance || 0) < (selectedItem?.cost || 0)}
                                 className="bg-primary hover:bg-primary/90 text-primary-foreground"
                             >
                                 {purchaseLoading ? 'Processing...' : 'Confirm Purchase'}
