@@ -210,6 +210,23 @@ export const questService = {
     },
 
     /**
+     * Get user's completion history (including repeatable quests that have been reset)
+     */
+    async getMyCompletionHistory(params?: {
+        page?: number;
+        limit?: number;
+        search?: string;
+    }): Promise<QuestListingResponse> {
+        const response = await api.get<ApiResponse<QuestListingResponse>>('/api/quests/my-completion-history', { params });
+
+        if (!response.data.success) {
+            throw new Error(response.data.error?.message || 'Failed to fetch completion history');
+        }
+
+        return response.data.data!;
+    },
+
+    /**
      * Get repeatable quests
      */
     async getRepeatableQuests(params?: {

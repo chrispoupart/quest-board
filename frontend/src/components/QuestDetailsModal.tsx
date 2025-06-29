@@ -134,7 +134,8 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                             <Badge className={`text-sm font-medium border ${getStatusColor(quest.status)}`}>
                                 {quest.status === "COMPLETED" ? "Pending Approval" :
                                     quest.status === "COOLDOWN" ? "On Cooldown" :
-                                        quest.status.replace("_", " ")}
+                                        (quest as any)._displayStatus === 'COMPLETED_REPEATABLE' ? "Completed" :
+                                            quest.status.replace("_", " ")}
                             </Badge>
                             {quest.isRepeatable && (
                                 <Badge className="text-sm font-medium border text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700">
@@ -196,6 +197,16 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                                         <Trophy className="w-4 h-4 text-primary" />
                                         <span className="text-muted-foreground">
                                             <strong>Completed:</strong> {formatDate(quest.completedAt)}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {/* Handle repeatable quests that have been reset but were completed */}
+                                {(quest as any)._completionDate && !quest.completedAt && (
+                                    <div className="flex items-center gap-2">
+                                        <Trophy className="w-4 h-4 text-primary" />
+                                        <span className="text-muted-foreground">
+                                            <strong>Completed:</strong> {formatDate((quest as any)._completionDate)}
                                         </span>
                                     </div>
                                 )}

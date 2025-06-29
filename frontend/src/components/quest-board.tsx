@@ -228,7 +228,8 @@ const QuestCard: React.FC<{
           <Badge className={`text-xs font-medium border ${getStatusColor(quest.status)}`}>
             {quest.status === "COMPLETED" ? "Pending Approval" :
               quest.status === "COOLDOWN" ? "On Cooldown" :
-                quest.status.replace("_", " ")}
+                (quest as any)._displayStatus === 'COMPLETED_REPEATABLE' ? "Completed" :
+                  quest.status.replace("_", " ")}
           </Badge>
           {quest.isRepeatable && (
             <Badge className="text-xs font-medium border text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700">
@@ -313,7 +314,23 @@ const QuestCard: React.FC<{
             </div>
           )}
 
+          {/* Handle repeatable quests that have been reset but were completed */}
+          {(quest as any)._displayStatus === 'COMPLETED_REPEATABLE' && (quest as any)._completionDate && (
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+              <Trophy className="w-3 h-3" />
+              <span>Completed: {new Date((quest as any)._completionDate).toLocaleDateString()}</span>
+            </div>
+          )}
+
           {quest.status === "APPROVED" && (
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-medium">
+              <Check className="w-3 h-3" />
+              <span>Approved - Bounty awarded!</span>
+            </div>
+          )}
+
+          {/* Handle repeatable quests that have been reset but were approved */}
+          {(quest as any)._displayStatus === 'COMPLETED_REPEATABLE' && (quest as any)._approvalStatus === 'APPROVED' && (
             <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-medium">
               <Check className="w-3 h-3" />
               <span>Approved - Bounty awarded!</span>
@@ -381,7 +398,7 @@ const QuestCard: React.FC<{
             </Button>
           )}
 
-          {quest.status === "CLAIMED" && quest.claimerName === currentUser.name && (
+          {quest.status === "CLAIMED" && currentUser.id === quest.claimedBy && (
             <Button
               onClick={() => handleAction("complete")}
               disabled={actionLoading === "complete"}
@@ -425,6 +442,15 @@ const QuestCard: React.FC<{
                 : "text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border-red-200 dark:border-red-700"
                 }`}>
                 {quest.status === "APPROVED" ? "✓ Completed" : "✗ Rejected"}
+              </Badge>
+            </div>
+          )}
+
+          {/* Show completion status for repeatable quests that have been reset */}
+          {(quest as any)._displayStatus === 'COMPLETED_REPEATABLE' && (
+            <div className="flex-1 flex items-center justify-center">
+              <Badge className="text-xs font-medium border text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 border-green-200 dark:border-green-700">
+                ✓ Completed
               </Badge>
             </div>
           )}
@@ -570,9 +596,8 @@ const QuestBoard: React.FC = () => {
           })
           break
         case "completed":
-          // Show user's own completed quests (approved/rejected)
-          questData = await questService.getMyClaimedQuests({
-            status: "APPROVED,REJECTED",
+          // Show user's own completed quests (approved/rejected) and repeatable quests that have been reset
+          questData = await questService.getMyCompletionHistory({
             ...params
           })
           break
