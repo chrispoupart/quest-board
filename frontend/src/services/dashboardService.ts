@@ -57,7 +57,7 @@ export const dashboardService = {
      * Get user dashboard stats
      */
     async getUserStats(): Promise<UserStats> {
-        const response = await api.get<ApiResponse<UserStats>>('/api/users/me/stats');
+        const response = await api.get<ApiResponse<UserStats>>('/users/me/stats');
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch user stats');
