@@ -1,3 +1,17 @@
+## [2.5.0](https://github.com/chrispoupart/quest-board/compare/v2.4.1...v2.5.0) (2025-06-29)
+
+### Features
+
+* **theme:** 💄 add theme toggle and context for dynamic theming ([b25c94e](https://github.com/chrispoupart/quest-board/commit/b25c94e64a92439b38d2e08901cbcd3825d0deb3))
+
+### Bug Fixes
+
+* **header:** 💄 add mobile navigation menu ([93590e2](https://github.com/chrispoupart/quest-board/commit/93590e212ec27909565416c17e1557ad491ca5d7))
+* **header:** 💄 update character route to profile ([03e74b9](https://github.com/chrispoupart/quest-board/commit/03e74b98811a684c74b9922641788acbab6b0a7d))
+* **header:** 💄 update navigation link to quests ([60b77c5](https://github.com/chrispoupart/quest-board/commit/60b77c5eaa3d42f0e6fb591513a21c8c573d564a))
+* **quest-board:** 💄 add admin/editor approval buttons for quests ([46c0078](https://github.com/chrispoupart/quest-board/commit/46c0078ac7e23605412501c753f4aa6b3090bd02))
+* **store:** 💄 update balance display to use bountyBalance ([5766504](https://github.com/chrispoupart/quest-board/commit/5766504af72c708609371185bceeb76f885aef9c))
+
 ## [2.4.1](https://github.com/chrispoupart/quest-board/compare/v2.4.0...v2.4.1) (2025-06-29)
 
 ### Bug Fixes
