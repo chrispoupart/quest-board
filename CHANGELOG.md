@@ -1,3 +1,9 @@
+## [2.4.0](https://github.com/chrispoupart/quest-board/compare/v2.3.0...v2.4.0) (2025-06-29)
+
+### Features
+
+* **pagination:** 💄 add pagination to quest management ([dbc0535](https://github.com/chrispoupart/quest-board/commit/dbc0535571a129c00ac53f7dc6c2047567c3ca4b))
+
 ## [2.3.0](https://github.com/chrispoupart/quest-board/compare/v2.2.0...v2.3.0) (2025-06-28)
 
 ### Features
