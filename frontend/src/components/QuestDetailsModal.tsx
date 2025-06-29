@@ -33,28 +33,28 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
     const getDifficultyColor = (difficulty: "EASY" | "MEDIUM" | "HARD") => {
         switch (difficulty) {
             case "EASY":
-                return "text-emerald-600 bg-emerald-50 border-emerald-200";
+            return "text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700";
             case "MEDIUM":
-                return "text-amber-600 bg-amber-50 border-amber-200";
+            return "text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 border-yellow-300 dark:border-yellow-700";
             case "HARD":
-                return "text-red-600 bg-red-50 border-red-200";
+            return "text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700";
         }
     };
 
     const getStatusColor = (status: Quest["status"]) => {
         switch (status) {
             case "AVAILABLE":
-                return "text-blue-700 bg-blue-100 border-blue-300";
+            return "text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700";
             case "CLAIMED":
-                return "text-orange-700 bg-orange-100 border-orange-300";
+            return "text-orange-700 dark:text-orange-400 bg-orange-100 dark:bg-orange-900 border-orange-300 dark:border-orange-700";
             case "COMPLETED":
-                return "text-purple-700 bg-purple-100 border-purple-300";
+            return "text-purple-700 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700";
             case "APPROVED":
-                return "text-green-700 bg-green-100 border-green-300";
+            return "text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700";
             case "REJECTED":
-                return "text-red-700 bg-red-100 border-red-300";
+            return "text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700";
             case "COOLDOWN":
-                return "text-purple-700 bg-purple-100 border-purple-300";
+            return "text-gray-700 dark:text-gray-400 bg-gray-100 dark:bg-gray-900 border-gray-300 dark:border-gray-700";
         }
     };
 
@@ -101,21 +101,21 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
     const difficulty = getDifficultyFromBounty(quest.bounty);
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"> {/* Use Tailwind's opacity shorthand */}
+            <div className="bg-card text-card-foreground rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-border">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between p-6 border-b border-border">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center">
-                            <Scroll className="w-6 h-6 text-white" />
+                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                            <Scroll className="w-6 h-6 text-primary-foreground" />
                         </div>
-                        <h2 className="text-2xl font-bold text-amber-900 font-serif">Quest Details</h2>
+                        <h2 className="text-2xl font-bold text-foreground font-serif">Quest Details</h2>
                     </div>
                     <Button
                         onClick={onClose}
                         variant="ghost"
                         size="sm"
-                        className="text-gray-500 hover:text-gray-700"
+                        className="text-muted-foreground hover:text-foreground"
                     >
                         <X className="w-5 h-5" />
                     </Button>
@@ -125,7 +125,7 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                 <div className="p-6 space-y-6">
                     {/* Quest Title and Basic Info */}
                     <div>
-                        <h3 className="text-xl font-bold text-amber-900 mb-3">{quest.title}</h3>
+                        <h3 className="text-xl font-bold text-foreground mb-3">{quest.title}</h3>
 
                         <div className="flex flex-wrap gap-2 mb-4">
                             <Badge className={`text-sm font-medium border ${getDifficultyColor(difficulty)}`}>
@@ -137,13 +137,13 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                                         quest.status.replace("_", " ")}
                             </Badge>
                             {quest.isRepeatable && (
-                                <Badge className="text-sm font-medium border text-purple-600 bg-purple-50 border-purple-200">
+                                <Badge className="text-sm font-medium border text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700">
                                     🔄 Repeatable
                                 </Badge>
                             )}
                         </div>
 
-                        <div className="flex items-center gap-4 text-amber-700 font-bold mb-4">
+                        <div className="flex items-center gap-4 text-primary font-bold mb-4">
                             <div className="flex items-center gap-1">
                                 <Coins className="w-5 h-5" />
                                 <span className="text-lg">{quest.bounty} Bounty</span>
@@ -153,9 +153,9 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
 
                     {/* Quest Description */}
                     <div>
-                        <h4 className="text-lg font-semibold text-amber-900 mb-2">Quest Requirements</h4>
-                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                            <p className="text-amber-800 leading-relaxed whitespace-pre-wrap">
+                        <h4 className="text-lg font-semibold text-foreground mb-2">Quest Requirements</h4>
+                        <div className="bg-muted border border-border rounded-lg p-4">
+                            <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
                                 {quest.description || "No detailed requirements provided."}
                             </p>
                         </div>
@@ -164,27 +164,27 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                     {/* Quest Metadata */}
                     <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-3">
-                            <h4 className="text-lg font-semibold text-amber-900">Quest Information</h4>
+                            <h4 className="text-lg font-semibold text-foreground">Quest Information</h4>
 
                             <div className="space-y-2 text-sm">
                                 <div className="flex items-center gap-2">
-                                    <User className="w-4 h-4 text-amber-600" />
-                                    <span className="text-amber-700">
+                                    <User className="w-4 h-4 text-primary" />
+                                    <span className="text-muted-foreground">
                                         <strong>Created by:</strong> {quest.creator?.name || `User ${quest.createdBy}`}
                                     </span>
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                    <Calendar className="w-4 h-4 text-amber-600" />
-                                    <span className="text-amber-700">
+                                    <Calendar className="w-4 h-4 text-primary" />
+                                    <span className="text-muted-foreground">
                                         <strong>Created:</strong> {formatDate(quest.createdAt)}
                                     </span>
                                 </div>
 
                                 {quest.claimedAt && (
                                     <div className="flex items-center gap-2">
-                                        <Shield className="w-4 h-4 text-amber-600" />
-                                        <span className="text-amber-700">
+                                        <Shield className="w-4 h-4 text-primary" />
+                                        <span className="text-muted-foreground">
                                             <strong>Claimed:</strong> {formatDate(quest.claimedAt)}
                                             {quest.claimer?.name && ` by ${quest.claimer.name}`}
                                         </span>
@@ -193,8 +193,8 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
 
                                 {quest.completedAt && (
                                     <div className="flex items-center gap-2">
-                                        <Trophy className="w-4 h-4 text-amber-600" />
-                                        <span className="text-amber-700">
+                                        <Trophy className="w-4 h-4 text-primary" />
+                                        <span className="text-muted-foreground">
                                             <strong>Completed:</strong> {formatDate(quest.completedAt)}
                                         </span>
                                     </div>
@@ -205,13 +205,13 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                         {/* Repeatable Quest Information */}
                         {quest.isRepeatable && (
                             <div className="space-y-3">
-                                <h4 className="text-lg font-semibold text-purple-900">Repeatable Quest Details</h4>
+                                <h4 className="text-lg font-semibold text-foreground">Repeatable Quest Details</h4>
 
                                 <div className="space-y-2 text-sm">
                                     {quest.cooldownDays && (
                                         <div className="flex items-center gap-2">
-                                            <Clock className="w-4 h-4 text-purple-600" />
-                                            <span className="text-purple-700">
+                                            <Clock className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                                            <span className="text-muted-foreground">
                                                 <strong>Cooldown Period:</strong> {formatCooldownPeriod(quest.cooldownDays)}
                                             </span>
                                         </div>
@@ -219,8 +219,8 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
 
                                     {quest.lastCompletedAt && (
                                         <div className="flex items-center gap-2">
-                                            <Calendar className="w-4 h-4 text-purple-600" />
-                                            <span className="text-purple-700">
+                                            <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                                            <span className="text-muted-foreground">
                                                 <strong>Last Completed:</strong> {formatDate(quest.lastCompletedAt)}
                                             </span>
                                         </div>
@@ -228,8 +228,8 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
 
                                     {quest.status === 'COOLDOWN' && (
                                         <div className="flex items-center gap-2">
-                                            <AlertCircle className="w-4 h-4 text-red-600" />
-                                            <span className="text-red-600 font-medium">
+                                            <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                                            <span className="text-red-600 dark:text-red-400 font-medium">
                                                 <strong>Available in:</strong> {getCooldownTimeRemaining(quest)}
                                             </span>
                                         </div>
@@ -237,8 +237,8 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
 
                                     {quest.status === 'AVAILABLE' && quest.lastCompletedAt && (
                                         <div className="flex items-center gap-2">
-                                            <Check className="w-4 h-4 text-green-600" />
-                                            <span className="text-green-600 font-medium">
+                                            <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                                            <span className="text-green-600 dark:text-green-400 font-medium">
                                                 <strong>Status:</strong> Ready to repeat!
                                             </span>
                                         </div>
@@ -250,11 +250,11 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
 
                     {/* Action Buttons */}
                     {onAction && currentUser && (
-                        <div className="flex gap-3 pt-4 border-t border-gray-200">
+                        <div className="flex gap-3 pt-4 border-t border-border">
                             {quest.status === "AVAILABLE" && (
                                 <Button
                                     onClick={() => onAction(quest.id, "claim")}
-                                    className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-medium"
+                                    className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
                                 >
                                     <Shield className="w-4 h-4 mr-2" />
                                     Accept Quest
@@ -264,7 +264,7 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                             {quest.status === "COOLDOWN" && (
                                 <Button
                                     disabled={true}
-                                    className="flex-1 bg-gray-400 text-white font-medium cursor-not-allowed"
+                                    className="flex-1 bg-muted text-muted-foreground font-medium cursor-not-allowed"
                                 >
                                     <Clock className="w-4 h-4 mr-2" />
                                     On Cooldown
@@ -274,7 +274,7 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                             {quest.status === "CLAIMED" && quest.claimer?.name === currentUser.name && (
                                 <Button
                                     onClick={() => onAction(quest.id, "complete")}
-                                    className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium"
+                                    className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 text-white dark:text-green-100 font-medium"
                                 >
                                     <Trophy className="w-4 h-4 mr-2" />
                                     Report Success
@@ -285,14 +285,14 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                                 <div className="flex gap-2 flex-1">
                                     <Button
                                         onClick={() => onAction(quest.id, "approve")}
-                                        className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium"
+                                        className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 text-white dark:text-green-100 font-medium"
                                     >
                                         <Check className="w-4 h-4 mr-2" />
                                         Approve
                                     </Button>
                                     <Button
                                         onClick={() => onAction(quest.id, "reject")}
-                                        className="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium"
+                                        className="flex-1 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 text-white dark:text-red-100 font-medium"
                                     >
                                         <X className="w-4 h-4 mr-2" />
                                         Reject
@@ -303,8 +303,8 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                             {(quest.status === "APPROVED" || quest.status === "REJECTED") && (
                                 <div className="flex-1 flex items-center justify-center">
                                     <Badge className={`text-sm font-medium border ${quest.status === "APPROVED"
-                                            ? "text-green-600 bg-green-50 border-green-200"
-                                            : "text-red-600 bg-red-50 border-red-200"
+                                            ? "text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700"
+                                            : "text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700"
                                         }`}>
                                         {quest.status === "APPROVED" ? "✓ Completed" : "✗ Rejected"}
                                     </Badge>
@@ -314,7 +314,7 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                             <Button
                                 onClick={onClose}
                                 variant="outline"
-                                className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                                className="border-border text-muted-foreground hover:bg-muted"
                             >
                                 Close
                             </Button>
