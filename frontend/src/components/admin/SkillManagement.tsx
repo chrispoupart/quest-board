@@ -190,8 +190,8 @@ const SkillManagement: React.FC = () => {
   if (loading && skills.length === 0) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
-        <span className="ml-3 text-amber-600">Loading skills...</span>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="ml-3 text-primary">Loading skills...</span>
       </div>
     );
   }
@@ -201,17 +201,17 @@ const SkillManagement: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center">
-            <Target className="w-6 h-6 text-white" />
+          <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+            <Target className="w-6 h-6 text-primary-foreground" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-amber-900">Skill Management</h2>
-            <p className="text-amber-700">Manage skills and user skill levels</p>
+            <h2 className="text-2xl font-bold text-foreground">Skill Management</h2>
+            <p className="text-muted-foreground">Manage skills and user skill levels</p>
           </div>
         </div>
         <Button
           onClick={() => setShowCreateForm(true)}
-          className="bg-amber-600 hover:bg-amber-700 text-white"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Skill
@@ -220,9 +220,9 @@ const SkillManagement: React.FC = () => {
 
       {/* Error/Success Messages */}
       {error && (
-        <Card className="border-2 border-red-200 bg-red-50">
+        <Card className="border-2 border-destructive bg-destructive/10">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-red-800">
+            <div className="flex items-center gap-2 text-destructive">
               <AlertCircle className="w-5 h-5" />
               <span className="font-medium">Error: {error}</span>
             </div>
@@ -231,9 +231,9 @@ const SkillManagement: React.FC = () => {
       )}
 
       {success && (
-        <Card className="border-2 border-green-200 bg-green-50">
+        <Card className="border-2 border-green-500 bg-green-500/10">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-green-800">
+            <div className="flex items-center gap-2 text-green-500">
               <CheckCircle className="w-5 h-5" />
               <span className="font-medium">{success}</span>
             </div>
@@ -243,177 +243,123 @@ const SkillManagement: React.FC = () => {
 
       {/* Create/Edit Skill Form */}
       {(showCreateForm || editingSkill) && (
-        <Card className="border-2 border-amber-200">
+        <Card className="border-2 border-border bg-card">
           <CardHeader>
-            <CardTitle className="text-amber-900">
+            <CardTitle className="text-foreground">
               {editingSkill ? 'Edit Skill' : 'Create New Skill'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="skillName" className="text-amber-900">Skill Name</Label>
+            <div>
+              <Label htmlFor="skill-name" className="text-foreground">Skill Name</Label>
               <Input
-                id="skillName"
+                id="skill-name"
                 value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Enter skill name"
-                className="border-amber-300 focus:border-amber-500 focus:ring-amber-500"
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="mt-1 bg-background border-border"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="skillDescription" className="text-amber-900">Description</Label>
+            <div>
+              <Label htmlFor="skill-desc" className="text-foreground">Skill Description</Label>
               <Textarea
-                id="skillDescription"
+                id="skill-desc"
                 value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Enter skill description"
-                className="border-amber-300 focus:border-amber-500 focus:ring-amber-500"
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="mt-1 bg-background border-border"
               />
             </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={editingSkill ? handleUpdateSkill : handleCreateSkill}
-                disabled={loading || !formData.name.trim()}
-                className="bg-amber-600 hover:bg-amber-700 text-white"
-              >
-                <Save className="w-4 h-4 mr-2" />
-                {editingSkill ? 'Update Skill' : 'Create Skill'}
-              </Button>
-              <Button
-                onClick={resetForm}
-                variant="outline"
-                className="border-amber-300 text-amber-700 hover:bg-amber-50"
-              >
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={resetForm}>
                 <X className="w-4 h-4 mr-2" />
                 Cancel
+              </Button>
+              <Button
+                onClick={editingSkill ? handleUpdateSkill : handleCreateSkill}
+                disabled={loading}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {editingSkill ? 'Save Changes' : 'Create Skill'}
               </Button>
             </div>
           </CardContent>
         </Card>
       )}
 
-      <div className="grid lg:grid-cols-2 gap-6">
+      {/* Main Content */}
+      <div className="grid md:grid-cols-3 gap-6">
         {/* Skills List */}
-        <Card className="border-2 border-amber-200">
-          <CardHeader>
-            <CardTitle className="text-amber-900 flex items-center gap-2">
-              <Target className="w-5 h-5" />
-              Available Skills
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {skills.length === 0 ? (
-                <p className="text-amber-600 text-center py-4">No skills available.</p>
-              ) : (
-                skills.map((skill) => (
-                  <div key={skill.id} className="flex items-center justify-between p-3 border border-amber-200 rounded-lg bg-white">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-amber-900">{skill.name}</h4>
-                      {skill.description && (
-                        <p className="text-sm text-amber-600 mt-1">{skill.description}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setEditingSkill(skill);
-                          setFormData({ name: skill.name, description: skill.description || '' });
-                        }}
-                        className="border-amber-300 text-amber-700 hover:bg-amber-50"
-                      >
-                        <Edit className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDeleteSkill(skill.id)}
-                        className="border-red-300 text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
+        <div className="md:col-span-1">
+          <Card className="border-2 border-border bg-card">
+            <CardHeader>
+              <CardTitle className="text-foreground">All Skills</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {skills.map(skill => (
+                <div key={skill.id} className="p-3 rounded-lg flex justify-between items-center bg-background border border-border">
+                  <div>
+                    <h3 className="font-semibold text-foreground">{skill.name}</h3>
+                    <p className="text-sm text-muted-foreground">{skill.description}</p>
                   </div>
-                ))
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="icon" onClick={() => { setEditingSkill(skill); setFormData({ name: skill.name, description: skill.description || '' }); setShowCreateForm(true); }}>
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button variant="destructive" size="icon" onClick={() => handleDeleteSkill(skill.id)}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* User Skills Management */}
-        <Card className="border-2 border-amber-200">
-          <CardHeader>
-            <CardTitle className="text-amber-900 flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              User Skills
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* User Selector */}
-            <div className="space-y-2">
-              <Label className="text-amber-900">Select User</Label>
-              <select
-                value={selectedUser || ''}
-                onChange={(e) => handleUserSelect(Number(e.target.value))}
-                className="w-full p-2 border border-amber-300 rounded-md focus:border-amber-500 focus:ring-amber-500"
-              >
-                <option value="">Choose a user...</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.characterName || user.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* User Skills */}
-            {selectedUser && (
-              <div className="space-y-3">
-                <h4 className="font-medium text-amber-900">Skill Levels</h4>
-                {skills.length === 0 ? (
-                  <p className="text-amber-600 text-center py-4">No skills available.</p>
-                ) : (
-                  skills.map((skill) => {
-                    const level = getUserSkillLevel(skill.id);
-                    const levelColor = getSkillLevelColor(level);
-
-                    return (
-                      <div key={skill.id} className="flex items-center justify-between p-3 border border-amber-200 rounded-lg bg-white">
-                        <div className="flex-1">
-                          <h5 className="font-medium text-amber-900">{skill.name}</h5>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge className={`text-xs font-medium border ${levelColor}`}>
-                            Level {level}
-                          </Badge>
-                          <div className="flex items-center gap-1">
-                            {[1, 2, 3, 4, 5].map((skillLevel) => (
-                              <Button
-                                key={skillLevel}
-                                size="sm"
-                                variant={level === skillLevel ? "default" : "outline"}
-                                onClick={() => handleUpdateUserSkill(selectedUser, skill.id, skillLevel)}
-                                className={`w-8 h-8 p-0 ${
-                                  level === skillLevel
-                                    ? 'bg-amber-600 text-white'
-                                    : 'border-amber-300 text-amber-700 hover:bg-amber-50'
-                                }`}
-                              >
-                                {skillLevel}
-                              </Button>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
+        {/* User Skill Levels */}
+        <div className="md:col-span-2">
+          <Card className="border-2 border-border bg-card">
+            <CardHeader>
+              <CardTitle className="text-foreground">User Skill Levels</CardTitle>
+              <div className="flex items-center gap-2 mt-2">
+                <Users className="w-4 h-4 text-muted-foreground" />
+                <select
+                  onChange={(e) => handleUserSelect(Number(e.target.value))}
+                  className="p-2 border rounded-md bg-background border-border text-foreground"
+                >
+                  <option>Select a user</option>
+                  {users.map(user => (
+                    <option key={user.id} value={user.id}>{user.name}</option>
+                  ))}
+                </select>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent>
+              {selectedUser && (
+                <div className="space-y-2">
+                  {skills.map(skill => (
+                    <div key={skill.id} className="p-3 rounded-lg flex justify-between items-center bg-background border border-border">
+                      <div>
+                        <h3 className="font-semibold text-foreground">{skill.name}</h3>
+                        <p className="text-sm text-muted-foreground">Current Level: {getUserSkillLevel(skill.id)}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          defaultValue={getUserSkillLevel(skill.id)}
+                          onBlur={(e) => handleUpdateUserSkill(selectedUser, skill.id, Number(e.target.value))}
+                          className="w-20 bg-input border-border"
+                        />
+                        <Badge className={`border ${getSkillLevelColor(getUserSkillLevel(skill.id))}`}>
+                          Level {getUserSkillLevel(skill.id)}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
