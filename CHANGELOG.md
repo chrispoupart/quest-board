@@ -1,3 +1,9 @@
+## [2.9.0](https://github.com/chrispoupart/quest-board/compare/v2.8.0...v2.9.0) (2025-06-30)
+
+### Features
+
+* **frontend:** 🍱 add PWA assets and social media metadata ([f71a2af](https://github.com/chrispoupart/quest-board/commit/f71a2af019857f26af4f9d4e6d6b50a6091e2a42))
+
 ## [2.8.0](https://github.com/chrispoupart/quest-board/compare/v2.7.0...v2.8.0) (2025-06-29)
 
 ### Features
