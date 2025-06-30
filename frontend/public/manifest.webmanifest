@@ -1,0 +1,21 @@
+{
+  "name": "Quest Board",
+  "short_name": "QuestBoard",
+  "description": "A fantasy quest board app for managing and tracking quests.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#2d2a4a",
+  "theme_color": "#2d2a4a",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
