@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { ApiResponse } from '../types';
-
-const prisma = new PrismaClient();
+import { prisma } from '../index';
 
 export class StoreController {
     /**

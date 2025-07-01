@@ -12,6 +12,8 @@ router.use(authenticateToken);
 router.get('/', DashboardController.getUserDashboard);
 router.get('/stats', DashboardController.getUserStats);
 router.get('/quests', validatePagination, DashboardController.getQuestListing);
+router.get('/recent-activity', DashboardController.getRecentActivity);
+router.get('/active-quests', DashboardController.getActiveQuests);
 
 // Admin dashboard routes
 router.get('/admin', requireAdmin, DashboardController.getAdminDashboard);

@@ -1,10 +1,8 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { UserRole, AuthUser, ApiResponse, UpdateUserRequest } from '../types';
 import { validateUserRole } from '../utils/validation';
 import { calculateLevel } from '../utils/leveling';
-
-const prisma = new PrismaClient();
+import { prisma } from '../index';
 
 export class UserController {
     /**

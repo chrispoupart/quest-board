@@ -1,4 +1,5 @@
-// Set NODE_ENV and JWT_SECRET before any imports
+// Set DATABASE_URL for test environment BEFORE any imports
+process.env['DATABASE_URL'] = `file:${process.cwd()}/prisma/test.db`;
 process.env['NODE_ENV'] = 'test';
 process.env['JWT_SECRET'] = 'test-secret-key';
 process.env['JWT_REFRESH_SECRET'] = 'test-refresh-secret-key-that-is-long-enough-for-security';
@@ -8,8 +9,12 @@ import * as jwt from 'jsonwebtoken';
 import * as childProcess from 'child_process';
 import { promisify } from 'util';
 import * as fs from 'fs';
+import path from 'path';
+import { exec } from 'child_process';
 
-const execAsync = promisify(childProcess.exec);
+
+
+const execAsync = promisify(exec);
 
 // Internal variable for the Prisma client
 let testPrisma: PrismaClient | undefined = undefined;
@@ -50,10 +55,7 @@ export const setupTestDatabase = async (): Promise<void> => {
     
     try {
         const dbPath = 'prisma/test.db';
-        const absoluteDbPath = `file:${process.cwd()}/${dbPath}`;
         
-        // Set the DATABASE_URL for the app and Prisma client
-        process.env['DATABASE_URL'] = absoluteDbPath;
         console.log('🗃️  Using DATABASE_URL:', process.env['DATABASE_URL']);
         console.log('🗃️  Current working directory:', process.cwd());
         
@@ -84,13 +86,7 @@ export const setupTestDatabase = async (): Promise<void> => {
         
         // Connect Prisma client
         console.log('🔌 Connecting Prisma client...');
-        testPrisma = new PrismaClient({
-            datasources: {
-                db: {
-                    url: absoluteDbPath
-                }
-            }
-        });
+        testPrisma = new PrismaClient();
         await testPrisma.$connect();
         console.log('✅ Test database setup complete');
     } catch (error) {

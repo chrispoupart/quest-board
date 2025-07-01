@@ -52,7 +52,10 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 
         next();
     } catch (error) {
-        console.error('Token verification failed:', error);
+        // Only log in non-test environments to reduce noise during testing
+        if (process.env['NODE_ENV'] !== 'test') {
+            console.error('Token verification failed:', error);
+        }
         res.status(403).json({
             success: false,
             error: { message: 'Invalid or expired token' }

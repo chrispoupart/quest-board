@@ -111,7 +111,10 @@ export const refreshTokenHandler = async (req: Request, res: Response): Promise<
     const { accessToken: newAccessToken } = await AuthService.refreshToken(refreshToken);
     return res.json({ success: true, data: { accessToken: newAccessToken } });
   } catch (error) {
-    console.error('Refresh token error:', error);
+    // Only log in non-test environments to reduce noise during testing
+    if (process.env['NODE_ENV'] !== 'test') {
+      console.error('Refresh token error:', error);
+    }
     // Differentiate between invalid token and other errors if needed
     if (error instanceof Error && error.message.includes('Invalid token') ) {
         return res.status(401).json({ success: false, error: { message: 'Invalid or expired refresh token' } });
@@ -214,7 +217,10 @@ export const googleAuth = async (req: Request, res: Response): Promise<Response>
     });
 
   } catch (error) {
-    console.error('Authentication error:', error);
+    // Only log in non-test environments to reduce noise during testing
+    if (process.env['NODE_ENV'] !== 'test') {
+      console.error('Authentication error:', error);
+    }
     return res.status(500).json({ 
       success: false, 
       error: { message: 'Authentication failed' } 

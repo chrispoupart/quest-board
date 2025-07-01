@@ -1,9 +1,7 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { UserRole, ApiResponse, CreateSkillRequest, UpdateSkillRequest, CreateUserSkillRequest, UpdateUserSkillRequest } from '../types';
 import { validateUserRole } from '../utils/validation';
-
-const prisma = new PrismaClient();
+import { prisma } from '../index';
 
 export class SkillController {
     /**

@@ -1,11 +1,9 @@
 import { OAuth2Client } from 'google-auth-library';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { PrismaClient } from '@prisma/client';
 import { UserRole, JwtPayload, GoogleUserInfo, AuthUser } from '../types';
 import { calculateLevel } from '../utils/leveling';
-
-const prisma = new PrismaClient();
+import { prisma } from '../index';
 
 // Initialize Google OAuth2 client
 const googleClient = new OAuth2Client(
@@ -100,7 +98,10 @@ export class AuthService {
                 level: calculateLevel(user.experience)
             };
         } catch (error) {
-            console.error('Google authentication error:', error);
+            // Only log in non-test environments to reduce noise during testing
+            if (process.env['NODE_ENV'] !== 'test') {
+                console.error('Google authentication error:', error);
+            }
             throw new Error('Authentication failed');
         }
     }
@@ -209,7 +210,10 @@ export class AuthService {
 
             return decoded;
         } catch (error) {
-            console.error("Token verification error:", error);
+            // Only log in non-test environments to reduce noise during testing
+            if (process.env['NODE_ENV'] !== 'test') {
+                console.error("Token verification error:", error);
+            }
             throw new Error('Invalid token');
         }
     }
@@ -258,7 +262,10 @@ export class AuthService {
             const newAccessToken = this.generateAccessToken(authUser);
             return { accessToken: newAccessToken };
         } catch (error) {
-            console.error("Token refresh error:", error);
+            // Only log in non-test environments to reduce noise during testing
+            if (process.env['NODE_ENV'] !== 'test') {
+                console.error("Token refresh error:", error);
+            }
             
             // Handle specific JWT errors for proper 401 responses
             if (error instanceof Error) {

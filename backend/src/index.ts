@@ -17,7 +17,16 @@ import { PrismaClient } from '@prisma/client';
 // Load environment variables
 dotenv.config();
 
-export const prisma = new PrismaClient();
+// Create Prisma client with proper configuration for test environment
+export const prisma = process.env['DATABASE_URL'] 
+  ? new PrismaClient({
+      datasources: {
+        db: {
+          url: process.env['DATABASE_URL']
+        }
+      }
+    })
+  : new PrismaClient();
 
 const app = express();
 const PORT = process.env['PORT'] || 8000;

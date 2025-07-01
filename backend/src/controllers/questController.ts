@@ -1,9 +1,7 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { ApiResponse, UserRole } from '../types';
 import { calculateQuestExperience, checkLevelUp, getLevelInfo } from '../utils/leveling';
-
-const prisma = new PrismaClient();
+import { prisma } from '../index';
 
 export class QuestController {
     /**
