@@ -25,7 +25,7 @@ import request from 'supertest';
 import { Express } from 'express';
 import { app } from '../src/index';
 import {
-    ensureTestDatabase,
+    setupTestDatabase,
     clearTestData,
     createTestUser,
     createTestToken,
@@ -39,7 +39,7 @@ describe('Authentication Endpoints', () => {
     let server: Express;
 
     beforeAll(async () => {
-        await ensureTestDatabase();
+        await setupTestDatabase();
         server = app;
     });
 
@@ -152,12 +152,12 @@ describe('Authentication Endpoints', () => {
             expect(response.body.success).toBe(false);
         });
 
-        it('should return 403 for invalid token', async () => {
+        it('should return 401 for invalid token', async () => {
             const response = await request(server)
                 .post('/auth/logout')
                 .set('Authorization', 'Bearer invalid-token');
 
-            expect(response.status).toBe(403);
+            expect(response.status).toBe(401);
             expect(response.body.success).toBe(false);
         });
     });

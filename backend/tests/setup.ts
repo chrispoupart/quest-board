@@ -18,7 +18,6 @@ const execAsync = promisify(exec);
 
 // Internal variable for the Prisma client
 let testPrisma: PrismaClient | undefined = undefined;
-let isDbSetup = false; // Track if database has been set up
 
 // Function to get the initialized Prisma client
 export const getTestPrisma = (): PrismaClient => {
@@ -39,39 +38,27 @@ async function waitForFile(path: string, timeoutMs = 3000): Promise<void> {
     }
 }
 
-// Ensure database is set up (only runs once)
-export const ensureTestDatabase = async (): Promise<void> => {
-    if (!isDbSetup) {
-        await setupTestDatabase();
-        isDbSetup = true;
-    }
-};
-
 // Setup function to run before all tests
 export const setupTestDatabase = async (): Promise<void> => {
-    if (isDbSetup) {
-        return; // Already set up
-    }
-    
     try {
         const dbPath = 'prisma/test.db';
-        
+
         console.log('🗃️  Using DATABASE_URL:', process.env['DATABASE_URL']);
         console.log('🗃️  Current working directory:', process.cwd());
-        
+
         // Remove any old test DB files
         await execAsync('rm -f prisma/test.db prisma/test.db-journal');
         console.log('🧹 Cleaned up old test database files');
-        
+
         // Run migrations from the prisma directory, using a relative path
         console.log('🔄 Running database migrations...');
-        await execAsync(`cd prisma && DATABASE_URL="file:./test.db" npx prisma migrate reset --force --skip-seed`);
-        
+        await execAsync(`npx prisma migrate deploy`);
+
         // Wait for the test DB file to appear
         console.log('⏳ Waiting for test database file...');
         await waitForFile(dbPath, 20000);
         console.log('✅ Test database file created');
-        
+
         // Verify the file exists and get its stats
         const fullPath = `${process.cwd()}/${dbPath}`;
         console.log('📁 Full database path:', fullPath);
@@ -80,10 +67,10 @@ export const setupTestDatabase = async (): Promise<void> => {
             const stats = fs.statSync(fullPath);
             console.log('📊 File size:', stats.size, 'bytes');
         }
-        
+
         // Small delay to ensure file is fully written
         await new Promise(res => setTimeout(res, 500));
-        
+
         // Connect Prisma client
         console.log('🔌 Connecting Prisma client...');
         testPrisma = new PrismaClient();
@@ -115,20 +102,22 @@ export const clearTestData = async (): Promise<void> => {
     try {
         // For SQLite, we need to disable foreign key constraints temporarily
         await prisma.$executeRaw`PRAGMA foreign_keys = OFF;`;
-        
+
         // Delete all data from all tables
         await prisma.storeTransaction.deleteMany();
         await prisma.storeItem.deleteMany();
         await prisma.questRequiredSkill.deleteMany();
         await prisma.userSkill.deleteMany();
+        await prisma.questCompletion.deleteMany();
+        await prisma.notification.deleteMany();
         await prisma.approval.deleteMany();
         await prisma.skill.deleteMany();
         await prisma.quest.deleteMany();
         await prisma.user.deleteMany();
-        
+
         // Re-enable foreign key constraints
         await prisma.$executeRaw`PRAGMA foreign_keys = ON;`;
-        
+
         // Force a brief delay to ensure transactions are committed
         await new Promise(resolve => setTimeout(resolve, 10));
     } catch (error) {
@@ -145,7 +134,7 @@ export const createTestUser = async (overrides: any = {}) => {
     userCounter++; // Increment counter for each user creation
     const processId = process.pid; // Add process ID for uniqueness across test runs
     const uniqueId = `${timestamp}-${processId}-${userCounter}-${Math.floor(Math.random() * 10000)}`;
-    
+
     const defaultUser = {
         googleId: `test-google-${uniqueId}`,
         name: 'Test User',

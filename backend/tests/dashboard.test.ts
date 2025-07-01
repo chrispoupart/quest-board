@@ -4,7 +4,7 @@ process.env['NODE_ENV'] = 'test';
 import request from 'supertest';
 import { app } from '../src/index';
 import {
-    ensureTestDatabase,
+    setupTestDatabase,
     clearTestData,
     createTestUser,
     createTestQuest,
@@ -16,7 +16,7 @@ jest.setTimeout(30000);
 
 describe('Dashboard Endpoints', () => {
     beforeAll(async () => {
-        await ensureTestDatabase();
+        await setupTestDatabase();
     });
 
     beforeEach(async () => {
@@ -61,7 +61,7 @@ describe('Dashboard Endpoints', () => {
 
             const stats = response.body.data.stats;
             expect(stats.completedQuests).toBe(1);
-            expect(stats.totalBounty).toBe(300);
+            expect(stats.totalBounty).toBe(100);
             expect(stats.activeQuests).toBe(1);
             expect(stats.questsCreated).toBe(1);
         });

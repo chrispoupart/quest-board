@@ -4,7 +4,7 @@ process.env['NODE_ENV'] = 'test';
 import request from 'supertest';
 import { app } from '../src/index';
 import {
-    ensureTestDatabase,
+    setupTestDatabase,
     clearTestData,
     createTestUser,
     createTestQuest,
@@ -17,7 +17,7 @@ jest.setTimeout(30000);
 
 describe('Admin Quest Approval Endpoints', () => {
     beforeAll(async () => {
-        await ensureTestDatabase();
+        await setupTestDatabase();
     });
 
     beforeEach(async () => {
@@ -41,17 +41,29 @@ describe('Admin Quest Approval Endpoints', () => {
                 bountyBalance: 100
             });
 
+            // Create quest in available state
             const quest = await createTestQuest(questGiver.id, {
-                status: 'COMPLETED',
-                claimedBy: player.id,
                 bounty: 500
             });
 
-            const token = createTestToken(admin.id, admin.email, admin.role);
+            const playerToken = createTestToken(player.id, player.email, player.role);
+
+            // Player claims the quest
+            await request(app)
+                .put(`/quests/${quest.id}/claim`)
+                .set('Authorization', `Bearer ${playerToken}`);
+
+            // Player completes the quest
+            await request(app)
+                .put(`/quests/${quest.id}/complete`)
+                .set('Authorization', `Bearer ${playerToken}`);
+
+            const adminToken = createTestToken(admin.id, admin.email, admin.role);
 
             const response = await request(app)
-                .put(`/quests/${quest.id}/approve`)
-                .set('Authorization', `Bearer ${token}`);
+                .post('/quests/approve-quest')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({ questId: quest.id, aipApproval: true });
 
             expect(response.status).toBe(200);
             expect(response.body.success).toBe(true);
@@ -77,16 +89,25 @@ describe('Admin Quest Approval Endpoints', () => {
             });
 
             const quest = await createTestQuest(questGiver.id, {
-                status: 'COMPLETED',
-                claimedBy: player.id,
                 bounty: 300
             });
 
-            const token = createTestToken(questGiver.id, questGiver.email, questGiver.role);
+            const playerToken = createTestToken(player.id, player.email, player.role);
+
+            // Player claims and completes the quest
+            await request(app)
+                .put(`/quests/${quest.id}/claim`)
+                .set('Authorization', `Bearer ${playerToken}`);
+            await request(app)
+                .put(`/quests/${quest.id}/complete`)
+                .set('Authorization', `Bearer ${playerToken}`);
+
+            const questGiverToken = createTestToken(questGiver.id, questGiver.email, questGiver.role);
 
             const response = await request(app)
-                .put(`/quests/${quest.id}/approve`)
-                .set('Authorization', `Bearer ${token}`);
+                .post('/quests/approve-quest')
+                .set('Authorization', `Bearer ${questGiverToken}`)
+                .send({ questId: quest.id, aipApproval: true });
 
             expect(response.status).toBe(200);
             expect(response.body.success).toBe(true);
@@ -115,16 +136,24 @@ describe('Admin Quest Approval Endpoints', () => {
             });
 
             const quest = await createTestQuest(questGiver.id, {
-                status: 'COMPLETED',
-                claimedBy: player.id,
                 bounty: 200
             });
 
-            const token = createTestToken(otherUser.id, otherUser.email, otherUser.role);
+            const playerToken = createTestToken(player.id, player.email, player.role);
+            // Player claims and completes the quest
+            await request(app)
+                .put(`/quests/${quest.id}/claim`)
+                .set('Authorization', `Bearer ${playerToken}`);
+            await request(app)
+                .put(`/quests/${quest.id}/complete`)
+                .set('Authorization', `Bearer ${playerToken}`);
+
+            const otherUserToken = createTestToken(otherUser.id, otherUser.email, otherUser.role);
 
             const response = await request(app)
-                .put(`/quests/${quest.id}/approve`)
-                .set('Authorization', `Bearer ${token}`);
+                .post('/quests/approve-quest')
+                .set('Authorization', `Bearer ${otherUserToken}`)
+                .send({ questId: quest.id, aipApproval: true });
 
             expect(response.status).toBe(403);
             expect(response.body.success).toBe(false);
@@ -139,15 +168,15 @@ describe('Admin Quest Approval Endpoints', () => {
             });
 
             const quest = await createTestQuest(questGiver.id, {
-                status: 'AVAILABLE',
                 bounty: 100
             });
 
-            const token = createTestToken(admin.id, admin.email, admin.role);
+            const adminToken = createTestToken(admin.id, admin.email, admin.role);
 
             const response = await request(app)
-                .put(`/quests/${quest.id}/approve`)
-                .set('Authorization', `Bearer ${token}`);
+                .post('/quests/approve-quest')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({ questId: quest.id, aipApproval: true });
 
             expect(response.status).toBe(400);
             expect(response.body.success).toBe(false);
@@ -170,17 +199,26 @@ describe('Admin Quest Approval Endpoints', () => {
             });
 
             const quest = await createTestQuest(questGiver.id, {
-                status: 'COMPLETED',
-                claimedBy: player.id,
                 bounty: 200
             });
 
-            const token = createTestToken(admin.id, admin.email, admin.role);
+            const playerToken = createTestToken(player.id, player.email, player.role);
+
+            // Player claims and completes the quest
+            await request(app)
+                .put(`/quests/${quest.id}/claim`)
+                .set('Authorization', `Bearer ${playerToken}`);
+            await request(app)
+                .put(`/quests/${quest.id}/complete`)
+                .set('Authorization', `Bearer ${playerToken}`);
+
+            const adminToken = createTestToken(admin.id, admin.email, admin.role);
 
             const response = await request(app)
-                .put(`/quests/${quest.id}/reject`)
-                .set('Authorization', `Bearer ${token}`)
+                .post('/quests/reject-quest')
+                .set('Authorization', `Bearer ${adminToken}`)
                 .send({
+                    questId: quest.id,
                     reason: 'Quest not completed satisfactorily'
                 });
 
@@ -205,17 +243,25 @@ describe('Admin Quest Approval Endpoints', () => {
             const player = await createTestUser({ role: 'PLAYER' });
 
             const quest = await createTestQuest(questGiver.id, {
-                status: 'COMPLETED',
-                claimedBy: player.id,
                 bounty: 150
             });
 
-            const token = createTestToken(admin.id, admin.email, admin.role);
+            const playerToken = createTestToken(player.id, player.email, player.role);
+
+            // Player claims and completes the quest
+            await request(app)
+                .put(`/quests/${quest.id}/claim`)
+                .set('Authorization', `Bearer ${playerToken}`);
+            await request(app)
+                .put(`/quests/${quest.id}/complete`)
+                .set('Authorization', `Bearer ${playerToken}`);
+
+            const adminToken = createTestToken(admin.id, admin.email, admin.role);
 
             const response = await request(app)
-                .put(`/quests/${quest.id}/reject`)
-                .set('Authorization', `Bearer ${token}`)
-                .send({}); // No reason provided
+                .post('/quests/reject-quest')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({ questId: quest.id }); // No reason provided
 
             expect(response.status).toBe(400);
             expect(response.body.success).toBe(false);

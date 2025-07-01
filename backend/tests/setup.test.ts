@@ -2,7 +2,7 @@
 process.env['NODE_ENV'] = 'test';
 
 import {
-    ensureTestDatabase,
+    setupTestDatabase,
     teardownTestDatabase,
     clearTestData,
     createTestUser,
@@ -15,7 +15,7 @@ jest.setTimeout(30000);
 
 describe('Test Setup', () => {
     beforeAll(async () => {
-        await ensureTestDatabase();
+        await setupTestDatabase();
     });
 
     afterAll(async () => {

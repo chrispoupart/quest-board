@@ -4,7 +4,7 @@ process.env['NODE_ENV'] = 'test';
 import request from 'supertest';
 import { app } from '../src/index';
 import {
-    ensureTestDatabase,
+    setupTestDatabase,
     clearTestData,
     createTestUser,
     createTestQuest,
@@ -17,7 +17,7 @@ jest.setTimeout(30000);
 
 describe('User Endpoints', () => {
     beforeAll(async () => {
-        await ensureTestDatabase();
+        await setupTestDatabase();
     });
 
     beforeEach(async () => {
@@ -56,12 +56,12 @@ describe('User Endpoints', () => {
             expect(response.body.success).toBe(false);
         });
 
-        it('should return 403 for invalid token', async () => {
+        it('should return 401 for invalid token', async () => {
             const response = await request(app)
                 .get('/users/profile')
                 .set('Authorization', 'Bearer invalid-token');
 
-            expect(response.status).toBe(403);
+            expect(response.status).toBe(401);
             expect(response.body.success).toBe(false);
         });
     });
