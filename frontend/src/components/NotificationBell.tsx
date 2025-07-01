@@ -16,8 +16,7 @@ const NotificationBell: React.FC = () => {
         isSupported,
         permission,
         requestPermission,
-        showQuestNotification,
-        showLevelUpNotification
+        showQuestNotification
     } = usePushNotifications();
 
     const fetchUnreadCount = async () => {
