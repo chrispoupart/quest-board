@@ -281,13 +281,13 @@ describe('Admin Quest Approval Endpoints', () => {
             // Create quests with different statuses
             const pendingQuest1 = await createTestQuest(questGiver.id, {
                 title: 'Pending Quest 1',
-                status: 'COMPLETED',
+                status: 'PENDING_APPROVAL',
                 claimedBy: player.id,
                 bounty: 100
             });
             const pendingQuest2 = await createTestQuest(questGiver.id, {
                 title: 'Pending Quest 2',
-                status: 'COMPLETED',
+                status: 'PENDING_APPROVAL',
                 claimedBy: player.id,
                 bounty: 200
             });

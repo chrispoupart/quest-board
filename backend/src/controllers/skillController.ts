@@ -592,6 +592,15 @@ export class SkillController {
                 return;
             }
 
+            const skillId = parseInt(req.params['skillId'] || '');
+            if (isNaN(skillId)) {
+                res.status(400).json({
+                    success: false,
+                    error: { message: 'Invalid skill ID' }
+                } as ApiResponse);
+                return;
+            }
+
             const { level }: UpdateUserSkillRequest = req.body;
 
             if (!level || typeof level !== 'number' || level < 1 || level > 5) {
@@ -611,18 +620,6 @@ export class SkillController {
                 res.status(404).json({
                     success: false,
                     error: { message: 'User not found' }
-                } as ApiResponse);
-                return;
-            }
-
-            // For this endpoint, we need skillId in the body or URL
-            // Let me check if it's in the body or if we need to modify the route
-            const { skillId } = req.body;
-
-            if (!skillId || typeof skillId !== 'number') {
-                res.status(400).json({
-                    success: false,
-                    error: { message: 'Skill ID is required' }
                 } as ApiResponse);
                 return;
             }

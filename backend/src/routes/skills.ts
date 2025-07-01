@@ -25,6 +25,5 @@ router.delete('/:id', isAdmin, SkillController.deleteSkill);
 router.get('/my-skill/:skillId/level', SkillController.getMySkillLevel);
 router.get('/user/:userId', SkillController.getUserSkills);
 router.get('/user/:userId/:skillId/level', SkillController.getUserSkillLevel);
-router.delete('/user/:userId/:skillId', SkillController.removeUserSkill);
 
 export default router;

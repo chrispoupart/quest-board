@@ -1251,7 +1251,7 @@ export class QuestController {
 
             const [quests, total] = await Promise.all([
                 prisma.quest.findMany({
-                    where: { status: 'COMPLETED' },
+                    where: { status: 'PENDING_APPROVAL' },
                     include: {
                         creator: {
                             select: {
@@ -1274,7 +1274,7 @@ export class QuestController {
                     skip,
                     take: limit,
                 }),
-                prisma.quest.count({ where: { status: 'COMPLETED' } })
+                prisma.quest.count({ where: { status: 'PENDING_APPROVAL' } })
             ]);
 
             const response = {
