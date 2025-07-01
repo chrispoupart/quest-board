@@ -592,7 +592,15 @@ export class SkillController {
                 return;
             }
 
-            const skillId = parseInt(req.params['skillId'] || '');
+            // Get skillId from URL parameters (for PUT route) or request body (for POST route)
+            let skillId: number;
+            if (req.params['skillId']) {
+                skillId = parseInt(req.params['skillId'] || '');
+            } else {
+                const { skillId: bodySkillId } = req.body;
+                skillId = parseInt(bodySkillId || '');
+            }
+
             if (isNaN(skillId)) {
                 res.status(400).json({
                     success: false,
