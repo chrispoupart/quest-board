@@ -1,26 +1,29 @@
 import { Router } from 'express';
 import { SkillController } from '../controllers/skillController';
-import { authenticateToken } from '../middleware/authMiddleware';
+import { authMiddleware, isAdmin } from '../middleware/authMiddleware';
+import { validateRequiredFields } from '../middleware/validationMiddleware';
 
 const router = Router();
 
-// Apply auth middleware to all routes
-router.use(authenticateToken);
+// Apply authentication middleware to all skill routes
+router.use(authMiddleware);
 
-// Skill management routes (admin only)
-router.get('/', SkillController.getAllSkills);
-router.get('/quest-creation', SkillController.getSkillsForQuestCreation);
-router.get('/available', SkillController.getAvailableSkills);
-router.post('/', SkillController.createSkill);
-router.put('/:id', SkillController.updateSkill);
-router.delete('/:id', SkillController.deleteSkill);
+// Public routes (for all authenticated users)
+router.get('/', SkillController.getAvailableSkills);
+router.get('/my-skills', SkillController.getMySkills);
+router.post('/user/:userId', isAdmin, SkillController.updateUserSkill); // Admin can add/update skills for a user
+router.put('/user/:userId/:skillId', isAdmin, SkillController.updateUserSkill);
+router.delete('/user/:userId/:skillId', isAdmin, SkillController.removeUserSkill);
+
+// Routes for admins to manage skills
+router.post('/', isAdmin, SkillController.createSkill);
+router.get('/all', isAdmin, SkillController.getAllSkills);
+router.put('/:id', isAdmin, SkillController.updateSkill);
+router.delete('/:id', isAdmin, SkillController.deleteSkill);
 
 // User skill management routes
-router.get('/my-skills', SkillController.getMySkills);
 router.get('/my-skill/:skillId/level', SkillController.getMySkillLevel);
 router.get('/user/:userId', SkillController.getUserSkills);
 router.get('/user/:userId/:skillId/level', SkillController.getUserSkillLevel);
-router.post('/user/:userId', SkillController.updateUserSkill);
-router.delete('/user/:userId/:skillId', SkillController.removeUserSkill);
 
 export default router;

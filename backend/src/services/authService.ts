@@ -1,11 +1,9 @@
 import { OAuth2Client } from 'google-auth-library';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { PrismaClient } from '@prisma/client';
 import { UserRole, JwtPayload, GoogleUserInfo, AuthUser } from '../types';
 import { calculateLevel } from '../utils/leveling';
-
-const prisma = new PrismaClient();
+import { prisma } from '../db';
 
 // Initialize Google OAuth2 client
 const googleClient = new OAuth2Client(
@@ -13,7 +11,10 @@ const googleClient = new OAuth2Client(
     process.env['GOOGLE_CLIENT_SECRET']
 );
 
-const JWT_SECRET = process.env['JWT_SECRET'] || 'your-default-secret-key';
+const JWT_SECRET = process.env['JWT_SECRET'];
+if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET environment variable is required but not set');
+}
 
 export class AuthService {
     /**
@@ -34,7 +35,7 @@ export class AuthService {
 
         // Validate that the secret is not weak or predictable
         if (!secret || secret === 'undefined_refresh' || secret.length < 32) {
-            throw new Error('JWT refresh secret is weak or not properly configured');
+            throw new Error('JWT refresh secret is weak or not properly configured (minimum 32 characters required)');
         }
 
         return secret;
@@ -100,7 +101,10 @@ export class AuthService {
                 level: calculateLevel(user.experience)
             };
         } catch (error) {
-            console.error('Google authentication error:', error);
+            // Only log in non-test environments to reduce noise during testing
+            if (process.env['NODE_ENV'] !== 'test') {
+                console.error('Google authentication error:', error);
+            }
             throw new Error('Authentication failed');
         }
     }
@@ -209,7 +213,10 @@ export class AuthService {
 
             return decoded;
         } catch (error) {
-            console.error("Token verification error:", error);
+            // Only log in non-test environments to reduce noise during testing
+            if (process.env['NODE_ENV'] !== 'test') {
+                console.error("Token verification error:", error);
+            }
             throw new Error('Invalid token');
         }
     }
@@ -258,7 +265,22 @@ export class AuthService {
             const newAccessToken = this.generateAccessToken(authUser);
             return { accessToken: newAccessToken };
         } catch (error) {
-            console.error("Token refresh error:", error);
+            // Only log in non-test environments to reduce noise during testing
+            if (process.env['NODE_ENV'] !== 'test') {
+                console.error("Token refresh error:", error);
+            }
+
+            // Handle specific JWT errors for proper 401 responses
+            if (error instanceof Error) {
+                if (error.message.includes('jwt malformed') ||
+                    error.message.includes('invalid token') ||
+                    error.message.includes('Invalid token') ||
+                    error.message.includes('Invalid refresh token payload') ||
+                    error.message.includes('User not found for refresh token')) {
+                    throw new Error('Invalid token');
+                }
+            }
+
             throw new Error('Token refresh failed');
         }
     }

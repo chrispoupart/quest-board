@@ -8,7 +8,7 @@
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
     "start": "node dist/src/index.js",
-    "test": "jest",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' JWT_SECRET='a-very-secure-test-secret' JWT_REFRESH_SECRET='another-very-secure-test-secret' GOOGLE_CLIENT_ID=dummy GOOGLE_CLIENT_SECRET=dummy jest",
     "test:watch": "jest --watch",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",

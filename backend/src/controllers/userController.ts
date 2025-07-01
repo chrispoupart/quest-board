@@ -1,10 +1,8 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { UserRole, AuthUser, ApiResponse, UpdateUserRequest } from '../types';
 import { validateUserRole } from '../utils/validation';
 import { calculateLevel } from '../utils/leveling';
-
-const prisma = new PrismaClient();
+import { prisma } from '../db';
 
 export class UserController {
     /**
@@ -69,25 +67,26 @@ export class UserController {
             res.json({
                 success: true,
                 data: {
-                    id: user.id,
-                    googleId: user.googleId,
-                    name: user.name,
-                    email: user.email,
-                    role: user.role as UserRole,
-                    bountyBalance: user.bountyBalance,
-                    createdAt: user.createdAt,
-                    updatedAt: user.updatedAt,
-                    characterName: user.characterName || undefined,
-                    avatarUrl: user.avatarUrl || undefined,
-                    characterClass: user.characterClass || undefined,
-                    characterBio: user.characterBio || undefined,
-                    preferredPronouns: user.preferredPronouns || undefined,
-                    favoriteColor: user.favoriteColor || undefined,
-                    experience: user.experience,
-                    level: levelInfo,
-                    userSkills: user.userSkills
+                    user: {
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        role: user.role as UserRole,
+                        bountyBalance: user.bountyBalance,
+                        createdAt: user.createdAt,
+                        updatedAt: user.updatedAt,
+                        characterName: user.characterName || undefined,
+                        avatarUrl: user.avatarUrl || undefined,
+                        characterClass: user.characterClass || undefined,
+                        characterBio: user.characterBio || undefined,
+                        preferredPronouns: user.preferredPronouns || undefined,
+                        favoriteColor: user.favoriteColor || undefined,
+                        experience: user.experience,
+                        level: levelInfo,
+                        userSkills: user.userSkills
+                    }
                 }
-            } as ApiResponse<AuthUser>);
+            } as any);
         } catch (error) {
             console.error('Error getting current user:', error);
             res.status(500).json({
@@ -183,24 +182,26 @@ export class UserController {
             res.json({
                 success: true,
                 data: {
-                    id: updatedUser.id,
-                    googleId: updatedUser.googleId,
-                    name: updatedUser.name,
-                    email: updatedUser.email,
-                    role: updatedUser.role as UserRole,
-                    bountyBalance: updatedUser.bountyBalance,
-                    createdAt: updatedUser.createdAt,
-                    updatedAt: updatedUser.updatedAt,
-                    characterName: updatedUser.characterName || undefined,
-                    avatarUrl: updatedUser.avatarUrl || undefined,
-                    characterClass: updatedUser.characterClass || undefined,
-                    characterBio: updatedUser.characterBio || undefined,
-                    preferredPronouns: updatedUser.preferredPronouns || undefined,
-                    favoriteColor: updatedUser.favoriteColor || undefined,
-                    experience: updatedUser.experience,
-                    level: levelInfo
+                    user: {
+                        id: updatedUser.id,
+                        googleId: updatedUser.googleId,
+                        name: updatedUser.name,
+                        email: updatedUser.email,
+                        role: updatedUser.role as UserRole,
+                        bountyBalance: updatedUser.bountyBalance,
+                        createdAt: updatedUser.createdAt,
+                        updatedAt: updatedUser.updatedAt,
+                        characterName: updatedUser.characterName || undefined,
+                        avatarUrl: updatedUser.avatarUrl || undefined,
+                        characterClass: updatedUser.characterClass || undefined,
+                        characterBio: updatedUser.characterBio || undefined,
+                        preferredPronouns: updatedUser.preferredPronouns || undefined,
+                        favoriteColor: updatedUser.favoriteColor || undefined,
+                        experience: updatedUser.experience,
+                        level: levelInfo
+                    }
                 }
-            } as ApiResponse<AuthUser>);
+            } as any);
         } catch (error) {
             console.error('Error updating current user:', error);
             res.status(500).json({
@@ -270,8 +271,10 @@ export class UserController {
 
             res.json({
                 success: true,
-                data: formattedUsers
-            } as ApiResponse<AuthUser[]>);
+                data: {
+                    users: formattedUsers
+                }
+            } as any);
         } catch (error) {
             console.error('Error getting all users:', error);
             res.status(500).json({
@@ -446,16 +449,18 @@ export class UserController {
             res.json({
                 success: true,
                 data: {
-                    id: updatedUser.id,
-                    googleId: updatedUser.googleId,
-                    name: updatedUser.name,
-                    email: updatedUser.email,
-                    role: updatedUser.role as UserRole,
-                    bountyBalance: updatedUser.bountyBalance,
-                    createdAt: updatedUser.createdAt,
-                    updatedAt: updatedUser.updatedAt,
+                    user: {
+                        id: updatedUser.id,
+                        googleId: updatedUser.googleId,
+                        name: updatedUser.name,
+                        email: updatedUser.email,
+                        role: updatedUser.role as UserRole,
+                        bountyBalance: updatedUser.bountyBalance,
+                        createdAt: updatedUser.createdAt,
+                        updatedAt: updatedUser.updatedAt,
+                    }
                 }
-            } as ApiResponse<AuthUser>);
+            } as any);
         } catch (error) {
             console.error('Error updating user role:', error);
             res.status(500).json({
@@ -481,7 +486,7 @@ export class UserController {
             }
 
             // Get user's quest statistics
-            const [totalQuests, completedQuests, currentQuests, totalBounty] = await Promise.all([
+            const [questsCreated, questsCompleted, questsClaimed, totalBounty] = await Promise.all([
                 // Total quests created by user
                 prisma.quest.count({
                     where: { createdBy: userId }
@@ -515,17 +520,127 @@ export class UserController {
             res.json({
                 success: true,
                 data: {
-                    totalQuests,
-                    completedQuests,
-                    currentQuests,
-                    totalBounty: totalBounty._sum.bounty || 0
+                    stats: {
+                        questsCreated,
+                        questsCompleted,
+                        questsClaimed,
+                        totalBounty: totalBounty._sum.bounty || 0,
+                        bountyBalance: (await prisma.user.findUnique({
+                            where: { id: userId },
+                            select: { bountyBalance: true }
+                        }))?.bountyBalance || 0
+                    }
                 }
-            } as ApiResponse);
+            } as any);
         } catch (error) {
             console.error('Error getting user stats:', error);
             res.status(500).json({
                 success: false,
                 error: { message: 'Internal server error' }
+            } as ApiResponse);
+        }
+    }
+
+    /**
+     * Get user statistics by ID (user can access own stats, admin can access any)
+     */
+    static async getUserStatsById(req: Request, res: Response): Promise<void> {
+        try {
+            const currentUserId = (req as any).user?.userId;
+            const userRole = (req as any).user?.role;
+
+            const userIdParam = req.params['id'];
+            if (!userIdParam) {
+                res.status(400).json({
+                    success: false,
+                    error: { message: 'User ID is required' }
+                } as ApiResponse);
+                return;
+            }
+
+            const userId = parseInt(userIdParam);
+            if (isNaN(userId)) {
+                res.status(400).json({
+                    success: false,
+                    error: { message: 'Invalid user ID' }
+                } as ApiResponse);
+                return;
+            }
+
+            // Check if user exists first
+            const user = await prisma.user.findUnique({
+                where: { id: userId },
+            });
+
+            if (!user) {
+                res.status(404).json({
+                    success: false,
+                    error: { message: 'User not found' }
+                } as ApiResponse);
+                return;
+            }
+
+            // Then check access control - allow users to access their own stats, or admins to access any user's stats
+            if (userId !== currentUserId && userRole !== 'ADMIN') {
+                res.status(403).json({
+                    success: false,
+                    error: { message: 'Access denied' }
+                } as ApiResponse);
+                return;
+            }
+
+            // Get user's quest statistics
+            const [questsCreated, questsCompleted, questsClaimed, totalBounty] = await Promise.all([
+                // Total quests created by user
+                prisma.quest.count({
+                    where: { createdBy: userId }
+                }),
+                // Completed quests by user
+                prisma.quest.count({
+                    where: {
+                        claimedBy: userId,
+                        status: 'APPROVED'
+                    }
+                }),
+                // Current claimed quests
+                prisma.quest.count({
+                    where: {
+                        claimedBy: userId,
+                        status: { in: ['CLAIMED', 'COMPLETED'] }
+                    }
+                }),
+                // Total bounty earned (approved quests)
+                prisma.quest.aggregate({
+                    where: {
+                        claimedBy: userId,
+                        status: 'APPROVED'
+                    },
+                    _sum: {
+                        bounty: true
+                    }
+                })
+            ]);
+
+            const stats = {
+                bountyBalance: user.bountyBalance,
+                questsCreated,
+                questsCompleted,
+                questsClaimed,
+                totalBountyEarned: totalBounty._sum.bounty || 0,
+                level: calculateLevel(user.experience),
+                experience: user.experience
+            };
+
+            res.json({
+                success: true,
+                data: { stats }
+            } as any);
+
+        } catch (error) {
+            console.error('Error getting user statistics:', error);
+            res.status(500).json({
+                success: false,
+                error: { message: 'Failed to get user statistics' }
             } as ApiResponse);
         }
     }

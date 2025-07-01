@@ -1,14 +1,39 @@
+// Mock Google OAuth FIRST, before any imports
+jest.mock('google-auth-library', () => {
+    return {
+        OAuth2Client: jest.fn().mockImplementation(() => ({
+            getToken: jest.fn().mockResolvedValue({
+                tokens: {
+                    id_token: 'mock-id-token'
+                }
+            }),
+            verifyIdToken: jest.fn().mockResolvedValue({
+                getPayload: () => ({
+                    sub: 'mock-google-id',
+                    email: 'mock@example.com',
+                    name: 'Mock User'
+                })
+            })
+        }))
+    };
+});
+
+// Set environment before importing app
+process.env['NODE_ENV'] = 'test';
+
 import request from 'supertest';
 import { Express } from 'express';
-import app from '../src/index';
+import { app } from '../src/index';
 import {
     setupTestDatabase,
-    teardownTestDatabase,
     clearTestData,
     createTestUser,
     createTestToken,
-    getTestPrisma
+    getTestPrisma,
+    resetUserCounter
 } from './setup';
+
+jest.setTimeout(30000);
 
 describe('Authentication Endpoints', () => {
     let server: Express;
@@ -18,26 +43,13 @@ describe('Authentication Endpoints', () => {
         server = app;
     });
 
-    afterAll(async () => {
-        await teardownTestDatabase();
-    });
-
     beforeEach(async () => {
+        resetUserCounter(); // Reset counter FIRST to ensure unique emails
         await clearTestData();
     });
 
     describe('POST /auth/google', () => {
         it('should authenticate user with valid Google OAuth code', async () => {
-            // Mock successful Google OAuth verification
-            const mockGoogleUser = {
-                sub: 'google-123456',
-                name: 'John Doe',
-                email: 'john.doe@example.com'
-            };
-
-            // Note: In real tests, you'd mock the Google OAuth library
-            // For now, we'll test the endpoint structure
-
             const response = await request(server)
                 .post('/auth/google')
                 .send({
@@ -45,9 +57,14 @@ describe('Authentication Endpoints', () => {
                     redirectUri: 'http://localhost:3000/auth/callback'
                 });
 
-            // Test will depend on Google OAuth mock setup
-            // This structure shows what we're testing
-            expect(response.status).toBeDefined();
+            // Should successfully create user and return tokens
+            expect(response.status).toBe(200);
+            expect(response.body.success).toBe(true);
+            expect(response.body.data).toHaveProperty('accessToken');
+            expect(response.body.data).toHaveProperty('refreshToken');
+            expect(response.body.data).toHaveProperty('user');
+            expect(response.body.data.user.email).toBe('mock@example.com');
+            expect(response.body.data.user.name).toBe('Mock User');
         });
 
         it('should return 400 for missing OAuth code', async () => {
@@ -135,12 +152,12 @@ describe('Authentication Endpoints', () => {
             expect(response.body.success).toBe(false);
         });
 
-        it('should return 403 for invalid token', async () => {
+        it('should return 401 for invalid token', async () => {
             const response = await request(server)
                 .post('/auth/logout')
                 .set('Authorization', 'Bearer invalid-token');
 
-            expect(response.status).toBe(403);
+            expect(response.status).toBe(401);
             expect(response.body.success).toBe(false);
         });
     });

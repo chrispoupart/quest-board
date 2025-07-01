@@ -1,10 +1,20 @@
+// Set DATABASE_URL for test environment BEFORE any imports
+process.env['DATABASE_URL'] = `file:${process.cwd()}/prisma/test.db`;
+process.env['NODE_ENV'] = 'test';
+process.env['JWT_SECRET'] = 'test-secret-key';
+process.env['JWT_REFRESH_SECRET'] = 'test-refresh-secret-key-that-is-long-enough-for-security';
+
 import { PrismaClient } from '@prisma/client';
 import * as jwt from 'jsonwebtoken';
 import * as childProcess from 'child_process';
 import { promisify } from 'util';
 import * as fs from 'fs';
+import path from 'path';
+import { exec } from 'child_process';
 
-const execAsync = promisify(childProcess.exec);
+
+
+const execAsync = promisify(exec);
 
 // Internal variable for the Prisma client
 let testPrisma: PrismaClient | undefined = undefined;
@@ -31,10 +41,38 @@ async function waitForFile(path: string, timeoutMs = 3000): Promise<void> {
 // Setup function to run before all tests
 export const setupTestDatabase = async (): Promise<void> => {
     try {
-        process.env['DATABASE_URL'] = 'file:./prisma/test.db';
-        await execAsync('rm -f prisma/test.db');
-        await execAsync('DATABASE_URL="file:./prisma/test.db" npx prisma migrate deploy');
-        await waitForFile('prisma/test.db', 5000);
+        const dbPath = 'prisma/test.db';
+
+        console.log('🗃️  Using DATABASE_URL:', process.env['DATABASE_URL']);
+        console.log('🗃️  Current working directory:', process.cwd());
+
+        // Remove any old test DB files
+        await execAsync('rm -f prisma/test.db prisma/test.db-journal');
+        console.log('🧹 Cleaned up old test database files');
+
+        // Run migrations from the prisma directory, using a relative path
+        console.log('🔄 Running database migrations...');
+        await execAsync(`npx prisma migrate deploy`);
+
+        // Wait for the test DB file to appear
+        console.log('⏳ Waiting for test database file...');
+        await waitForFile(dbPath, 20000);
+        console.log('✅ Test database file created');
+
+        // Verify the file exists and get its stats
+        const fullPath = `${process.cwd()}/${dbPath}`;
+        console.log('📁 Full database path:', fullPath);
+        console.log('📊 File exists:', fs.existsSync(fullPath));
+        if (fs.existsSync(fullPath)) {
+            const stats = fs.statSync(fullPath);
+            console.log('📊 File size:', stats.size, 'bytes');
+        }
+
+        // Small delay to ensure file is fully written
+        await new Promise(res => setTimeout(res, 500));
+
+        // Connect Prisma client
+        console.log('🔌 Connecting Prisma client...');
         testPrisma = new PrismaClient();
         await testPrisma.$connect();
         console.log('✅ Test database setup complete');
@@ -51,7 +89,7 @@ export const teardownTestDatabase = async (): Promise<void> => {
             await testPrisma.$disconnect();
             testPrisma = undefined;
         }
-        await execAsync('rm -f prisma/test.db');
+        await execAsync('rm -f prisma/test.db prisma/test.db-journal');
         console.log('✅ Test database cleanup complete');
     } catch (error) {
         console.error('❌ Test database cleanup failed:', error);
@@ -62,34 +100,55 @@ export const teardownTestDatabase = async (): Promise<void> => {
 export const clearTestData = async (): Promise<void> => {
     const prisma = getTestPrisma();
     try {
-        // Delete in reverse order of dependencies, with error handling for each
-        try {
-            await prisma.approval.deleteMany();
-        } catch (error) { }
-        try {
-            await prisma.quest.deleteMany();
-        } catch (error) { }
-        try {
-            await prisma.user.deleteMany();
-        } catch (error) { }
+        // For SQLite, we need to disable foreign key constraints temporarily
+        await prisma.$executeRaw`PRAGMA foreign_keys = OFF;`;
+
+        // Delete all data from all tables
+        await prisma.storeTransaction.deleteMany();
+        await prisma.storeItem.deleteMany();
+        await prisma.questRequiredSkill.deleteMany();
+        await prisma.userSkill.deleteMany();
+        await prisma.questCompletion.deleteMany();
+        await prisma.notification.deleteMany();
+        await prisma.approval.deleteMany();
+        await prisma.skill.deleteMany();
+        await prisma.quest.deleteMany();
+        await prisma.user.deleteMany();
+
+        // Re-enable foreign key constraints
+        await prisma.$executeRaw`PRAGMA foreign_keys = ON;`;
+
+        // Force a brief delay to ensure transactions are committed
+        await new Promise(resolve => setTimeout(resolve, 10));
     } catch (error) {
         console.error('❌ Failed to clear test data:', error);
         throw error;
     }
 };
 
-// Test user factory
+// Test user factory with improved uniqueness
+let userCounter = 0;
 export const createTestUser = async (overrides: any = {}) => {
     const prisma = getTestPrisma();
+    const timestamp = Date.now();
+    userCounter++; // Increment counter for each user creation
+    const processId = process.pid; // Add process ID for uniqueness across test runs
+    const uniqueId = `${timestamp}-${processId}-${userCounter}-${Math.floor(Math.random() * 10000)}`;
+
     const defaultUser = {
-        googleId: `test-google-${Date.now()}`,
+        googleId: `test-google-${uniqueId}`,
         name: 'Test User',
-        email: `test-${Date.now()}@example.com`,
+        email: `test-${uniqueId}@example.com`,
         role: 'PLAYER',
         bountyBalance: 0,
         ...overrides
     };
     return await prisma.user.create({ data: defaultUser });
+};
+
+// Reset user counter for test isolation
+export const resetUserCounter = () => {
+    userCounter = 0;
 };
 
 // Test quest factory
@@ -108,9 +167,10 @@ export const createTestQuest = async (createdBy: number, overrides: any = {}) =>
 
 // Helper to create JWT token for testing
 export const createTestToken = (userId: number, email: string, role: string): string => {
+    const secret = process.env['JWT_SECRET'] || 'test-secret-key';
     return jwt.sign(
         { userId, email, role },
-        process.env['JWT_SECRET'] || 'test-secret',
+        secret,
         { expiresIn: '1h' }
     );
 };

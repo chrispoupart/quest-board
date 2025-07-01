@@ -1,25 +1,25 @@
 import { Router } from 'express';
 import { StoreController } from '../controllers/storeController';
-import { authenticateToken, requireAdminOrEditor, requireAdmin } from '../middleware/authMiddleware';
+import { authMiddleware, isEditorOrAdmin, isAdmin } from '../middleware/authMiddleware';
 
 const router = Router();
 
-// Apply authentication middleware to all store routes
-router.use(authenticateToken);
+router.use(authMiddleware);
 
-// Public store routes (authenticated users)
+// Get all store items (for all authenticated users)
 router.get('/items', StoreController.getStoreItems);
 router.get('/items/:id', StoreController.getStoreItemById);
+
+// Purchase an item (for all authenticated users)
 router.post('/purchase', StoreController.purchaseItem);
 router.get('/purchases', StoreController.getUserPurchases);
 
-// Admin/Editor only routes
-router.get('/transactions/pending', requireAdminOrEditor, StoreController.getPendingTransactions);
-router.put('/transactions/:id', requireAdminOrEditor, StoreController.updateTransaction);
+// Admin/Editor routes for managing store items
+router.get('/transactions/pending', isEditorOrAdmin, StoreController.getPendingTransactions);
+router.put('/transactions/:id', isEditorOrAdmin, StoreController.updateTransaction);
 
-// Admin only routes
-router.post('/items', requireAdminOrEditor, StoreController.createStoreItem);
-router.put('/items/:id', requireAdminOrEditor, StoreController.updateStoreItem);
-router.delete('/items/:id', requireAdmin, StoreController.deleteStoreItem);
+router.post('/items', isEditorOrAdmin, StoreController.createStoreItem);
+router.put('/items/:id', isEditorOrAdmin, StoreController.updateStoreItem);
+router.delete('/items/:id', isAdmin, StoreController.deleteStoreItem);
 
 export default router;

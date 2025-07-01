@@ -1,14 +1,12 @@
 import { Router } from 'express';
 import { JobController } from '../controllers/jobController';
-import { authenticateToken, requireAdmin } from '../middleware/authMiddleware';
+import { authMiddleware, isAdmin } from '../middleware/authMiddleware';
 
 const router = Router();
 
-// Apply authentication middleware to all job routes
-router.use(authenticateToken);
-
-// All job routes require admin access
-router.use(requireAdmin);
+// All job routes are protected and require admin privileges
+router.use(authMiddleware);
+router.use(isAdmin);
 
 // Job management routes
 router.get('/', JobController.getAllJobStatuses);

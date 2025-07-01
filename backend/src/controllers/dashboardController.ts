@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { ApiResponse } from '../types';
-
-const prisma = new PrismaClient();
+import { prisma } from '../db';
 
 export class DashboardController {
     /**
@@ -111,7 +109,12 @@ export class DashboardController {
             }
 
             // Get comprehensive user statistics
-            const [totalQuests, completedQuests, currentQuests, totalBounty, pendingApproval] = await Promise.all([
+            const [user, totalQuests, completedQuests, currentQuests, earnedBounty, pendingApproval] = await Promise.all([
+                // Get user's bounty balance
+                prisma.user.findUnique({
+                    where: { id: userId },
+                    select: { bountyBalance: true }
+                }),
                 // Total quests created by user
                 prisma.quest.count({
                     where: { createdBy: userId }
@@ -130,7 +133,7 @@ export class DashboardController {
                         status: { in: ['CLAIMED', 'COMPLETED'] }
                     }
                 }),
-                // Total bounty earned
+                // Total bounty earned from completed quests (for average calculation)
                 prisma.quest.aggregate({
                     where: {
                         claimedBy: userId,
@@ -152,12 +155,14 @@ export class DashboardController {
             res.json({
                 success: true,
                 data: {
-                    totalQuests,
-                    completedQuests,
-                    currentQuests,
-                    pendingApproval,
-                    totalBounty: totalBounty._sum.bounty || 0,
-                    averageBounty: completedQuests > 0 ? (totalBounty._sum.bounty || 0) / completedQuests : 0
+                    stats: {
+                        questsCreated: totalQuests,
+                        completedQuests,
+                        activeQuests: currentQuests,
+                        pendingApproval,
+                        totalBounty: earnedBounty._sum.bounty || 0,
+                        averageBounty: completedQuests > 0 ? (earnedBounty._sum.bounty || 0) / completedQuests : 0
+                    }
                 }
             } as ApiResponse);
         } catch (error) {
@@ -356,6 +361,153 @@ export class DashboardController {
             } as ApiResponse);
         } catch (error) {
             console.error('Error getting admin dashboard:', error);
+            res.status(500).json({
+                success: false,
+                error: { message: 'Internal server error' }
+            } as ApiResponse);
+        }
+    }
+
+    /**
+     * Get recent activity for the current user
+     */
+    static async getRecentActivity(req: Request, res: Response): Promise<void> {
+        try {
+            const userId = (req as any).user?.userId;
+            const userRole = (req as any).user?.role;
+
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    error: { message: 'User not authenticated' }
+                } as ApiResponse);
+                return;
+            }
+
+            let quests;
+
+            // For quest creators (EDITOR/ADMIN), show quests they created
+            // For players, show quests they have claimed/completed
+            if (userRole === 'EDITOR' || userRole === 'ADMIN') {
+                quests = await prisma.quest.findMany({
+                    where: {
+                        createdBy: userId
+                    },
+                    orderBy: {
+                        createdAt: 'desc'
+                    },
+                    take: 10,
+                    include: {
+                        creator: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        },
+                        claimer: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                });
+            } else {
+                // For players, show quests they have interacted with
+                quests = await prisma.quest.findMany({
+                    where: {
+                        claimedBy: userId
+                    },
+                    orderBy: {
+                        claimedAt: 'desc'
+                    },
+                    take: 10,
+                    include: {
+                        creator: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        },
+                        claimer: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            res.json({
+                success: true,
+                data: {
+                    quests
+                }
+            } as ApiResponse);
+        } catch (error) {
+            console.error('Error getting recent activity:', error);
+            res.status(500).json({
+                success: false,
+                error: { message: 'Internal server error' }
+            } as ApiResponse);
+        }
+    }
+
+    /**
+     * Get user's active quests (claimed/completed quests)
+     */
+    static async getActiveQuests(req: Request, res: Response): Promise<void> {
+        try {
+            const userId = (req as any).user?.userId;
+
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    error: { message: 'User not authenticated' }
+                } as ApiResponse);
+                return;
+            }
+
+            // Get user's active quests (claimed or completed)
+            const quests = await prisma.quest.findMany({
+                where: {
+                    claimedBy: userId,
+                    status: { in: ['CLAIMED', 'COMPLETED'] }
+                },
+                orderBy: {
+                    claimedAt: 'desc'
+                },
+                include: {
+                    creator: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true
+                        }
+                    },
+                    claimer: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true
+                        }
+                    }
+                }
+            });
+
+            res.json({
+                success: true,
+                data: {
+                    quests
+                }
+            } as ApiResponse);
+        } catch (error) {
+            console.error('Error getting active quests:', error);
             res.status(500).json({
                 success: false,
                 error: { message: 'Internal server error' }

@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { ApiResponse } from '../types';
-
-const prisma = new PrismaClient();
+import { prisma } from '../db';
 
 export class StoreController {
     /**
@@ -224,81 +222,59 @@ export class StoreController {
                 return;
             }
 
-            // Get the item and user
-            const [item, user] = await Promise.all([
-                prisma.storeItem.findUnique({ where: { id: itemId } }),
-                prisma.user.findUnique({ where: { id: userId } })
-            ]);
+            const transactionResult = await prisma.$transaction(async (tx) => {
+                const item = await tx.storeItem.findUnique({ where: { id: itemId } });
+                if (!item) {
+                    throw new Error('Store item not found');
+                }
+                if (!item.isActive) {
+                    throw new Error('Item is not available for purchase');
+                }
 
-            if (!item) {
-                res.status(404).json({ success: false, error: { message: 'Store item not found' } });
-                return;
-            }
+                const user = await tx.user.findUnique({ where: { id: userId } });
+                if (!user) {
+                    throw new Error('User not found');
+                }
+                if (user.bountyBalance < item.cost) {
+                    throw new Error('Insufficient bounty balance');
+                }
 
-            if (!item.isActive) {
-                res.status(400).json({ success: false, error: { message: 'Item is not available for purchase' } });
-                return;
-            }
-
-            if (!user) {
-                res.status(404).json({ success: false, error: { message: 'User not found' } });
-                return;
-            }
-
-            if (user.bountyBalance < item.cost) {
-                res.status(400).json({ success: false, error: { message: 'Insufficient bounty balance' } });
-                return;
-            }
-
-            // Create transaction and deduct bounty
-            const transaction = await prisma.$transaction(async (tx) => {
-                // Deduct bounty from user
                 await tx.user.update({
                     where: { id: userId },
                     data: { bountyBalance: { decrement: item.cost } }
                 });
 
-                // Create store transaction
-                return await tx.storeTransaction.create({
+                const newTransaction = await tx.storeTransaction.create({
                     data: {
-                        itemId,
+                        itemId: item.id,
                         buyerId: userId,
-                        status: 'PENDING'
+                        sellerId: item.createdBy,
+                        amount: item.cost,
+                        status: 'PENDING',
                     },
                     include: {
-                        item: {
-                            include: {
-                                creator: {
-                                    select: {
-                                        id: true,
-                                        name: true,
-                                        email: true,
-                                        role: true,
-                                    }
-                                }
-                            }
-                        },
-                        buyer: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true,
-                                role: true,
-                            }
-                        }
+                        item: { include: { creator: true } },
+                        buyer: true
                     }
                 });
+
+                return newTransaction;
             });
 
-            res.status(201).json({ success: true, data: transaction } as ApiResponse);
-        } catch (error) {
+            res.status(201).json({ success: true, data: transactionResult } as ApiResponse);
+
+        } catch (error: any) {
             console.error('Error purchasing item:', error);
-            res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+            if (error.message.includes('not found') || error.message.includes('Insufficient')) {
+                res.status(400).json({ success: false, error: { message: error.message } });
+            } else {
+                res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+            }
         }
     }
 
     /**
-     * Get user's purchase history
+     * Get a user's purchase history
      */
     static async getUserPurchases(req: Request, res: Response): Promise<void> {
         try {
@@ -310,48 +286,19 @@ export class StoreController {
 
             const page = parseInt(req.query['page'] as string) || 1;
             const limit = parseInt(req.query['limit'] as string) || 10;
-            const status = req.query['status'] as string;
             const skip = (page - 1) * limit;
-
-            const where: any = { buyerId: userId };
-            if (status) {
-                if (status.includes(',')) {
-                    where.status = { in: status.split(',') };
-                } else {
-                    where.status = status;
-                }
-            }
 
             const [transactions, total] = await Promise.all([
                 prisma.storeTransaction.findMany({
-                    where,
+                    where: { buyerId: userId },
                     include: {
-                        item: {
-                            include: {
-                                creator: {
-                                    select: {
-                                        id: true,
-                                        name: true,
-                                        email: true,
-                                        role: true,
-                                    }
-                                }
-                            }
-                        },
-                        buyer: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true,
-                                role: true,
-                            }
-                        }
+                        item: true
                     },
                     orderBy: { createdAt: 'desc' },
                     skip,
-                    take: limit,
+                    take: limit
                 }),
-                prisma.storeTransaction.count({ where })
+                prisma.storeTransaction.count({ where: { buyerId: userId } })
             ]);
 
             const response = {
@@ -372,16 +319,10 @@ export class StoreController {
     }
 
     /**
-     * Get all pending transactions (admin/editor only)
+     * Get pending transactions for admin/editor to approve
      */
     static async getPendingTransactions(req: Request, res: Response): Promise<void> {
         try {
-            const userId = (req as any).user?.userId;
-            if (!userId) {
-                res.status(401).json({ success: false, error: { message: 'User not authenticated' } });
-                return;
-            }
-
             const page = parseInt(req.query['page'] as string) || 1;
             const limit = parseInt(req.query['limit'] as string) || 10;
             const skip = (page - 1) * limit;
@@ -390,30 +331,13 @@ export class StoreController {
                 prisma.storeTransaction.findMany({
                     where: { status: 'PENDING' },
                     include: {
-                        item: {
-                            include: {
-                                creator: {
-                                    select: {
-                                        id: true,
-                                        name: true,
-                                        email: true,
-                                        role: true,
-                                    }
-                                }
-                            }
-                        },
-                        buyer: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true,
-                                role: true,
-                            }
-                        }
+                        item: true,
+                        buyer: true,
+                        seller: true
                     },
                     orderBy: { createdAt: 'desc' },
                     skip,
-                    take: limit,
+                    take: limit
                 }),
                 prisma.storeTransaction.count({ where: { status: 'PENDING' } })
             ]);
@@ -436,92 +360,61 @@ export class StoreController {
     }
 
     /**
-     * Approve or reject a transaction (admin/editor only)
+     * Update a transaction's status (approve/reject)
      */
     static async updateTransaction(req: Request, res: Response): Promise<void> {
         try {
-            const transactionIdParam = req.params['id'];
-            if (!transactionIdParam) {
-                res.status(400).json({ success: false, error: { message: 'Transaction ID is required' } });
-                return;
-            }
-            const transactionId = parseInt(transactionIdParam);
+            const transactionId = parseInt(req.params['id']);
+            const { status, notes } = req.body;
+            const processorId = (req as any).user?.userId;
+
             if (isNaN(transactionId)) {
                 res.status(400).json({ success: false, error: { message: 'Invalid transaction ID' } });
                 return;
             }
-
-            const { status, notes } = req.body;
-            if (!status || !['APPROVED', 'REJECTED'].includes(status)) {
-                res.status(400).json({ success: false, error: { message: 'Status must be APPROVED or REJECTED' } });
+            if (!['APPROVED', 'REJECTED'].includes(status)) {
+                res.status(400).json({ success: false, error: { message: 'Invalid status' } });
                 return;
             }
 
-            const transaction = await prisma.storeTransaction.findUnique({
+            const transactionToUpdate = await prisma.storeTransaction.findUnique({
                 where: { id: transactionId },
-                include: {
-                    item: true,
-                    buyer: true
-                }
             });
 
-            if (!transaction) {
+            if (!transactionToUpdate) {
                 res.status(404).json({ success: false, error: { message: 'Transaction not found' } });
                 return;
             }
-
-            if (transaction.status !== 'PENDING') {
-                res.status(400).json({ success: false, error: { message: 'Transaction is not pending' } });
+            if (transactionToUpdate.status !== 'PENDING') {
+                res.status(400).json({ success: false, error: { message: 'Transaction has already been processed' } });
                 return;
             }
 
-            // If rejecting, refund the bounty
-            if (status === 'REJECTED') {
-                await prisma.$transaction(async (tx) => {
-                    // Refund bounty to user
+            const updatedTransaction = await prisma.$transaction(async (tx) => {
+                const transaction = await tx.storeTransaction.update({
+                    where: { id: transactionId },
+                    data: {
+                        status,
+                        notes,
+                        processedBy: processorId,
+                        processedAt: new Date(),
+                    },
+                });
+
+                if (status === 'APPROVED') {
+                    // Transfer bounty to the seller
+                    await tx.user.update({
+                        where: { id: transaction.sellerId },
+                        data: { bountyBalance: { increment: transaction.amount } },
+                    });
+                } else if (status === 'REJECTED') {
+                    // Refund bounty to the buyer
                     await tx.user.update({
                         where: { id: transaction.buyerId },
-                        data: { bountyBalance: { increment: transaction.item.cost } }
+                        data: { bountyBalance: { increment: transaction.amount } },
                     });
-
-                    // Update transaction status
-                    await tx.storeTransaction.update({
-                        where: { id: transactionId },
-                        data: { status, notes }
-                    });
-                });
-            } else {
-                // Just update the status for approval
-                await prisma.storeTransaction.update({
-                    where: { id: transactionId },
-                    data: { status, notes }
-                });
-            }
-
-            const updatedTransaction = await prisma.storeTransaction.findUnique({
-                where: { id: transactionId },
-                include: {
-                    item: {
-                        include: {
-                            creator: {
-                                select: {
-                                    id: true,
-                                    name: true,
-                                    email: true,
-                                    role: true,
-                                }
-                            }
-                        }
-                    },
-                    buyer: {
-                        select: {
-                            id: true,
-                            name: true,
-                            email: true,
-                            role: true,
-                        }
-                    }
                 }
+                return transaction;
             });
 
             res.json({ success: true, data: updatedTransaction } as ApiResponse);

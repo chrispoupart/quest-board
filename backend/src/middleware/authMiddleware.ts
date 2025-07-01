@@ -1,6 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { UserRole } from '../types';
+import config from '../config';
+
+// Type guard function to ensure JWT secret is a string
+function isJwtSecret(value: string | undefined): value is string {
+    return typeof value === 'string' && value.length > 0;
+}
 
 // Extend Express Request interface to include user
 declare global {
@@ -15,45 +21,41 @@ declare global {
     }
 }
 
-/**
- * Middleware to verify JWT token and attach user info to request
- */
-export const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
+export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
-    if (!token) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
         res.status(401).json({
             success: false,
-            error: { message: 'Access token required' }
+            error: { message: 'Authentication required' }
+        });
+        return;
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    // Ensure jwtSecret is defined before using it
+    if (!isJwtSecret(config.jwtSecret)) {
+        console.error('JWT Secret is not defined in the configuration.');
+        res.status(500).json({
+            success: false,
+            error: { message: 'Server configuration error: JWT secret missing.' }
         });
         return;
     }
 
     try {
-        const secret = process.env['JWT_SECRET'];
-        if (!secret) {
-            throw new Error('JWT_SECRET not configured');
+        // TypeScript now knows config.jwtSecret is a string due to the type guard
+        const decoded = jwt.verify(token, config.jwtSecret);
+
+        if (typeof decoded === 'object' && decoded !== null && 'userId' in decoded) {
+            req.user = decoded as { userId: number; email: string; role: UserRole };
+            next();
+        } else {
+            throw new Error('Invalid token payload');
         }
-
-        const decoded = jwt.verify(token, secret) as {
-            userId: number;
-            email: string;
-            role: UserRole;
-            iat: number;
-            exp: number;
-        };
-
-        req.user = {
-            userId: decoded.userId,
-            email: decoded.email,
-            role: decoded.role,
-        };
-
-        next();
     } catch (error) {
-        console.error('Token verification failed:', error);
-        res.status(403).json({
+        res.status(401).json({
             success: false,
             error: { message: 'Invalid or expired token' }
         });
@@ -61,53 +63,35 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 };
 
 /**
- * Middleware to check if user has required role
+ * Middleware to check for specific roles.
+ * Usage: `app.get('/admin', authMiddleware, hasRole(['ADMIN']), ...)`
  */
-export const requireRole = (requiredRoles: UserRole | UserRole[]) => {
-    return (req: Request, res: Response, next: NextFunction): void => {
-        if (!req.user) {
-            res.status(401).json({
-                success: false,
-                error: { message: 'Authentication required' }
-            });
-            return;
-        }
+export const hasRole = (roles: UserRole[]) => {
+    return (req: Request, res: Response, next: NextFunction) => {
+        const user = req.user;
 
-        const userRole = req.user.role;
-        const roles = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
-
-        if (!roles.includes(userRole)) {
+        if (!user || !roles.includes(user.role)) {
             res.status(403).json({
                 success: false,
-                error: {
-                    message: `Access denied. Required role(s): ${roles.join(', ')}. Current role: ${userRole}`
-                }
+                error: { message: `Access denied. Required roles: ${roles.join(', ')}` }
             });
             return;
         }
-
         next();
     };
 };
 
 /**
- * Middleware to check if user is admin
+ * Middleware to check for admin role.
+ * For admin-only routes.
  */
-export const requireAdmin = requireRole('ADMIN');
+export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
 
-/**
- * Middleware to check if user is admin or editor
- */
-export const requireAdminOrEditor = requireRole(['ADMIN', 'EDITOR']);
-
-/**
- * Middleware to check if user is authenticated (any role)
- */
-export const requireAuth = (req: Request, res: Response, next: NextFunction): void => {
-    if (!req.user) {
-        res.status(401).json({
+    if (!user || user.role !== 'ADMIN') {
+        res.status(403).json({
             success: false,
-            error: { message: 'Authentication required' }
+            error: { message: 'Access denied. Admin role required.' }
         });
         return;
     }
@@ -115,42 +99,71 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction): vo
 };
 
 /**
- * Optional authentication middleware - doesn't fail if no token
+ * Middleware to check for editor or admin role.
+ * For routes that can be accessed by content creators and admins.
  */
-export const optionalAuth = (req: Request, res: Response, next: NextFunction): void => {
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1];
+export const isEditorOrAdmin = (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
 
-    if (!token) {
-        next();
+    if (!user || (user.role !== 'EDITOR' && user.role !== 'ADMIN')) {
+        res.status(403).json({
+            success: false,
+            error: { message: 'Access denied. Editor or admin role required.' }
+        });
         return;
     }
+    next();
+};
 
-    try {
-        const secret = process.env['JWT_SECRET'];
-        if (!secret) {
-            next();
+/**
+ * Middleware to check if the authenticated user is the owner of a resource
+ * or has a specific role (e.g., admin).
+ *
+ * This is a flexible middleware that requires you to provide a function
+ * to retrieve the resource owner's ID.
+ *
+ * @param getOwnerId - An async function that takes the request object and returns the resource owner's ID.
+ * @param allowedRoles - An optional array of roles that are always allowed access.
+ */
+export const isOwnerOrRole = (
+    getOwnerId: (req: Request) => Promise<number | null | undefined>,
+    allowedRoles: UserRole[] = []
+) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        const user = req.user;
+
+        if (!user) {
+            res.status(401).json({
+                success: false,
+                error: { message: 'User not authenticated' }
+            });
             return;
         }
 
-        const decoded = jwt.verify(token, secret) as {
-            userId: number;
-            email: string;
-            role: UserRole;
-            iat: number;
-            exp: number;
-        };
+        // Users with allowed roles can always proceed
+        if (allowedRoles.includes(user.role)) {
+            return next();
+        }
 
-        req.user = {
-            userId: decoded.userId,
-            email: decoded.email,
-            role: decoded.role,
-        };
+        try {
+            const ownerId = await getOwnerId(req);
 
-        next();
-    } catch (error) {
-        // Token is invalid, but we don't fail the request
-        console.warn('Invalid token in optional auth:', error);
-        next();
-    }
+            if (user.userId === ownerId) {
+                return next(); // User is the owner
+            }
+
+            res.status(403).json({
+                success: false,
+                error: { message: 'Access denied. You are not the owner of this resource.' }
+            });
+            return;
+        } catch (error) {
+            console.error('Error in isOwnerOrRole middleware:', error);
+            res.status(500).json({
+                success: false,
+                error: { message: 'Internal server error' }
+            });
+            return;
+        }
+    };
 };

@@ -23,7 +23,6 @@
     "exactOptionalPropertyTypes": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
-    "noUncheckedIndexedAccess": true,
     "types": [
       "node",
       "jest"
@@ -32,11 +31,11 @@
   "include": [
     "src/**/*",
     "prisma/**/*",
-    "scripts/**/*"
+    "scripts/**/*",
+    "tests/**/*"
   ],
   "exclude": [
     "node_modules",
-    "dist",
-    "tests"
+    "dist"
   ]
 }

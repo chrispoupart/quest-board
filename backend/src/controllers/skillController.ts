@@ -1,9 +1,7 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { UserRole, ApiResponse, CreateSkillRequest, UpdateSkillRequest, CreateUserSkillRequest, UpdateUserSkillRequest } from '../types';
 import { validateUserRole } from '../utils/validation';
-
-const prisma = new PrismaClient();
+import { prisma } from '../db';
 
 export class SkillController {
     /**
@@ -594,6 +592,23 @@ export class SkillController {
                 return;
             }
 
+            // Get skillId from URL parameters (for PUT route) or request body (for POST route)
+            let skillId: number;
+            if (req.params['skillId']) {
+                skillId = parseInt(req.params['skillId'] || '');
+            } else {
+                const { skillId: bodySkillId } = req.body;
+                skillId = parseInt(bodySkillId || '');
+            }
+
+            if (isNaN(skillId)) {
+                res.status(400).json({
+                    success: false,
+                    error: { message: 'Invalid skill ID' }
+                } as ApiResponse);
+                return;
+            }
+
             const { level }: UpdateUserSkillRequest = req.body;
 
             if (!level || typeof level !== 'number' || level < 1 || level > 5) {
@@ -613,18 +628,6 @@ export class SkillController {
                 res.status(404).json({
                     success: false,
                     error: { message: 'User not found' }
-                } as ApiResponse);
-                return;
-            }
-
-            // For this endpoint, we need skillId in the body or URL
-            // Let me check if it's in the body or if we need to modify the route
-            const { skillId } = req.body;
-
-            if (!skillId || typeof skillId !== 'number') {
-                res.status(400).json({
-                    success: false,
-                    error: { message: 'Skill ID is required' }
                 } as ApiResponse);
                 return;
             }

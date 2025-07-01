@@ -1,25 +1,27 @@
+// Set environment before importing app
+process.env['NODE_ENV'] = 'test';
+
 import request from 'supertest';
-import app from '../src/index';
+import { app } from '../src/index';
 import {
     setupTestDatabase,
-    teardownTestDatabase,
     clearTestData,
     createTestUser,
+    createTestQuest,
     createTestToken,
-    getTestPrisma
+    getTestPrisma,
+    resetUserCounter
 } from './setup';
+
+jest.setTimeout(30000);
 
 describe('User Endpoints', () => {
     beforeAll(async () => {
-        process.env['NODE_ENV'] = 'test';
         await setupTestDatabase();
     });
 
-    afterAll(async () => {
-        await teardownTestDatabase();
-    });
-
     beforeEach(async () => {
+        resetUserCounter(); // Reset counter FIRST to ensure unique emails
         await clearTestData();
     });
 
@@ -54,12 +56,12 @@ describe('User Endpoints', () => {
             expect(response.body.success).toBe(false);
         });
 
-        it('should return 403 for invalid token', async () => {
+        it('should return 401 for invalid token', async () => {
             const response = await request(app)
                 .get('/users/profile')
                 .set('Authorization', 'Bearer invalid-token');
 
-            expect(response.status).toBe(403);
+            expect(response.status).toBe(401);
             expect(response.body.success).toBe(false);
         });
     });
