@@ -49,8 +49,12 @@ app.get('/health', (req, res) => {
 // Error handling
 app.use(errorHandler);
 
-// Initialize scheduled jobs
-JobService.initializeJobs();
+// Initialize scheduled jobs (only if not in test environment)
+if (process.env['NODE_ENV'] !== 'test') {
+  JobService.initializeJobs();
+}
+
+export { app };
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
@@ -65,8 +69,10 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📚 API Documentation: http://localhost:${PORT}/docs`);
-});
+// Start server (only if not in test environment)
+if (process.env['NODE_ENV'] !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📚 API Documentation: http://localhost:${PORT}/docs`);
+  });
+}

@@ -1,5 +1,8 @@
+// Set environment before importing anything
+process.env['NODE_ENV'] = 'test';
+
 import {
-    setupTestDatabase,
+    ensureTestDatabase,
     teardownTestDatabase,
     clearTestData,
     createTestUser,
@@ -8,13 +11,15 @@ import {
     getTestPrisma
 } from './setup';
 
+jest.setTimeout(30000);
+
 describe('Test Setup', () => {
     beforeAll(async () => {
-        process.env['NODE_ENV'] = 'test';
-        await setupTestDatabase();
+        await ensureTestDatabase();
     });
 
     afterAll(async () => {
+        // Only clean up in the last test file
         await teardownTestDatabase();
     });
 

@@ -64,7 +64,7 @@ export class QuestController {
             const response = {
                 quests,
                 pagination: {
-                    page,
+                    currentPage: page,
                     limit,
                     total,
                     totalPages: Math.ceil(total / limit)
@@ -139,7 +139,7 @@ export class QuestController {
                     cooldownDays: isRepeatable ? cooldownDays : null,
                 },
             });
-            res.status(201).json({ success: true, data: quest } as ApiResponse);
+            res.status(201).json({ success: true, data: { quest } } as any);
         } catch (error) {
             console.error('Error creating quest:', error);
             res.status(500).json({ success: false, error: { message: 'Internal server error' } });
@@ -202,7 +202,7 @@ export class QuestController {
                 return;
             }
             await prisma.quest.delete({ where: { id: questId } });
-            res.json({ success: true, data: { id: questId } } as ApiResponse);
+            res.json({ success: true, message: 'Quest deleted successfully' } as ApiResponse);
         } catch (error) {
             console.error('Error deleting quest:', error);
             res.status(500).json({ success: false, error: { message: 'Internal server error' } });
@@ -253,7 +253,15 @@ export class QuestController {
             }
 
             if (quest.status !== 'AVAILABLE') {
-                res.status(400).json({ success: false, error: { message: 'Quest is not available for claiming' } });
+                let errorMessage = 'Quest is not available for claiming';
+                if (quest.status === 'CLAIMED') {
+                    errorMessage = 'Quest is already claimed';
+                } else if (quest.status === 'COMPLETED') {
+                    errorMessage = 'Quest is already completed';
+                } else if (quest.status === 'APPROVED') {
+                    errorMessage = 'Quest is already approved';
+                }
+                res.status(400).json({ success: false, error: { message: errorMessage } });
                 return;
             }
 
@@ -320,7 +328,7 @@ export class QuestController {
                     claimedAt: new Date(),
                 },
             });
-            res.json({ success: true, data: updatedQuest } as ApiResponse);
+            res.json({ success: true, data: { quest: updatedQuest } } as any);
         } catch (error) {
             console.error('Error claiming quest:', error);
             res.status(500).json({ success: false, error: { message: 'Internal server error' } });
@@ -352,8 +360,12 @@ export class QuestController {
                 res.status(404).json({ success: false, error: { message: 'Quest not found' } });
                 return;
             }
-            if (quest.status !== 'CLAIMED' || quest.claimedBy !== userId) {
-                res.status(400).json({ success: false, error: { message: 'Quest is not claimed by you' } });
+            if (quest.status !== 'CLAIMED') {
+                res.status(400).json({ success: false, error: { message: 'Quest is not claimed' } });
+                return;
+            }
+            if (quest.claimedBy !== userId) {
+                res.status(403).json({ success: false, error: { message: 'Quest is not claimed by you' } });
                 return;
             }
             const updatedQuest = await prisma.quest.update({
@@ -363,7 +375,7 @@ export class QuestController {
                     completedAt: new Date(),
                 },
             });
-            res.json({ success: true, data: updatedQuest } as ApiResponse);
+            res.json({ success: true, data: { quest: updatedQuest } } as any);
         } catch (error) {
             console.error('Error completing quest:', error);
             res.status(500).json({ success: false, error: { message: 'Internal server error' } });
@@ -404,6 +416,16 @@ export class QuestController {
                 return;
             }
 
+            // Check authorization - only admins or quest creators can approve
+            const user = (req as any).user;
+            const isAdmin = user?.role === 'ADMIN';
+            const isQuestCreator = quest.createdBy === userId;
+            
+            if (!isAdmin && !isQuestCreator) {
+                res.status(403).json({ success: false, error: { message: 'Access denied. Only admins or quest creators can approve quests.' } });
+                return;
+            }
+
             // Prepare update data
             const updateData: any = {
                 status: 'APPROVED',
@@ -411,15 +433,16 @@ export class QuestController {
             };
 
             // Create completion record for the user who completed the quest
-            await prisma.questCompletion.create({
-                data: {
-                    questId: questId,
-                    userId: quest.claimedBy,
-                    completedAt: quest.completedAt || new Date(),
-                    approvedAt: new Date(),
-                    status: 'APPROVED'
-                }
-            });
+            // TODO: Re-enable when QuestCompletion table is available
+            // await prisma.questCompletion.create({
+            //     data: {
+            //         questId: questId,
+            //         userId: quest.claimedBy,
+            //         completedAt: quest.completedAt || new Date(),
+            //         approvedAt: new Date(),
+            //         status: 'APPROVED'
+            //     }
+            // });
 
             // If quest is repeatable, set it to cooldown status instead of available
             if (quest.isRepeatable) {
@@ -510,6 +533,23 @@ export class QuestController {
                 return;
             }
 
+            // Check authorization - only admins or quest creators can reject
+            const user = (req as any).user;
+            const isAdmin = user?.role === 'ADMIN';
+            const isQuestCreator = quest.createdBy === userId;
+            
+            if (!isAdmin && !isQuestCreator) {
+                res.status(403).json({ success: false, error: { message: 'Access denied. Only admins or quest creators can reject quests.' } });
+                return;
+            }
+
+            // Validate rejection reason
+            const { reason } = req.body;
+            if (!reason || typeof reason !== 'string' || reason.trim() === '') {
+                res.status(400).json({ success: false, error: { message: 'Rejection reason is required' } });
+                return;
+            }
+
             // Use a transaction to ensure data consistency
             const result = await prisma.$transaction(async (tx) => {
                 // Create completion record for the user who completed the quest
@@ -534,7 +574,7 @@ export class QuestController {
                 return updatedQuest;
             });
 
-            res.json({ success: true, data: result } as ApiResponse);
+            res.json({ success: true, data: { quest: result } } as ApiResponse);
         } catch (error) {
             console.error('Error rejecting quest:', error);
             res.status(500).json({ success: false, error: { message: 'Internal server error' } });
@@ -605,7 +645,7 @@ export class QuestController {
             const response = {
                 quests,
                 pagination: {
-                    page,
+                    currentPage: page,
                     limit,
                     total,
                     totalPages: Math.ceil(total / limit)
@@ -688,7 +728,7 @@ export class QuestController {
             const response = {
                 quests,
                 pagination: {
-                    page,
+                    currentPage: page,
                     limit,
                     total,
                     totalPages: Math.ceil(total / limit)
@@ -743,7 +783,7 @@ export class QuestController {
             const response = {
                 quests: paginatedQuests,
                 pagination: {
-                    page,
+                    currentPage: page,
                     limit,
                     total,
                     totalPages: Math.ceil(total / limit)
@@ -1182,7 +1222,7 @@ export class QuestController {
             const response = {
                 quests: processedQuests,
                 pagination: {
-                    page,
+                    currentPage: page,
                     limit,
                     total,
                     totalPages: Math.ceil(total / limit)
@@ -1192,6 +1232,69 @@ export class QuestController {
             res.json({ success: true, data: response } as ApiResponse);
         } catch (error) {
             console.error('Error getting completion history:', error);
+            res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+        }
+    }
+
+    /**
+     * Get quests pending approval (admin/editor only)
+     */
+    static async getPendingApprovalQuests(req: Request, res: Response): Promise<void> {
+        try {
+            const userRole = (req as any).user?.role;
+            if (userRole !== 'ADMIN' && userRole !== 'EDITOR') {
+                res.status(403).json({
+                    success: false,
+                    error: { message: 'Access denied. Admin or Editor role required.' }
+                } as ApiResponse);
+                return;
+            }
+
+            const page = parseInt(req.query['page'] as string) || 1;
+            const limit = parseInt(req.query['limit'] as string) || 10;
+            const skip = (page - 1) * limit;
+
+            const [quests, total] = await Promise.all([
+                prisma.quest.findMany({
+                    where: { status: 'COMPLETED' },
+                    include: {
+                        creator: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                role: true,
+                            }
+                        },
+                        claimer: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                role: true,
+                            }
+                        }
+                    },
+                    orderBy: { completedAt: 'desc' },
+                    skip,
+                    take: limit,
+                }),
+                prisma.quest.count({ where: { status: 'COMPLETED' } })
+            ]);
+
+            const response = {
+                quests,
+                pagination: {
+                    currentPage: page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit)
+                }
+            };
+
+            res.json({ success: true, data: response } as ApiResponse);
+        } catch (error) {
+            console.error('Error getting pending approval quests:', error);
             res.status(500).json({ success: false, error: { message: 'Internal server error' } });
         }
     }

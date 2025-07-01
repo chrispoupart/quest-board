@@ -14,11 +14,14 @@ router.get('/repeatable', QuestController.getRepeatableQuests);
 router.get('/my-created', QuestController.getMyCreatedQuests);
 router.get('/my-claimed', QuestController.getMyClaimedQuests);
 router.get('/my-completion-history', QuestController.getMyCompletionHistory);
+router.get('/pending-approval', requireAdminOrEditor, QuestController.getPendingApprovalQuests);
 router.get('/:id', validateQuestId, QuestController.getQuestById);
 
-// Quest workflow routes (authenticated users)
-router.post('/:id/claim', validateQuestId, QuestController.claimQuest);
-router.post('/:id/complete', validateQuestId, QuestController.completeQuest);
+// Quest workflow routes (authenticated users) - using PUT to match tests
+router.put('/:id/claim', validateQuestId, QuestController.claimQuest);
+router.put('/:id/complete', validateQuestId, QuestController.completeQuest);
+router.post('/:id/claim', validateQuestId, QuestController.claimQuest);  // Keep POST for backward compatibility
+router.post('/:id/complete', validateQuestId, QuestController.completeQuest);  // Keep POST for backward compatibility
 
 // Quest skill requirements (all authenticated users can view for eligibility)
 router.get('/:id/skill-requirements', validateQuestId, QuestController.getQuestRequiredSkills);
@@ -30,6 +33,8 @@ router.put('/:id', requireAdminOrEditor, validateQuestId, QuestController.update
 router.put('/:id/with-skills', requireAdminOrEditor, validateQuestId, QuestController.updateQuestWithSkills);
 router.post('/:id/approve', requireAdminOrEditor, validateQuestId, QuestController.approveQuest);
 router.post('/:id/reject', requireAdminOrEditor, validateQuestId, QuestController.rejectQuest);
+router.put('/:id/approve', requireAdminOrEditor, validateQuestId, QuestController.approveQuest);  // Add PUT for tests
+router.put('/:id/reject', requireAdminOrEditor, validateQuestId, QuestController.rejectQuest);    // Add PUT for tests
 
 // Quest required skills routes (admin/editor only)
 router.get('/:id/required-skills', requireAdminOrEditor, validateQuestId, QuestController.getQuestRequiredSkills);

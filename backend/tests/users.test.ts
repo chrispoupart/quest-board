@@ -1,25 +1,27 @@
+// Set environment before importing app
+process.env['NODE_ENV'] = 'test';
+
 import request from 'supertest';
-import app from '../src/index';
+import { app } from '../src/index';
 import {
-    setupTestDatabase,
-    teardownTestDatabase,
+    ensureTestDatabase,
     clearTestData,
     createTestUser,
+    createTestQuest,
     createTestToken,
-    getTestPrisma
+    getTestPrisma,
+    resetUserCounter
 } from './setup';
+
+jest.setTimeout(30000);
 
 describe('User Endpoints', () => {
     beforeAll(async () => {
-        process.env['NODE_ENV'] = 'test';
-        await setupTestDatabase();
-    });
-
-    afterAll(async () => {
-        await teardownTestDatabase();
+        await ensureTestDatabase();
     });
 
     beforeEach(async () => {
+        resetUserCounter(); // Reset counter FIRST to ensure unique emails
         await clearTestData();
     });
 
