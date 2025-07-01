@@ -1,3 +1,17 @@
+## [2.10.0](https://github.com/chrispoupart/quest-board/compare/v2.9.0...v2.10.0) (2025-07-01)
+
+### Features
+
+* **backend:** 🎉 add notification system for user alerts ([7957ea7](https://github.com/chrispoupart/quest-board/commit/7957ea778e993e4ff98d0ed67975c8d259f99cef))
+* **notification:** 💄 add notification components and services ([e4e54ef](https://github.com/chrispoupart/quest-board/commit/e4e54ef845421646107df939e56a3a1339cf9bfb))
+* **prisma:** 🗃️  add notifications and update transactions schema ([228112f](https://github.com/chrispoupart/quest-board/commit/228112f4ad2566f2c11be79366d3835a42c30897))
+
+### Bug Fixes
+
+* **auth:** 🔒️ implement Google authentication for login ([c8dad30](https://github.com/chrispoupart/quest-board/commit/c8dad30cbfa2abb01a25aa45b7c3fd6b176f2d9e))
+* **skillController:** 🔒️ validate skill ID from URL params ([e2542e9](https://github.com/chrispoupart/quest-board/commit/e2542e9bb91e0a36df58e48f0946162d4497eab4))
+* **skillController:** 🦺 handle skillId from params or body ([6eb1626](https://github.com/chrispoupart/quest-board/commit/6eb16262bff0b3f995e37f1e329d73da90ef6956))
+
 ## [2.9.0](https://github.com/chrispoupart/quest-board/compare/v2.8.0...v2.9.0) (2025-06-30)
 
 ### Features
