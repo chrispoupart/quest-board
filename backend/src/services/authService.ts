@@ -3,7 +3,7 @@ import jwt, { SignOptions } from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { UserRole, JwtPayload, GoogleUserInfo, AuthUser } from '../types';
 import { calculateLevel } from '../utils/leveling';
-import { prisma } from '../index';
+import { prisma } from '../db';
 
 // Initialize Google OAuth2 client
 const googleClient = new OAuth2Client(
@@ -11,7 +11,10 @@ const googleClient = new OAuth2Client(
     process.env['GOOGLE_CLIENT_SECRET']
 );
 
-const JWT_SECRET = process.env['JWT_SECRET'] || 'your-default-secret-key';
+const JWT_SECRET = process.env['JWT_SECRET'];
+if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET environment variable is required but not set');
+}
 
 export class AuthService {
     /**
@@ -31,8 +34,8 @@ export class AuthService {
         }
 
         // Validate that the secret is not weak or predictable
-        if (!secret || secret === 'undefined_refresh' || secret.length < 16) {
-            throw new Error('JWT refresh secret is weak or not properly configured (minimum 16 characters required)');
+        if (!secret || secret === 'undefined_refresh' || secret.length < 32) {
+            throw new Error('JWT refresh secret is weak or not properly configured (minimum 32 characters required)');
         }
 
         return secret;
@@ -266,18 +269,18 @@ export class AuthService {
             if (process.env['NODE_ENV'] !== 'test') {
                 console.error("Token refresh error:", error);
             }
-            
+
             // Handle specific JWT errors for proper 401 responses
             if (error instanceof Error) {
-                if (error.message.includes('jwt malformed') || 
-                    error.message.includes('invalid token') || 
+                if (error.message.includes('jwt malformed') ||
+                    error.message.includes('invalid token') ||
                     error.message.includes('Invalid token') ||
                     error.message.includes('Invalid refresh token payload') ||
                     error.message.includes('User not found for refresh token')) {
                     throw new Error('Invalid token');
                 }
             }
-            
+
             throw new Error('Token refresh failed');
         }
     }

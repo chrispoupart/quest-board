@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { ApiResponse } from '../types';
-import { prisma } from '../index';
+import { prisma } from '../db';
 
 export class DashboardController {
     /**
@@ -160,7 +160,7 @@ export class DashboardController {
                         completedQuests,
                         activeQuests: currentQuests,
                         pendingApproval,
-                        totalBounty: user?.bountyBalance || 0,
+                        totalBounty: earnedBounty._sum.bounty || 0,
                         averageBounty: completedQuests > 0 ? (earnedBounty._sum.bounty || 0) / completedQuests : 0
                     }
                 }
@@ -375,7 +375,7 @@ export class DashboardController {
         try {
             const userId = (req as any).user?.userId;
             const userRole = (req as any).user?.role;
-            
+
             if (!userId) {
                 res.status(401).json({
                     success: false,
@@ -464,7 +464,7 @@ export class DashboardController {
     static async getActiveQuests(req: Request, res: Response): Promise<void> {
         try {
             const userId = (req as any).user?.userId;
-            
+
             if (!userId) {
                 res.status(401).json({
                     success: false,

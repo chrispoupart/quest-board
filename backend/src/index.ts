@@ -12,21 +12,11 @@ import dashboardRoutes from './routes/dashboard';
 import jobRoutes from './routes/jobs';
 import storeRoutes from './routes/store';
 import skillRoutes from './routes/skills';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from './db';
+import './config'; // This will load and validate environment variables
 
 // Load environment variables
 dotenv.config();
-
-// Create Prisma client with proper configuration for test environment
-export const prisma = process.env['DATABASE_URL'] 
-  ? new PrismaClient({
-      datasources: {
-        db: {
-          url: process.env['DATABASE_URL']
-        }
-      }
-    })
-  : new PrismaClient();
 
 const app = express();
 const PORT = process.env['PORT'] || 8000;

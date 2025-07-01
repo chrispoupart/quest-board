@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { googleLogin, googleCallback, googleAuth, refreshTokenHandler } from '../controllers/authController';
-import { authenticateToken } from '../middleware/authMiddleware';
+import { googleLogin, googleCallback, googleAuth, refreshTokenHandler, logout } from '../controllers/authController';
+import { authMiddleware, isEditorOrAdmin } from '../middleware/authMiddleware';
 
 const router = Router();
 
@@ -20,9 +20,16 @@ router.post('/refresh', (req, res, next) => {
 });
 
 // Logout route
-router.post('/logout', authenticateToken, (req, res) => {
-  // For now, just return success - in a real app you'd invalidate the token
-  res.json({ success: true, message: 'Logged out successfully' });
+router.post('/logout', authMiddleware, logout);
+
+// Example of a protected route
+router.get('/protected', authMiddleware, (req, res) => {
+    res.json({ success: true, message: 'Welcome to the protected route!', user: req.user });
+});
+
+// Example of a role-protected route (only accessible by EDITOR or ADMIN)
+router.get('/editor-only', authMiddleware, isEditorOrAdmin, (req, res) => {
+    res.json({ success: true, message: 'Welcome, editor/admin!' });
 });
 
 export default router;

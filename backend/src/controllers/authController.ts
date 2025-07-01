@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { OAuth2Client } from 'google-auth-library';
-import { prisma } from '../index';
+import { prisma } from '../db';
 import { AuthService } from '../services/authService';
 import { getLevel } from '../utils/leveling';
 
@@ -130,16 +130,16 @@ export const googleAuth = async (req: Request, res: Response): Promise<Response>
   const { code, redirectUri } = req.body;
 
   if (!code) {
-    return res.status(400).json({ 
-      success: false, 
-      error: { message: 'Authorization code is required' } 
+    return res.status(400).json({
+      success: false,
+      error: { message: 'Authorization code is required' }
     });
   }
 
   if (!redirectUri) {
-    return res.status(400).json({ 
-      success: false, 
-      error: { message: 'Redirect URI is required' } 
+    return res.status(400).json({
+      success: false,
+      error: { message: 'Redirect URI is required' }
     });
   }
 
@@ -150,9 +150,9 @@ export const googleAuth = async (req: Request, res: Response): Promise<Response>
     });
 
     if (!tokens.id_token) {
-      return res.status(400).json({ 
-        success: false, 
-        error: { message: 'ID token is missing from Google response' } 
+      return res.status(400).json({
+        success: false,
+        error: { message: 'ID token is missing from Google response' }
       });
     }
 
@@ -163,9 +163,9 @@ export const googleAuth = async (req: Request, res: Response): Promise<Response>
 
     const payload = ticket.getPayload();
     if (!payload || !payload.email || !payload.name) {
-      return res.status(400).json({ 
-        success: false, 
-        error: { message: 'Failed to retrieve user profile from Google' } 
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Failed to retrieve user profile from Google' }
       });
     }
 
@@ -201,11 +201,11 @@ export const googleAuth = async (req: Request, res: Response): Promise<Response>
 
     const { accessToken, refreshToken } = AuthService.generateTokens(authUser);
 
-    return res.json({ 
-      success: true, 
-      data: { 
-        accessToken, 
-        refreshToken, 
+    return res.json({
+      success: true,
+      data: {
+        accessToken,
+        refreshToken,
         user: {
           id: user.id,
           name: user.name,
@@ -213,7 +213,7 @@ export const googleAuth = async (req: Request, res: Response): Promise<Response>
           role: user.role,
           level
         }
-      } 
+      }
     });
 
   } catch (error) {
@@ -221,9 +221,15 @@ export const googleAuth = async (req: Request, res: Response): Promise<Response>
     if (process.env['NODE_ENV'] !== 'test') {
       console.error('Authentication error:', error);
     }
-    return res.status(500).json({ 
-      success: false, 
-      error: { message: 'Authentication failed' } 
+    return res.status(500).json({
+      success: false,
+      error: { message: 'Authentication failed' }
     });
   }
+};
+
+export const logout = (req: Request, res: Response) => {
+    // In a real-world scenario, you might add the token to a blacklist
+    // until it expires. For now, we'll just send a success message.
+    res.json({ success: true, message: 'Logged out successfully' });
 };

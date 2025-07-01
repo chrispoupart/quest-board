@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { UserRole, AuthUser, ApiResponse, UpdateUserRequest } from '../types';
 import { validateUserRole } from '../utils/validation';
 import { calculateLevel } from '../utils/leveling';
-import { prisma } from '../index';
+import { prisma } from '../db';
 
 export class UserController {
     /**

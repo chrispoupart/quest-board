@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { ApiResponse, UserRole } from '../types';
 import { calculateQuestExperience, checkLevelUp, getLevelInfo } from '../utils/leveling';
-import { prisma } from '../index';
+import { prisma } from '../db';
 
 export class QuestController {
     /**
@@ -369,7 +369,7 @@ export class QuestController {
             const updatedQuest = await prisma.quest.update({
                 where: { id: questId },
                 data: {
-                    status: 'COMPLETED',
+                    status: 'PENDING_APPROVAL',
                     completedAt: new Date(),
                 },
             });
@@ -385,13 +385,13 @@ export class QuestController {
      */
     static async approveQuest(req: Request, res: Response): Promise<void> {
         try {
-            const questIdParam = req.params['id'];
-            if (!questIdParam) {
+            const { questId, aipApproval } = req.body;
+            if (!questId) {
                 res.status(400).json({ success: false, error: { message: 'Quest ID is required' } });
                 return;
             }
-            const questId = parseInt(questIdParam);
-            if (isNaN(questId)) {
+            const questIdNum = parseInt(questId);
+            if (isNaN(questIdNum)) {
                 res.status(400).json({ success: false, error: { message: 'Invalid quest ID' } });
                 return;
             }
@@ -400,13 +400,13 @@ export class QuestController {
                 res.status(401).json({ success: false, error: { message: 'User not authenticated' } });
                 return;
             }
-            const quest = await prisma.quest.findUnique({ where: { id: questId } });
+            const quest = await prisma.quest.findUnique({ where: { id: questIdNum } });
             if (!quest) {
                 res.status(404).json({ success: false, error: { message: 'Quest not found' } });
                 return;
             }
-            if (quest.status !== 'COMPLETED') {
-                res.status(400).json({ success: false, error: { message: 'Quest is not completed' } });
+            if (quest.status !== 'PENDING_APPROVAL') {
+                res.status(400).json({ success: false, error: { message: 'Quest is not completed and ready for approval' } });
                 return;
             }
             if (!quest.claimedBy) {
@@ -418,7 +418,7 @@ export class QuestController {
             const user = (req as any).user;
             const isAdmin = user?.role === 'ADMIN';
             const isQuestCreator = quest.createdBy === userId;
-            
+
             if (!isAdmin && !isQuestCreator) {
                 res.status(403).json({ success: false, error: { message: 'Access denied. Only admins or quest creators can approve quests.' } });
                 return;
@@ -431,16 +431,15 @@ export class QuestController {
             };
 
             // Create completion record for the user who completed the quest
-            // TODO: Re-enable when QuestCompletion table is available
-            // await prisma.questCompletion.create({
-            //     data: {
-            //         questId: questId,
-            //         userId: quest.claimedBy,
-            //         completedAt: quest.completedAt || new Date(),
-            //         approvedAt: new Date(),
-            //         status: 'APPROVED'
-            //     }
-            // });
+            await prisma.questCompletion.create({
+                data: {
+                    questId: questIdNum,
+                    userId: quest.claimedBy,
+                    completedAt: quest.completedAt || new Date(),
+                    approvedAt: new Date(),
+                    status: 'APPROVED'
+                }
+            });
 
             // If quest is repeatable, set it to cooldown status instead of available
             if (quest.isRepeatable) {
@@ -451,7 +450,7 @@ export class QuestController {
             }
 
             const updatedQuest = await prisma.quest.update({
-                where: { id: questId },
+                where: { id: questIdNum },
                 data: updateData,
             });
 
@@ -502,13 +501,13 @@ export class QuestController {
      */
     static async rejectQuest(req: Request, res: Response): Promise<void> {
         try {
-            const questIdParam = req.params['id'];
-            if (!questIdParam) {
+            const { questId, reason } = req.body;
+            if (!questId) {
                 res.status(400).json({ success: false, error: { message: 'Quest ID is required' } });
                 return;
             }
-            const questId = parseInt(questIdParam);
-            if (isNaN(questId)) {
+            const questIdNum = parseInt(questId);
+            if (isNaN(questIdNum)) {
                 res.status(400).json({ success: false, error: { message: 'Invalid quest ID' } });
                 return;
             }
@@ -517,13 +516,13 @@ export class QuestController {
                 res.status(401).json({ success: false, error: { message: 'User not authenticated' } });
                 return;
             }
-            const quest = await prisma.quest.findUnique({ where: { id: questId } });
+            const quest = await prisma.quest.findUnique({ where: { id: questIdNum } });
             if (!quest) {
                 res.status(404).json({ success: false, error: { message: 'Quest not found' } });
                 return;
             }
-            if (quest.status !== 'COMPLETED') {
-                res.status(400).json({ success: false, error: { message: 'Quest is not completed' } });
+            if (quest.status !== 'PENDING_APPROVAL') {
+                res.status(400).json({ success: false, error: { message: 'Quest is not completed and ready for approval' } });
                 return;
             }
             if (!quest.claimedBy) {
@@ -535,14 +534,13 @@ export class QuestController {
             const user = (req as any).user;
             const isAdmin = user?.role === 'ADMIN';
             const isQuestCreator = quest.createdBy === userId;
-            
+
             if (!isAdmin && !isQuestCreator) {
                 res.status(403).json({ success: false, error: { message: 'Access denied. Only admins or quest creators can reject quests.' } });
                 return;
             }
 
             // Validate rejection reason
-            const { reason } = req.body;
             if (!reason || typeof reason !== 'string' || reason.trim() === '') {
                 res.status(400).json({ success: false, error: { message: 'Rejection reason is required' } });
                 return;
@@ -551,10 +549,9 @@ export class QuestController {
             // Use a transaction to ensure data consistency
             const result = await prisma.$transaction(async (tx) => {
                 // Create completion record for the user who completed the quest
-                // Note: approvedAt is not set for rejected quests
                 await tx.questCompletion.create({
                     data: {
-                        questId: questId,
+                        questId: questIdNum,
                         userId: quest.claimedBy!, // We already checked that claimedBy is not null above
                         completedAt: quest.completedAt || new Date(),
                         status: 'REJECTED'
@@ -563,7 +560,7 @@ export class QuestController {
 
                 // Update quest status to rejected
                 const updatedQuest = await tx.quest.update({
-                    where: { id: questId },
+                    where: { id: questIdNum },
                     data: {
                         status: 'REJECTED',
                     },

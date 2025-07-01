@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { UserRole, ApiResponse, CreateSkillRequest, UpdateSkillRequest, CreateUserSkillRequest, UpdateUserSkillRequest } from '../types';
 import { validateUserRole } from '../utils/validation';
-import { prisma } from '../index';
+import { prisma } from '../db';
 
 export class SkillController {
     /**
