@@ -38,11 +38,16 @@ model User {
   // Store relations
   createdStoreItems StoreItem[]        @relation("StoreItemCreator")
   storeTransactions StoreTransaction[] @relation("StoreTransactionBuyer")
+  soldTransactions  StoreTransaction[] @relation("StoreTransactionSeller")
 
   // Skills relations
   userSkills      UserSkill[]
   createdSkills   Skill[]           @relation("SkillCreator")
   QuestCompletion QuestCompletion[]
+
+  // Notifications
+  notifications    Notification[]
+  StoreTransaction StoreTransaction[]
 
   @@map("users")
 }
@@ -158,17 +163,24 @@ model StoreItem {
 }
 
 model StoreTransaction {
-  id        Int      @id @default(autoincrement())
-  itemId    Int      @map("item_id")
-  buyerId   Int      @map("buyer_id")
-  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
-  notes     String?
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id          Int       @id @default(autoincrement())
+  itemId      Int       @map("item_id")
+  buyerId     Int       @map("buyer_id")
+  sellerId    Int       @map("seller_id")
+  amount      Float
+  status      String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  notes       String?
+  processedBy Int?      @map("processed_by")
+  processedAt DateTime? @map("processed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
   // Relations
-  item  StoreItem @relation(fields: [itemId], references: [id])
-  buyer User      @relation("StoreTransactionBuyer", fields: [buyerId], references: [id])
+  item   StoreItem @relation(fields: [itemId], references: [id])
+  buyer  User      @relation("StoreTransactionBuyer", fields: [buyerId], references: [id])
+  seller User      @relation("StoreTransactionSeller", fields: [sellerId], references: [id])
+  User   User?     @relation(fields: [userId], references: [id])
+  userId Int?
 
   @@map("store_transactions")
 }
@@ -183,4 +195,20 @@ model QuestCompletion {
 
   quest Quest @relation(fields: [questId], references: [id])
   user  User  @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id")
+  type      String
+  title     String
+  message   String
+  data      String?
+  isRead    Boolean   @default(false) @map("is_read")
+  createdAt DateTime  @default(now()) @map("created_at")
+  readAt    DateTime? @map("read_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
 }
