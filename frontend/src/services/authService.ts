@@ -106,26 +106,26 @@ export const authService = {
      * Get current user profile
      */
     async getCurrentUser(): Promise<User> {
-        const response = await api.get<ApiResponse<User>>('/api/users/me');
+        const response = await api.get<ApiResponse<{ user: User }>>('/api/users/me');
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to get user profile');
         }
 
-        return response.data.data!;
+        return response.data.data!.user;
     },
 
     /**
      * Update current user profile
      */
     async updateProfile(updateData: { name?: string; email?: string }): Promise<User> {
-        const response = await api.put<ApiResponse<User>>('/api/users/me', updateData);
+        const response = await api.put<ApiResponse<{ user: User }>>('/api/users/me', updateData);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to update profile');
         }
 
-        return response.data.data!;
+        return response.data.data!.user;
     },
 
     /**
