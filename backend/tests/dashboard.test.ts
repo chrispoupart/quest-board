@@ -391,3 +391,89 @@ describe('Leaderboard API', () => {
         expect(res.body.find((u: { name: string }) => u.name === 'User1')).toBeUndefined();
     });
 });
+
+describe('Reward Config API', () => {
+    let adminUser: any;
+    let regularUser: any;
+    let adminToken: string;
+    let userToken: string;
+
+    beforeAll(async () => {
+        await setupTestDatabase();
+        adminUser = await createTestUser({ role: 'ADMIN', email: 'admin@example.com' });
+        regularUser = await createTestUser({ role: 'PLAYER', email: 'user@example.com' });
+        adminToken = createTestToken(adminUser.id, adminUser.email, adminUser.role);
+        userToken = createTestToken(regularUser.id, regularUser.email, regularUser.role);
+    });
+
+    afterAll(async () => {
+        await teardownTestDatabase();
+    });
+
+    beforeEach(async () => {
+        await clearTestData();
+        resetUserCounter();
+    });
+
+    it('should allow admin to get and update reward config', async () => {
+        // Admin can get config (should be default or empty)
+        let res = await request(app)
+            .get('/rewards/config')
+            .set('Authorization', `Bearer ${adminToken}`)
+            .expect(200);
+        expect(res.body).toHaveProperty('monthlyBountyReward');
+        expect(res.body).toHaveProperty('monthlyQuestReward');
+        expect(res.body).toHaveProperty('quarterlyCollectiveGoal');
+        expect(res.body).toHaveProperty('quarterlyCollectiveReward');
+
+        // Admin can update config
+        const newConfig = {
+            monthlyBountyReward: 100,
+            monthlyQuestReward: 50,
+            quarterlyCollectiveGoal: 1000,
+            quarterlyCollectiveReward: 'Pizza Party!'
+        };
+        res = await request(app)
+            .post('/rewards/config')
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send(newConfig)
+            .expect(200);
+        expect(res.body.success).toBe(true);
+
+        // Admin can get updated config
+        res = await request(app)
+            .get('/rewards/config')
+            .set('Authorization', `Bearer ${adminToken}`)
+            .expect(200);
+        expect(res.body.monthlyBountyReward).toBe(100);
+        expect(res.body.monthlyQuestReward).toBe(50);
+        expect(res.body.quarterlyCollectiveGoal).toBe(1000);
+        expect(res.body.quarterlyCollectiveReward).toBe('Pizza Party!');
+    });
+
+    it('should not allow non-admins to update reward config', async () => {
+        const newConfig = {
+            monthlyBountyReward: 200,
+            monthlyQuestReward: 100,
+            quarterlyCollectiveGoal: 2000,
+            quarterlyCollectiveReward: 'Ice Cream Social!'
+        };
+        // Non-admin cannot update
+        const res = await request(app)
+            .post('/rewards/config')
+            .set('Authorization', `Bearer ${userToken}`)
+            .send(newConfig)
+            .expect(403);
+        expect(res.body.success).toBe(false);
+    });
+
+    it('should not allow unauthenticated users to get or update config', async () => {
+        await request(app)
+            .get('/rewards/config')
+            .expect(401);
+        await request(app)
+            .post('/rewards/config')
+            .send({})
+            .expect(401);
+    });
+});

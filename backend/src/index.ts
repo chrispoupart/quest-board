@@ -12,6 +12,7 @@ import dashboardRoutes from './routes/dashboard';
 import jobRoutes from './routes/jobs';
 import storeRoutes from './routes/store';
 import skillRoutes from './routes/skills';
+import rewardsRoutes from './routes/rewards';
 import { prisma } from './db';
 import './config'; // This will load and validate environment variables
 
@@ -41,6 +42,7 @@ app.use('/dashboard', dashboardRoutes);
 app.use('/jobs', jobRoutes);
 app.use('/store', storeRoutes);
 app.use('/skills', skillRoutes);
+app.use('/rewards', rewardsRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
