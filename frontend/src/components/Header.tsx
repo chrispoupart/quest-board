@@ -56,10 +56,10 @@ const Header: React.FC = () => {
                                 <Menu.Button className="flex items-center space-x-2 text-foreground hover:text-primary transition-colors">
                                     <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                                         <span className="text-sm font-bold text-primary-foreground">
-                                            {user.name.charAt(0).toUpperCase()}
+                                            {(user.name || 'U').charAt(0).toUpperCase()}
                                         </span>
                                     </div>
-                                    <span className="hidden md:block text-sm font-medium">{user.name}</span>
+                                    <span className="hidden md:block text-sm font-medium">{user.name || 'User'}</span>
                                 </Menu.Button>
                                 <Transition
                                     as={Fragment}

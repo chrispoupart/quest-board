@@ -70,13 +70,13 @@ export const userService = {
      * Get current user profile
      */
     async getCurrentUser(): Promise<User> {
-        const response = await api.get<ApiResponse<User>>('/api/users/me');
+        const response = await api.get<ApiResponse<{ user: User }>>('/api/users/me');
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch current user');
         }
 
-        return response.data.data!;
+        return response.data.data!.user;
     },
 
     /**
@@ -93,12 +93,12 @@ export const userService = {
         favoriteColor?: string;
         experience?: number;
     }): Promise<User> {
-        const response = await api.put<ApiResponse<User>>('/api/users/me', userData);
+        const response = await api.put<ApiResponse<{ user: User }>>('/api/users/me', userData);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to update user profile');
         }
 
-        return response.data.data!;
+        return response.data.data!.user;
     },
 };
