@@ -568,4 +568,73 @@ export class DashboardController {
             res.status(500).json({ error: 'Internal server error' });
         }
     }
+
+    static async getQuestLeaderboard(req: Request, res: Response): Promise<void> {
+        try {
+            const { month } = req.query;
+            if (!month || typeof month !== 'string' || !/^\d{4}-\d{2}$/.test(month)) {
+                res.status(400).json({ error: 'Invalid or missing month parameter (expected YYYY-MM)' });
+                return;
+            }
+            // Calculate start and end of the month
+            const [year, mon] = month.split('-').map(Number);
+            const start = new Date(year, mon - 1, 1);
+            const end = new Date(year, mon, 1);
+
+            // Find all approved quest completions in this month
+            const completions = await prisma.questCompletion.findMany({
+                where: {
+                    completedAt: {
+                        gte: start,
+                        lt: end
+                    },
+                    status: 'APPROVED'
+                },
+                include: {
+                    user: true
+                }
+            });
+
+            // Count completions per user
+            const completionsByUser: Record<number, { name: string; questsCompleted: number }> = {};
+            for (const c of completions) {
+                if (!c.user) continue;
+                const userId = c.userId;
+                const userName = c.user.name;
+                if (!completionsByUser[userId]) {
+                    completionsByUser[userId] = { name: userName, questsCompleted: 0 };
+                }
+                completionsByUser[userId].questsCompleted += 1;
+            }
+
+            // Get all users with completions for the month
+            let leaderboard = Object.entries(completionsByUser).map(([userId, entry]) => ({
+                userId: Number(userId),
+                name: entry.name,
+                questsCompleted: entry.questsCompleted
+            }));
+            // Sort by completions desc, then name asc
+            leaderboard.sort((a, b) => b.questsCompleted - a.questsCompleted || a.name.localeCompare(b.name));
+
+            // If fewer than 5, fill with users with 0 completions (excluding those already in leaderboard)
+            if (leaderboard.length < 5) {
+                const excludeIds = leaderboard.map(u => u.userId);
+                const fillUsers = await prisma.user.findMany({
+                    where: excludeIds.length > 0 ? { id: { notIn: excludeIds } } : {},
+                    orderBy: { name: 'asc' },
+                    take: 5 - leaderboard.length
+                });
+                leaderboard = leaderboard.concat(
+                    fillUsers.map(u => ({ userId: u.id, name: u.name, questsCompleted: 0 }))
+                );
+            }
+            // Only return name and questsCompleted, and limit to 5
+            res.status(200).json(
+                leaderboard.slice(0, 5).map(u => ({ name: u.name, questsCompleted: u.questsCompleted }))
+            );
+        } catch (error) {
+            console.error('Error getting quest leaderboard:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
 }

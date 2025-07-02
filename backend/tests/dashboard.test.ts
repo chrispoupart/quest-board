@@ -332,4 +332,62 @@ describe('Leaderboard API', () => {
         // User1 should not be in the top 5
         expect(res.body.find((u: { name: string }) => u.name === 'User1')).toBeUndefined();
     });
+
+    it('should return the top 5 users by quests completed for the current month', async () => {
+        const now = new Date();
+        const users = [];
+        // Create 6 users
+        for (let i = 0; i < 6; i++) {
+            users.push(await createTestUser({ name: `User${i + 1}` }));
+        }
+
+        const prisma = getTestPrisma();
+        // Give each user a different number of completed quests
+        for (let i = 0; i < 6; i++) {
+            // User i+1 completes i+1 quests
+            for (let j = 0; j < i + 1; j++) {
+                const quest = await prisma.quest.create({
+                    data: {
+                        title: `Quest ${j} for User${i + 1}`,
+                        bounty: 10,
+                        status: 'COMPLETED',
+                        createdBy: users[i].id,
+                    },
+                });
+                await prisma.questCompletion.create({
+                    data: {
+                        questId: quest.id,
+                        userId: users[i].id,
+                        completedAt: now,
+                        status: 'APPROVED',
+                    },
+                });
+            }
+        }
+
+        // Authenticate as any user
+        const authUser = users[0];
+        const token = createTestToken(authUser.id, authUser.email, authUser.role);
+
+        // Call the leaderboard endpoint
+        const month = now.toISOString().slice(0, 7); // YYYY-MM
+        const res = await request(app)
+            .get(`/dashboard/leaderboard/quests?month=${month}`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200);
+
+        expect(res.body).toBeInstanceOf(Array);
+        expect(res.body.length).toBe(5);
+
+        // User6 should be first with 6 quests
+        expect(res.body[0].name).toBe('User6');
+        expect(res.body[0].questsCompleted).toBe(6);
+
+        // User2 should be last in the top 5 with 2 quests
+        expect(res.body[4].name).toBe('User2');
+        expect(res.body[4].questsCompleted).toBe(2);
+
+        // User1 (with 1 quest) should not be in the top 5
+        expect(res.body.find((u: { name: string }) => u.name === 'User1')).toBeUndefined();
+    });
 });
