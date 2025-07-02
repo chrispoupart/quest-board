@@ -1,3 +1,13 @@
+## [2.11.0](https://github.com/chrispoupart/quest-board/compare/v2.10.1...v2.11.0) (2025-07-02)
+
+### Features
+
+* **backend:** 🛂 add pagination for admin skill retrieval ([82be10d](https://github.com/chrispoupart/quest-board/commit/82be10da3bd200fc8864d76f5f8dfbc3d2ba503b))
+
+### Bug Fixes
+
+* **userService:** 🩹 fix user data structure in API response ([bf63baa](https://github.com/chrispoupart/quest-board/commit/bf63baa7c2f8ba4476e8da7156f74e4b0ed2fd05))
+
 ## [2.10.1](https://github.com/chrispoupart/quest-board/compare/v2.10.0...v2.10.1) (2025-07-02)
 
 ### Bug Fixes
