@@ -477,3 +477,91 @@ describe('Reward Config API', () => {
             .expect(401);
     });
 });
+
+describe('Collective Reward Progress API', () => {
+    let user: any;
+    let token: string;
+
+    beforeAll(async () => {
+        await setupTestDatabase();
+        user = await createTestUser({ role: 'PLAYER', email: 'user@example.com' });
+        token = createTestToken(user.id, user.email, user.role);
+    });
+
+    afterAll(async () => {
+        await teardownTestDatabase();
+    });
+
+    beforeEach(async () => {
+        await clearTestData();
+        resetUserCounter();
+    });
+
+    it('should return the collective reward progress for the quarter', async () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const quarter = Math.floor(month / 3) + 1;
+        const quarterParam = `${year}-Q${quarter}`;
+
+        // Set a collective goal in the reward config
+        const prisma = getTestPrisma();
+        await prisma.rewardConfig.create({
+            data: {
+                monthlyBountyReward: 0,
+                monthlyQuestReward: 0,
+                quarterlyCollectiveGoal: 1000,
+                quarterlyCollectiveReward: 'Team Pizza Party!'
+            }
+        });
+
+        // Seed users and completions in the current quarter
+        let totalBounty = 0;
+        for (let i = 0; i < 3; i++) {
+            const u = await createTestUser({ name: `User${i + 1}` });
+            for (let j = 0; j < i + 1; j++) {
+                const quest = await prisma.quest.create({
+                    data: {
+                        title: `Quest ${j} for User${i + 1}`,
+                        bounty: 100,
+                        status: 'COMPLETED',
+                        createdBy: u.id,
+                    },
+                });
+                await prisma.questCompletion.create({
+                    data: {
+                        questId: quest.id,
+                        userId: u.id,
+                        completedAt: now,
+                        status: 'APPROVED',
+                    },
+                });
+                totalBounty += 100;
+            }
+        }
+
+        // Call the endpoint
+        const res = await request(app)
+            .get(`/rewards/collective-progress?quarter=${quarterParam}`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200);
+
+        expect(res.body).toHaveProperty('goal', 1000);
+        expect(res.body).toHaveProperty('reward', 'Team Pizza Party!');
+        expect(res.body).toHaveProperty('progress', totalBounty);
+        expect(res.body).toHaveProperty('percent');
+        expect(typeof res.body.percent).toBe('number');
+        expect(res.body.percent).toBeCloseTo((totalBounty / 1000) * 100, 1);
+    });
+
+    it('should require authentication', async () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const quarter = Math.floor(month / 3) + 1;
+        const quarterParam = `${year}-Q${quarter}`;
+        await request(app)
+            .get(`/rewards/collective-progress?quarter=${quarterParam}`)
+            .expect(401);
+    });
+});

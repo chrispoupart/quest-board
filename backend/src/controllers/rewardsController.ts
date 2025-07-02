@@ -54,4 +54,57 @@ export class RewardsController {
             res.status(500).json({ success: false, error: 'Internal server error' });
         }
     }
+
+    static async getCollectiveProgress(req: Request, res: Response): Promise<void> {
+        try {
+            const { quarter } = req.query;
+            if (!quarter || typeof quarter !== 'string' || !/^\d{4}-Q[1-4]$/.test(quarter)) {
+                res.status(400).json({ error: 'Invalid or missing quarter parameter (expected YYYY-QN)' });
+                return;
+            }
+            const [yearStr, qStr] = quarter.split('-Q');
+            const year = parseInt(yearStr, 10);
+            const q = parseInt(qStr, 10);
+            if (isNaN(year) || isNaN(q) || q < 1 || q > 4) {
+                res.status(400).json({ error: 'Invalid quarter parameter' });
+                return;
+            }
+            // Calculate start and end of the quarter
+            const startMonth = (q - 1) * 3;
+            const start = new Date(year, startMonth, 1);
+            const end = new Date(year, startMonth + 3, 1);
+
+            // Get reward config
+            const config = await prisma.rewardConfig.findFirst();
+            const goal = config?.quarterlyCollectiveGoal || 0;
+            const reward = config?.quarterlyCollectiveReward || '';
+
+            // Find all approved quest completions in this quarter
+            const completions = await prisma.questCompletion.findMany({
+                where: {
+                    completedAt: {
+                        gte: start,
+                        lt: end
+                    },
+                    status: 'APPROVED'
+                },
+                include: {
+                    quest: true
+                }
+            });
+
+            // Sum bounty from completions
+            let progress = 0;
+            for (const c of completions) {
+                if (c.quest) {
+                    progress += c.quest.bounty || 0;
+                }
+            }
+            const percent = goal > 0 ? (progress / goal) * 100 : 0;
+            res.status(200).json({ goal, reward, progress, percent });
+        } catch (error) {
+            console.error('Error getting collective reward progress:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
 } 
