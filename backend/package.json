@@ -4,7 +4,7 @@
   "description": "Quest Board Backend API",
   "main": "dist/src/index.js",
   "scripts": {
-    "pretest": "rm -f prisma/test.db prisma/test.db-journal",
+    "pretest": "prisma generate && rm -f prisma/test.db prisma/test.db-journal",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
     "start": "node dist/src/index.js",
