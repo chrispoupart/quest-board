@@ -15,8 +15,10 @@ import skillRoutes from './routes/skills';
 import { prisma } from './db';
 import './config'; // This will load and validate environment variables
 
-// Load environment variables
-dotenv.config();
+// Load environment variables only if not in test environment
+if (process.env['NODE_ENV'] !== 'test') {
+  dotenv.config();
+}
 
 const app = express();
 const PORT = process.env['PORT'] || 8000;

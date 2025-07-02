@@ -1,16 +1,28 @@
 // Set environment before importing app
 process.env['NODE_ENV'] = 'test';
 
-import request from 'supertest';
-import { app } from '../src/index';
 import {
     setupTestDatabase,
     clearTestData,
     createTestUser,
     createTestQuest,
     createTestToken,
-    getTestPrisma
+    getTestPrisma,
+    teardownTestDatabase,
+    resetUserCounter
 } from './setup';
+
+// Mock the db module BEFORE importing the app.
+// This ensures the app uses the same Prisma client instance as the tests.
+jest.mock('../src/db', () => ({
+  __esModule: true,
+  get prisma() {
+    return getTestPrisma();
+  },
+}));
+
+import request from 'supertest';
+import { app } from '../src/index';
 
 jest.setTimeout(30000);
 
@@ -236,5 +248,88 @@ describe('Dashboard Endpoints', () => {
             // Should limit to 10 most recent
             expect(response.body.data.quests.length).toBeLessThanOrEqual(10);
         });
+    });
+});
+
+describe('Leaderboard API', () => {
+    beforeAll(async () => {
+        await setupTestDatabase();
+    });
+
+    afterAll(async () => {
+        await teardownTestDatabase();
+    });
+
+    beforeEach(async () => {
+        await clearTestData();
+        resetUserCounter();
+    });
+
+    it('should return the top 5 users by bounty earned for the current month', async () => {
+        const now = new Date();
+        const users = [];
+        // Create 6 users
+        for (let i = 0; i < 6; i++) {
+            users.push(await createTestUser({ name: `User${i + 1}` }));
+        }
+        // Give each user a different bounty total for the current month
+        const prisma = getTestPrisma();
+        for (let i = 0; i < 6; i++) {
+            // Each user completes i+1 quests, each worth 10 bounty
+            for (let j = 0; j < i + 1; j++) {
+                const quest = await prisma.quest.create({
+                    data: {
+                        title: `Quest for User${i + 1}`,
+                        bounty: 10,
+                        status: 'COMPLETED',
+                        createdBy: users[i].id,
+                        claimedBy: users[i].id,
+                        claimedAt: now,
+                        completedAt: now,
+                    },
+                });
+                await prisma.questCompletion.create({
+                    data: {
+                        questId: quest.id,
+                        userId: users[i].id,
+                        completedAt: now,
+                        status: 'APPROVED',
+                    },
+                });
+            }
+        }
+
+        // Diagnostic query
+        const diagnosticPrisma = getTestPrisma();
+        const monthForDiag = now.toISOString().slice(0, 7);
+        const [year, mon] = monthForDiag.split('-').map(Number);
+        const start = new Date(year, mon - 1, 1);
+        const end = new Date(year, mon, 1);
+        const completionsInTest = await diagnosticPrisma.questCompletion.findMany({
+            where: {
+                completedAt: { gte: start, lt: end },
+                status: 'APPROVED'
+            }
+        });
+        console.log('DIAGNOSTIC: Completions found in test right before API call:', completionsInTest.length);
+
+        // Authenticate as the first user
+        const authUser = users[0];
+        const token = createTestToken(authUser.id, authUser.email, authUser.role);
+        // Call the leaderboard endpoint
+        const month = now.toISOString().slice(0, 7); // YYYY-MM
+        const res = await request(app)
+            .get(`/dashboard/leaderboard/bounty?month=${month}`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200);
+        expect(res.body).toBeInstanceOf(Array);
+        expect(res.body.length).toBe(5);
+        // The user with the most completions should be first
+        expect(res.body[0].name).toBe('User6');
+        expect(res.body[0].bounty).toBe(60);
+        expect(res.body[4].name).toBe('User2');
+        expect(res.body[4].bounty).toBe(20);
+        // User1 should not be in the top 5
+        expect(res.body.find((u: { name: string }) => u.name === 'User1')).toBeUndefined();
     });
 });
