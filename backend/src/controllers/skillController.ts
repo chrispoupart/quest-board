@@ -92,26 +92,77 @@ export class SkillController {
 
     /**
      * Get all available skills (all authenticated users)
+     * Supports both paginated (for admins) and simple (for users) responses
      */
     static async getAvailableSkills(req: Request, res: Response): Promise<void> {
         try {
-            const skills = await prisma.skill.findMany({
-                where: { isActive: true },
-                select: {
-                    id: true,
-                    name: true,
-                    description: true,
-                    isActive: true
-                },
-                orderBy: {
-                    name: 'asc'
-                }
-            });
+            const userRole = (req as any).user?.role;
+            const page = parseInt(req.query['page'] as string) || 1;
+            const limit = parseInt(req.query['limit'] as string) || 10;
+            const isAdmin = userRole === 'ADMIN';
 
-            res.json({
-                success: true,
-                data: skills
-            } as ApiResponse);
+            // If admin and pagination is requested, return paginated response
+            if (isAdmin && (req.query['page'] || req.query['limit'])) {
+                const offset = (page - 1) * limit;
+
+                const [skills, total] = await Promise.all([
+                    prisma.skill.findMany({
+                        where: { isActive: true },
+                        include: {
+                            creator: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    email: true,
+                                    role: true,
+                                }
+                            }
+                        },
+                        orderBy: {
+                            name: 'asc'
+                        },
+                        skip: offset,
+                        take: limit
+                    }),
+                    prisma.skill.count({
+                        where: { isActive: true }
+                    })
+                ]);
+
+                const totalPages = Math.ceil(total / limit);
+
+                res.json({
+                    success: true,
+                    data: {
+                        skills,
+                        pagination: {
+                            currentPage: page,
+                            limit,
+                            total,
+                            totalPages
+                        }
+                    }
+                } as ApiResponse);
+            } else {
+                // Return simple array for regular users or when no pagination is requested
+                const skills = await prisma.skill.findMany({
+                    where: { isActive: true },
+                    select: {
+                        id: true,
+                        name: true,
+                        description: true,
+                        isActive: true
+                    },
+                    orderBy: {
+                        name: 'asc'
+                    }
+                });
+
+                res.json({
+                    success: true,
+                    data: skills
+                } as ApiResponse);
+            }
         } catch (error) {
             console.error('Error getting available skills:', error);
             res.status(500).json({

@@ -131,7 +131,7 @@ class SkillService {
 
     // Utility methods
     async getAllSkills(): Promise<Skill[]> {
-        const response = await this.request<ApiResponse<Skill[]>>('/api/skills/available');
+        const response = await this.request<ApiResponse<Skill[]>>('/api/skills');
         return response.data!;
     }
 
