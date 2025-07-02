@@ -1,3 +1,9 @@
+## [2.10.1](https://github.com/chrispoupart/quest-board/compare/v2.10.0...v2.10.1) (2025-07-02)
+
+### Bug Fixes
+
+* **authService:** 🦺 fix user data extraction from API response ([5351d57](https://github.com/chrispoupart/quest-board/commit/5351d57b9a3f5ace1410c37a0362c6b19fa98702))
+
 ## [2.10.0](https://github.com/chrispoupart/quest-board/compare/v2.9.0...v2.10.0) (2025-07-01)
 
 ### Features
