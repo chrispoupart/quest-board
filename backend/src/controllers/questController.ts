@@ -981,10 +981,10 @@ export class QuestController {
      */
     static async createQuestWithSkills(req: Request, res: Response): Promise<void> {
         try {
-            const { title, description, bounty, isRepeatable, cooldownDays, skillRequirements } = req.body;
-            const userId = (req as any).user?.userId;
+            const { title, description, bounty, isRepeatable, cooldownDays, skillRequirements, userId: assignedUserId } = req.body;
+            const creatorId = (req as any).user?.userId;
 
-            if (!userId) {
+            if (!creatorId) {
                 res.status(401).json({ success: false, error: { message: 'User not authenticated' } });
                 return;
             }
@@ -1027,9 +1027,10 @@ export class QuestController {
                         description,
                         bounty,
                         status: 'AVAILABLE',
-                        createdBy: userId,
+                        createdBy: creatorId,
                         isRepeatable: isRepeatable || false,
                         cooldownDays: isRepeatable ? cooldownDays : null,
+                        userId: assignedUserId ?? null,
                     },
                 });
 
@@ -1073,7 +1074,7 @@ export class QuestController {
                 return;
             }
 
-            const { title, description, bounty, status, isRepeatable, cooldownDays, skillRequirements } = req.body;
+            const { title, description, bounty, status, isRepeatable, cooldownDays, skillRequirements, userId } = req.body;
 
             // Validate skill requirements if provided
             if (skillRequirements && Array.isArray(skillRequirements)) {
@@ -1103,6 +1104,9 @@ export class QuestController {
                         throw new Error('Cooldown days must be a positive number for repeatable quests');
                     }
                     updateFields.cooldownDays = isRepeatable ? cooldownDays : null;
+                }
+                if ('userId' in req.body) {
+                    updateFields.userId = userId ?? null;
                 }
 
                 const quest = await tx.quest.update({
