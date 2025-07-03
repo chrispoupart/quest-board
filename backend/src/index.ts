@@ -13,6 +13,7 @@ import jobRoutes from './routes/jobs';
 import storeRoutes from './routes/store';
 import skillRoutes from './routes/skills';
 import rewardsRoutes from './routes/rewards';
+import notificationRoutes from './routes/notifications';
 import { prisma } from './db';
 import './config'; // This will load and validate environment variables
 import cron from 'node-cron';
@@ -45,6 +46,7 @@ app.use('/jobs', jobRoutes);
 app.use('/store', storeRoutes);
 app.use('/skills', skillRoutes);
 app.use('/rewards', rewardsRoutes);
+app.use('/notifications', notificationRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
