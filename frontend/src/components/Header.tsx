@@ -1,7 +1,7 @@
 import React, { Fragment, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, Transition } from '@headlessui/react';
-import { Settings, LogOut, Menu as MenuIcon, X } from 'lucide-react';
+import { Settings, LogOut, Menu as MenuIcon, X, Scroll } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import NotificationBell from './NotificationBell';
 import { Sun, Moon, Monitor } from 'lucide-react';
@@ -26,8 +26,9 @@ const Header: React.FC = () => {
         <header className="bg-gradient-to-r from-primary/20 to-primary/10 border-b-2 border-border shadow-lg relative">
             <div className="container mx-auto px-4 py-6">
                 <div className="flex justify-between items-center">
-                    <Link to="/" className="text-foreground hover:text-primary font-bold text-xl">
-                        Quest Board
+                    <Link to="/" className="flex items-center text-foreground hover:text-primary font-bold text-xl">
+                        <Scroll className="text-primary mr-2 h-8 w-8" />
+                        <span>Quest Board</span>
                     </Link>
                     <nav className="hidden md:flex items-center space-x-4">
                         <Link to="/quests" className="text-foreground hover:text-primary font-medium transition-colors">
