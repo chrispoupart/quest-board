@@ -434,58 +434,63 @@ export class QuestController {
                 return;
             }
 
-            const claimer = await prisma.user.findUnique({ where: { id: quest.claimedBy } });
-            if (!claimer) {
-                res.status(404).json({ success: false, error: { message: 'Claimer not found' } });
-                return;
-            }
-
-            const updatedClaimer = await prisma.user.update({
-                where: { id: claimer.id },
-                data: {
-                    bountyBalance: { increment: quest.bounty },
-                    experience: { increment: calculateQuestExperience(quest.bounty) }
+            const result = await prisma.$transaction(async (tx) => {
+                const claimer = await tx.user.findUnique({ where: { id: quest.claimedBy! } });
+                if (!claimer) {
+                    throw new Error('Claimer not found');
                 }
-            });
 
-            const hasLeveledUp = checkLevelUp(claimer.experience, updatedClaimer.experience);
-            const { level: newLevel } = getLevelInfo(updatedClaimer.experience);
-
-            const updatedQuest = await prisma.quest.update({
-                where: { id: questId },
-                data: {
-                    status: quest.isRepeatable ? 'AVAILABLE' : 'COMPLETED',
-                    claimedBy: null,
-                    completedAt: null,
-                    lastCompletedAt: new Date()
-                }
-            });
-
-            await prisma.questCompletion.create({
-                data: {
-                    questId: quest.id,
-                    userId: claimer.id,
-                    completedAt: quest.completedAt || new Date(),
-                    approvedAt: new Date(),
-                    status: 'APPROVED'
-                }
-            });
-
-            await NotificationService.createNotification(claimer.id, 'QUEST_APPROVED', 'Quest Approved', `Your quest "${quest.title}" has been approved. You've earned ${quest.bounty} bounty!`);
-            if (hasLeveledUp) {
-                const levelUpBonus = 100;
-                await prisma.user.update({
+                const updatedClaimer = await tx.user.update({
                     where: { id: claimer.id },
-                    data: { bountyBalance: { increment: levelUpBonus } },
+                    data: {
+                        bountyBalance: { increment: quest.bounty },
+                        experience: { increment: calculateQuestExperience(quest.bounty) }
+                    }
                 });
-                await NotificationService.createNotification(claimer.id, 'LEVEL_UP', 'Level Up!', `Congratulations! You've reached level ${newLevel} and received a bonus of ${levelUpBonus} bounty!`);
-            }
 
-            res.json({ success: true, data: { quest: updatedQuest } });
+                const hasLeveledUp = checkLevelUp(claimer.experience, updatedClaimer.experience);
+                const { level: newLevel } = getLevelInfo(updatedClaimer.experience);
 
+                const updatedQuest = await tx.quest.update({
+                    where: { id: questId },
+                    data: {
+                        status: quest.isRepeatable ? 'AVAILABLE' : 'COMPLETED',
+                        claimedBy: null,
+                        completedAt: null,
+                        lastCompletedAt: new Date()
+                    }
+                });
+
+                await tx.questCompletion.create({
+                    data: {
+                        questId: quest.id,
+                        userId: claimer.id,
+                        completedAt: quest.completedAt || new Date(),
+                        approvedAt: new Date(),
+                        status: 'APPROVED'
+                    }
+                });
+
+                await NotificationService.createNotification(claimer.id, 'QUEST_APPROVED', 'Quest Approved', `Your quest "${quest.title}" has been approved. You've earned ${quest.bounty} bounty!`, undefined, tx);
+                if (hasLeveledUp) {
+                    const levelUpBonus = 100;
+                    await tx.user.update({
+                        where: { id: claimer.id },
+                        data: { bountyBalance: { increment: levelUpBonus } },
+                    });
+                    await NotificationService.createNotification(claimer.id, 'LEVEL_UP', 'Level Up!', `Congratulations! You've reached level ${newLevel} and received a bonus of ${levelUpBonus} bounty!`, undefined, tx);
+                }
+                return updatedQuest;
+            });
+
+            res.json({ success: true, data: { quest: result } });
         } catch (error) {
             console.error('Error approving quest:', error);
-            res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+            if (error instanceof Error && error.message === 'Claimer not found') {
+                res.status(404).json({ success: false, error: { message: 'Claimer not found' } });
+            } else {
+                res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+            }
         }
     }
 
@@ -505,6 +510,11 @@ export class QuestController {
                 return;
             }
 
+            if (!rejectionReason || typeof rejectionReason !== 'string' || rejectionReason.trim() === '') {
+                res.status(400).json({ success: false, error: { message: 'Rejection reason is required' } });
+                return;
+            }
+
             if (quest.status !== 'PENDING_APPROVAL') {
                 res.status(400).json({ success: false, error: { message: 'Quest is not pending approval' } });
                 return;
@@ -516,14 +526,25 @@ export class QuestController {
                 return;
             }
 
-            const updatedQuest = await prisma.quest.update({
-                where: { id: questId },
-                data: { status: 'AVAILABLE', claimedBy: null, completedAt: null }
-            });
+            const updatedQuest = await prisma.$transaction(async (tx) => {
+                const rejectedQuest = await tx.quest.update({
+                    where: { id: questId },
+                    data: { status: 'AVAILABLE', claimedBy: null, completedAt: null }
+                });
 
-            if (quest.claimedBy) {
-                await NotificationService.createNotification(quest.claimedBy, 'QUEST_REJECTED', 'Quest Rejected', `Your submission for "${quest.title}" was rejected. Reason: ${rejectionReason || 'No reason provided.'}`);
-            }
+                if (quest.claimedBy) {
+                    await tx.questCompletion.create({
+                        data: {
+                            questId: quest.id,
+                            userId: quest.claimedBy,
+                            completedAt: quest.completedAt || new Date(),
+                            status: 'REJECTED'
+                        }
+                    });
+                    await NotificationService.createNotification(quest.claimedBy, 'QUEST_REJECTED', 'Quest Rejected', `Your submission for "${quest.title}" was rejected. Reason: ${rejectionReason}`, undefined, tx);
+                }
+                return rejectedQuest;
+            });
 
             res.json({ success: true, data: { quest: updatedQuest } });
         } catch (error) {

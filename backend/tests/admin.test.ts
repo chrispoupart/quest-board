@@ -264,8 +264,8 @@ describe('Admin Quest Approval Endpoints', () => {
                 .set('Authorization', `Bearer ${adminToken}`)
                 .send({}); // No reason provided
 
-            expect(response.status).toBe(200);
-            expect(response.body.success).toBe(true);
+            expect(response.status).toBe(400);
+            expect(response.body.success).toBe(false);
         });
     });
 
