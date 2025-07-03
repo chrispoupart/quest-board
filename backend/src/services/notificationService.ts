@@ -52,7 +52,7 @@ export class NotificationService {
             });
         } catch (error) {
             console.error('Error creating notification:', error);
-            throw error;
+            // Don't throw error to avoid breaking main functionality
         }
     }
 
