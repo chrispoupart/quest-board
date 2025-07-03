@@ -33,14 +33,12 @@ router.post('/', isEditorOrAdmin, QuestController.createQuest);
 router.post('/with-skills', isEditorOrAdmin, QuestController.createQuestWithSkills);
 router.put('/:id', isEditorOrAdmin, validateQuestId, QuestController.updateQuest);
 router.put('/:id/with-skills', isEditorOrAdmin, validateQuestId, QuestController.updateQuestWithSkills);
+router.delete('/:id', isAdmin, validateQuestId, QuestController.deleteQuest);
 
 // Quest required skills routes (admin/editor only)
 router.get('/:id/required-skills', isEditorOrAdmin, validateQuestId, QuestController.getQuestRequiredSkills);
 router.post('/:id/required-skills', isEditorOrAdmin, validateQuestId, QuestController.addQuestRequiredSkill);
 router.put('/:id/required-skills/:skillId', isEditorOrAdmin, validateQuestId, QuestController.updateQuestRequiredSkill);
 router.delete('/:id/required-skills/:skillId', isEditorOrAdmin, validateQuestId, QuestController.removeQuestRequiredSkill);
-
-// Admin only routes
-router.delete('/:id', isAdmin, validateQuestId, QuestController.deleteQuest);
 
 export default router;

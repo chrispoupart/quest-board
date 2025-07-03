@@ -64,7 +64,7 @@ describe('Admin Quest Approval Endpoints', () => {
             const response = await request(app)
                 .put(`/quests/${quest.id}/approve`)
                 .set('Authorization', `Bearer ${adminToken}`)
-                .send({ aipApproval: true });
+                .send();
 
             expect(response.status).toBe(200);
             expect(response.body.success).toBe(true);
@@ -109,7 +109,7 @@ describe('Admin Quest Approval Endpoints', () => {
             const response = await request(app)
                 .put(`/quests/${quest.id}/approve`)
                 .set('Authorization', `Bearer ${questGiverToken}`)
-                .send({ aipApproval: true });
+                .send();
 
             expect(response.status).toBe(200);
             expect(response.body.success).toBe(true);
@@ -155,7 +155,7 @@ describe('Admin Quest Approval Endpoints', () => {
             const response = await request(app)
                 .put(`/quests/${quest.id}/approve`)
                 .set('Authorization', `Bearer ${otherUserToken}`)
-                .send({ aipApproval: true });
+                .send();
 
             expect(response.status).toBe(403);
             expect(response.body.success).toBe(false);
@@ -178,7 +178,7 @@ describe('Admin Quest Approval Endpoints', () => {
             const response = await request(app)
                 .put(`/quests/${quest.id}/approve`)
                 .set('Authorization', `Bearer ${adminToken}`)
-                .send({ aipApproval: true });
+                .send();
 
             expect(response.status).toBe(400);
             expect(response.body.success).toBe(false);

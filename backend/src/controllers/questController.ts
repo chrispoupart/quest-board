@@ -412,29 +412,25 @@ export class QuestController {
             const approverId = (req as any).user?.userId;
             const approverRole = (req as any).user?.role as UserRole;
 
-            const quest = await prisma.quest.findUnique({ where: { id: questId } });
-            if (!quest) {
-                res.status(404).json({ success: false, error: { message: 'Quest not found' } });
-                return;
-            }
-
-            if (quest.status !== 'PENDING_APPROVAL') {
-                res.status(400).json({ success: false, error: { message: 'Quest is not pending approval' } });
-                return;
-            }
-
-            if (!quest.claimedBy) {
-                res.status(400).json({ success: false, error: { message: 'Quest has no claimant' } });
-                return;
-            }
-
-            const canApprove = approverRole === 'ADMIN' || quest.createdBy === approverId;
-            if (!canApprove) {
-                res.status(403).json({ success: false, error: { message: 'You are not authorized to approve this quest' } });
-                return;
-            }
-
             const result = await prisma.$transaction(async (tx) => {
+                const quest = await tx.quest.findUnique({ where: { id: questId } });
+                if (!quest) {
+                    throw new Error('Quest not found');
+                }
+
+                if (quest.status !== 'PENDING_APPROVAL') {
+                    throw new Error('Quest is not pending approval');
+                }
+
+                if (!quest.claimedBy) {
+                    throw new Error('Quest has no claimant');
+                }
+
+                const canApprove = approverRole === 'ADMIN' || quest.createdBy === approverId;
+                if (!canApprove) {
+                    throw new Error('You are not authorized to approve this quest');
+                }
+
                 const claimer = await tx.user.findUnique({ where: { id: quest.claimedBy! } });
                 if (!claimer) {
                     throw new Error('Claimer not found');
@@ -485,10 +481,24 @@ export class QuestController {
 
             res.json({ success: true, data: { quest: result } });
         } catch (error) {
-            console.error('Error approving quest:', error);
-            if (error instanceof Error && error.message === 'Claimer not found') {
-                res.status(404).json({ success: false, error: { message: 'Claimer not found' } });
+            if (error instanceof Error) {
+                const message = error.message;
+                let statusCode = 500;
+                if (message === 'Quest not found' || message === 'Claimer not found') {
+                    statusCode = 404;
+                } else if (message === 'Quest is not pending approval' || message === 'Quest has no claimant') {
+                    statusCode = 400;
+                } else if (message === 'You are not authorized to approve this quest') {
+                    statusCode = 403;
+                }
+
+                if (statusCode >= 500) {
+                    console.error('Error approving quest:', error);
+                }
+
+                res.status(statusCode).json({ success: false, error: { message } });
             } else {
+                console.error('Error approving quest:', error);
                 res.status(500).json({ success: false, error: { message: 'Internal server error' } });
             }
         }
@@ -504,29 +514,26 @@ export class QuestController {
             const approverId = (req as any).user?.userId;
             const approverRole = (req as any).user?.role as UserRole;
 
-            const quest = await prisma.quest.findUnique({ where: { id: questId } });
-            if (!quest) {
-                res.status(404).json({ success: false, error: { message: 'Quest not found' } });
-                return;
-            }
-
             if (!rejectionReason || typeof rejectionReason !== 'string' || rejectionReason.trim() === '') {
                 res.status(400).json({ success: false, error: { message: 'Rejection reason is required' } });
                 return;
             }
 
-            if (quest.status !== 'PENDING_APPROVAL') {
-                res.status(400).json({ success: false, error: { message: 'Quest is not pending approval' } });
-                return;
-            }
-
-            const canApprove = approverRole === 'ADMIN' || quest.createdBy === approverId;
-            if (!canApprove) {
-                res.status(403).json({ success: false, error: { message: 'You are not authorized to reject this quest' } });
-                return;
-            }
-
             const updatedQuest = await prisma.$transaction(async (tx) => {
+                const quest = await tx.quest.findUnique({ where: { id: questId } });
+                if (!quest) {
+                    throw new Error('Quest not found');
+                }
+
+                if (quest.status !== 'PENDING_APPROVAL') {
+                    throw new Error('Quest is not pending approval');
+                }
+
+                const canApprove = approverRole === 'ADMIN' || quest.createdBy === approverId;
+                if (!canApprove) {
+                    throw new Error('You are not authorized to reject this quest');
+                }
+
                 const rejectedQuest = await tx.quest.update({
                     where: { id: questId },
                     data: { status: 'AVAILABLE', claimedBy: null, completedAt: null }
@@ -548,8 +555,26 @@ export class QuestController {
 
             res.json({ success: true, data: { quest: updatedQuest } });
         } catch (error) {
-            console.error('Error rejecting quest:', error);
-            res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+            if (error instanceof Error) {
+                const message = error.message;
+                let statusCode = 500;
+                if (message === 'Quest not found') {
+                    statusCode = 404;
+                } else if (message === 'Quest is not pending approval') {
+                    statusCode = 400;
+                } else if (message === 'You are not authorized to reject this quest') {
+                    statusCode = 403;
+                }
+
+                if (statusCode >= 500) {
+                    console.error('Error rejecting quest:', error);
+                }
+
+                res.status(statusCode).json({ success: false, error: { message } });
+            } else {
+                console.error('Error rejecting quest:', error);
+                res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+            }
         }
     }
 
