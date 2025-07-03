@@ -9,10 +9,13 @@ export function backupDatabase() {
   }
   // Extract the file path from DATABASE_URL (e.g., file:./dev.db)
   const dbPath = dbUrl.replace(/^file:/, '');
+  const projectRoot = __dirname.includes('dist')
+    ? path.resolve(__dirname, '../../..')
+    : path.resolve(__dirname, '../..');
   const absDbPath = path.isAbsolute(dbPath)
     ? dbPath
-    : path.resolve(__dirname, '../../prisma', dbPath);
-  const backupDir = path.resolve(__dirname, '../../backups');
+    : path.resolve(projectRoot, 'prisma', dbPath);
+  const backupDir = path.resolve(projectRoot, 'backups');
   const timestamp = new Date().toISOString().replace(/[.:\-T]/g, '').slice(0, 15);
   const backupFile = path.join(backupDir, `sqlite_backup_${timestamp}.db`);
 
