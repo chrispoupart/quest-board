@@ -26,6 +26,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { userService } from '../services/userService';
 import { skillService } from '../services/skillService';
 import { Skill, UserSkill } from '../types';
+import { getLevelInfo } from '../utils/leveling';
 
 interface CharacterSheetProps {
 }
@@ -403,6 +404,39 @@ const CharacterSheet: React.FC<CharacterSheetProps> = () => {
             <div className="grid lg:grid-cols-3 gap-8">
               {/* Left Column - Character Details */}
               <div className="lg:col-span-1 space-y-6">
+                {/* Level & XP Card */}
+                <Card className="border-border bg-background">
+                  <CardHeader>
+                    <CardTitle>Level & Experience</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {user?.experience !== undefined && (
+                      (() => {
+                        const levelInfo = getLevelInfo(user.experience || 0);
+                        return (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-2xl font-bold text-primary">Level {levelInfo.level}</span>
+                            </div>
+                            <div className="w-full bg-muted rounded-full h-3 mb-1">
+                              <div
+                                className="bg-primary h-3 rounded-full transition-all duration-300"
+                                style={{ width: `${levelInfo.progressToNext * 100}%` }}
+                              ></div>
+                            </div>
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>{levelInfo.experience - levelInfo.experienceForCurrentLevel} XP</span>
+                              <span>{levelInfo.experienceToNext} XP to next</span>
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Total XP: {levelInfo.experience}
+                            </div>
+                          </div>
+                        );
+                      })()
+                    )}
+                  </CardContent>
+                </Card>
                 <Card className="border-border bg-background">
                   <CardHeader>
                     <CardTitle>Avatar</CardTitle>
