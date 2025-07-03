@@ -1,14 +1,17 @@
 import React, { Fragment, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, Transition } from '@headlessui/react';
-import { Settings, LogOut, Menu as MenuIcon, X } from 'lucide-react';
+import { Settings, LogOut, Menu as MenuIcon, X, Scroll } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { ThemeToggle } from './ui/theme-toggle';
+import NotificationBell from './NotificationBell';
+import { Sun, Moon, Monitor } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Header: React.FC = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const { theme, setTheme, isSystem, setIsSystem } = useTheme();
 
     const handleLogout = async () => {
         try {
@@ -23,8 +26,9 @@ const Header: React.FC = () => {
         <header className="bg-gradient-to-r from-primary/20 to-primary/10 border-b-2 border-border shadow-lg relative">
             <div className="container mx-auto px-4 py-6">
                 <div className="flex justify-between items-center">
-                    <Link to="/" className="text-foreground hover:text-primary font-bold text-xl">
-                        Quest Board
+                    <Link to="/" className="flex items-center text-foreground hover:text-primary font-bold text-xl">
+                        <Scroll className="text-primary mr-2 h-8 w-8" />
+                        <span>Quest Board</span>
                     </Link>
                     <nav className="hidden md:flex items-center space-x-4">
                         <Link to="/quests" className="text-foreground hover:text-primary font-medium transition-colors">
@@ -43,11 +47,9 @@ const Header: React.FC = () => {
                         )}
                     </nav>
 
-                    {/* User Menu and Mobile Menu Button */}
+                    {/* User Menu Row: Notification Bell and User Menu */}
                     <div className="flex items-center">
-                        {/* Theme Toggle */}
-                        <ThemeToggle />
-
+                        <NotificationBell />
                         {user && (
                             <Menu as="div" className="ml-3 relative">
                                 <Menu.Button className="flex items-center space-x-2 text-foreground hover:text-primary transition-colors">
@@ -73,22 +75,60 @@ const Header: React.FC = () => {
                                                 {({ active }) => (
                                                     <Link
                                                         to="/profile"
-                                                        className={`${
-                                                            active ? 'bg-muted text-foreground' : 'text-muted-foreground'
-                                                        } flex items-center px-4 py-2 text-sm`}
+                                                        className={`${active ? 'bg-muted text-foreground' : 'text-muted-foreground'
+                                                            } flex items-center px-4 py-2 text-sm`}
                                                     >
                                                         <Settings className="mr-3 h-4 w-4" />
                                                         Character Sheet
                                                     </Link>
                                                 )}
                                             </Menu.Item>
+                                            <div className="px-4 py-2 text-sm text-muted-foreground">Theme</div>
+                                            <Menu.Item>
+                                                {({ active }) => (
+                                                    <button
+                                                        onClick={() => { setIsSystem(false); setTheme('light'); }}
+                                                        className={`${active ? 'bg-muted text-foreground' : 'text-muted-foreground'
+                                                            } flex w-full items-center px-4 py-2 text-sm`}
+                                                    >
+                                                        <Sun className="mr-2 h-4 w-4" />
+                                                        <span>Light</span>
+                                                        {(!isSystem && theme === 'light') && <span className="ml-auto">✓</span>}
+                                                    </button>
+                                                )}
+                                            </Menu.Item>
+                                            <Menu.Item>
+                                                {({ active }) => (
+                                                    <button
+                                                        onClick={() => { setIsSystem(false); setTheme('dark'); }}
+                                                        className={`${active ? 'bg-muted text-foreground' : 'text-muted-foreground'
+                                                            } flex w-full items-center px-4 py-2 text-sm`}
+                                                    >
+                                                        <Moon className="mr-2 h-4 w-4" />
+                                                        <span>Dark</span>
+                                                        {(!isSystem && theme === 'dark') && <span className="ml-auto">✓</span>}
+                                                    </button>
+                                                )}
+                                            </Menu.Item>
+                                            <Menu.Item>
+                                                {({ active }) => (
+                                                    <button
+                                                        onClick={() => setIsSystem(true)}
+                                                        className={`${active ? 'bg-muted text-foreground' : 'text-muted-foreground'
+                                                            } flex w-full items-center px-4 py-2 text-sm`}
+                                                    >
+                                                        <Monitor className="mr-2 h-4 w-4" />
+                                                        <span>System</span>
+                                                        {isSystem && <span className="ml-auto">✓</span>}
+                                                    </button>
+                                                )}
+                                            </Menu.Item>
                                             <Menu.Item>
                                                 {({ active }) => (
                                                     <button
                                                         onClick={handleLogout}
-                                                        className={`${
-                                                            active ? 'bg-muted text-foreground' : 'text-muted-foreground'
-                                                        } flex w-full items-center px-4 py-2 text-sm`}
+                                                        className={`${active ? 'bg-muted text-foreground' : 'text-muted-foreground'
+                                                            } flex w-full items-center px-4 py-2 text-sm`}
                                                     >
                                                         <LogOut className="mr-3 h-4 w-4" />
                                                         Sign Out

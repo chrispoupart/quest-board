@@ -43,7 +43,8 @@ describe('Admin Quest Approval Endpoints', () => {
 
             // Create quest in available state
             const quest = await createTestQuest(questGiver.id, {
-                bounty: 500
+                bounty: 500,
+                isRepeatable: true
             });
 
             const playerToken = createTestToken(player.id, player.email, player.role);
@@ -61,19 +62,19 @@ describe('Admin Quest Approval Endpoints', () => {
             const adminToken = createTestToken(admin.id, admin.email, admin.role);
 
             const response = await request(app)
-                .post('/quests/approve-quest')
+                .put(`/quests/${quest.id}/approve`)
                 .set('Authorization', `Bearer ${adminToken}`)
-                .send({ questId: quest.id, aipApproval: true });
+                .send();
 
             expect(response.status).toBe(200);
             expect(response.body.success).toBe(true);
-            expect(response.body.data.quest.status).toBe('APPROVED');
+            expect(response.body.data.quest.status).toBe('COOLDOWN');
 
             // Check if bounty was added to player
             const updatedPlayer = await getTestPrisma().user.findUnique({
                 where: { id: player.id }
             });
-            expect(updatedPlayer?.bountyBalance).toBe(600); // 100 + 500
+            expect(updatedPlayer?.bountyBalance).toBe(700); // 100 (initial) + 500 (quest) + 100 (level up bonus)
         });
 
         it('should allow quest creator to approve their own quest', async () => {
@@ -89,7 +90,8 @@ describe('Admin Quest Approval Endpoints', () => {
             });
 
             const quest = await createTestQuest(questGiver.id, {
-                bounty: 300
+                bounty: 300,
+                isRepeatable: true
             });
 
             const playerToken = createTestToken(player.id, player.email, player.role);
@@ -105,19 +107,48 @@ describe('Admin Quest Approval Endpoints', () => {
             const questGiverToken = createTestToken(questGiver.id, questGiver.email, questGiver.role);
 
             const response = await request(app)
-                .post('/quests/approve-quest')
+                .put(`/quests/${quest.id}/approve`)
                 .set('Authorization', `Bearer ${questGiverToken}`)
-                .send({ questId: quest.id, aipApproval: true });
+                .send();
 
             expect(response.status).toBe(200);
             expect(response.body.success).toBe(true);
-            expect(response.body.data.quest.status).toBe('APPROVED');
+            expect(response.body.data.quest.status).toBe('COOLDOWN');
 
             // Check if bounty was added to player
             const updatedPlayer = await getTestPrisma().user.findUnique({
                 where: { id: player.id }
             });
-            expect(updatedPlayer?.bountyBalance).toBe(300);
+            expect(updatedPlayer?.bountyBalance).toBe(400); // 0 (initial) + 300 (quest) + 100 (level up bonus)
+        });
+
+        it('should set status to APPROVED for non-repeatable quests', async () => {
+            const admin = await createTestUser({ role: 'ADMIN', email: 'admin@test.com' });
+            const questGiver = await createTestUser({ role: 'EDITOR', email: 'questgiver@test.com' });
+            const player = await createTestUser({ role: 'PLAYER', email: 'player@test.com' });
+
+            const quest = await createTestQuest(questGiver.id, {
+                bounty: 100,
+                isRepeatable: false // This is a non-repeatable quest
+            });
+
+            const playerToken = createTestToken(player.id, player.email, player.role);
+            await request(app)
+                .put(`/quests/${quest.id}/claim`)
+                .set('Authorization', `Bearer ${playerToken}`);
+            await request(app)
+                .put(`/quests/${quest.id}/complete`)
+                .set('Authorization', `Bearer ${playerToken}`);
+
+            const adminToken = createTestToken(admin.id, admin.email, admin.role);
+            const response = await request(app)
+                .put(`/quests/${quest.id}/approve`)
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send();
+
+            expect(response.status).toBe(200);
+            expect(response.body.success).toBe(true);
+            expect(response.body.data.quest.status).toBe('APPROVED');
         });
 
         it('should return 403 for non-admin/non-creator users', async () => {
@@ -151,9 +182,9 @@ describe('Admin Quest Approval Endpoints', () => {
             const otherUserToken = createTestToken(otherUser.id, otherUser.email, otherUser.role);
 
             const response = await request(app)
-                .post('/quests/approve-quest')
+                .put(`/quests/${quest.id}/approve`)
                 .set('Authorization', `Bearer ${otherUserToken}`)
-                .send({ questId: quest.id, aipApproval: true });
+                .send();
 
             expect(response.status).toBe(403);
             expect(response.body.success).toBe(false);
@@ -174,13 +205,13 @@ describe('Admin Quest Approval Endpoints', () => {
             const adminToken = createTestToken(admin.id, admin.email, admin.role);
 
             const response = await request(app)
-                .post('/quests/approve-quest')
+                .put(`/quests/${quest.id}/approve`)
                 .set('Authorization', `Bearer ${adminToken}`)
-                .send({ questId: quest.id, aipApproval: true });
+                .send();
 
             expect(response.status).toBe(400);
             expect(response.body.success).toBe(false);
-            expect(response.body.error.message).toContain('completed');
+            expect(response.body.error.message).toContain('pending approval');
         });
     });
 
@@ -215,16 +246,15 @@ describe('Admin Quest Approval Endpoints', () => {
             const adminToken = createTestToken(admin.id, admin.email, admin.role);
 
             const response = await request(app)
-                .post('/quests/reject-quest')
+                .put(`/quests/${quest.id}/reject`)
                 .set('Authorization', `Bearer ${adminToken}`)
                 .send({
-                    questId: quest.id,
-                    reason: 'Quest not completed satisfactorily'
+                    rejectionReason: 'Quest requirements not met.'
                 });
 
             expect(response.status).toBe(200);
             expect(response.body.success).toBe(true);
-            expect(response.body.data.quest.status).toBe('REJECTED');
+            expect(response.body.data.quest.status).toBe('AVAILABLE');
 
             // Player balance should remain unchanged
             const updatedPlayer = await getTestPrisma().user.findUnique({
@@ -259,9 +289,9 @@ describe('Admin Quest Approval Endpoints', () => {
             const adminToken = createTestToken(admin.id, admin.email, admin.role);
 
             const response = await request(app)
-                .post('/quests/reject-quest')
+                .put(`/quests/${quest.id}/reject`)
                 .set('Authorization', `Bearer ${adminToken}`)
-                .send({ questId: quest.id }); // No reason provided
+                .send({}); // No reason provided
 
             expect(response.status).toBe(400);
             expect(response.body.success).toBe(false);

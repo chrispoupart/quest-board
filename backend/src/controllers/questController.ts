@@ -404,221 +404,184 @@ export class QuestController {
     }
 
     /**
-     * Approve quest completion (admin/editor only)
+     * Approve a completed quest (admin/editor only)
      */
     static async approveQuest(req: Request, res: Response): Promise<void> {
         try {
-            const { questId, aipApproval } = req.body;
-            if (!questId) {
-                res.status(400).json({ success: false, error: { message: 'Quest ID is required' } });
-                return;
-            }
-            const questIdNum = parseInt(questId);
-            if (isNaN(questIdNum)) {
-                res.status(400).json({ success: false, error: { message: 'Invalid quest ID' } });
-                return;
-            }
-            const userId = (req as any).user?.userId;
-            if (!userId) {
-                res.status(401).json({ success: false, error: { message: 'User not authenticated' } });
-                return;
-            }
-            const quest = await prisma.quest.findUnique({ where: { id: questIdNum } });
-            if (!quest) {
-                res.status(404).json({ success: false, error: { message: 'Quest not found' } });
-                return;
-            }
-            if (quest.status !== 'PENDING_APPROVAL') {
-                res.status(400).json({ success: false, error: { message: 'Quest is not completed and ready for approval' } });
-                return;
-            }
-            if (!quest.claimedBy) {
-                res.status(400).json({ success: false, error: { message: 'Quest has no claimant' } });
-                return;
-            }
+            const questId = parseInt(req.params['id']);
+            const approverId = (req as any).user?.userId;
+            const approverRole = (req as any).user?.role as UserRole;
 
-            // Check authorization - only admins or quest creators can approve
-            const user = (req as any).user;
-            const isAdmin = user?.role === 'ADMIN';
-            const isQuestCreator = quest.createdBy === userId;
-
-            if (!isAdmin && !isQuestCreator) {
-                res.status(403).json({ success: false, error: { message: 'Access denied. Only admins or quest creators can approve quests.' } });
-                return;
-            }
-
-            // Prepare update data
-            const updateData: any = {
-                status: 'APPROVED',
-                lastCompletedAt: new Date(), // Track when quest was last completed
-            };
-
-            // Create completion record for the user who completed the quest
-            await prisma.questCompletion.create({
-                data: {
-                    questId: questIdNum,
-                    userId: quest.claimedBy,
-                    completedAt: quest.completedAt || new Date(),
-                    approvedAt: new Date(),
-                    status: 'APPROVED'
+            const result = await prisma.$transaction(async (tx) => {
+                const quest = await tx.quest.findUnique({ where: { id: questId } });
+                if (!quest) {
+                    throw new Error('Quest not found');
                 }
-            });
 
-            // If quest is repeatable, set it to cooldown status instead of available
-            if (quest.isRepeatable) {
-                updateData.status = 'COOLDOWN';
-                updateData.claimedBy = null;
-                updateData.claimedAt = null;
-                updateData.completedAt = null;
-            }
-
-            const updatedQuest = await prisma.quest.update({
-                where: { id: questIdNum },
-                data: updateData,
-            });
-
-            // Update user's bounty balance (always give bounty regardless of repeatable status)
-            const userUpdate = await prisma.user.update({
-                where: { id: quest.claimedBy },
-                data: {
-                    bountyBalance: {
-                        increment: quest.bounty,
-                    },
-                },
-                select: {
-                    experience: true,
+                if (quest.status !== 'PENDING_APPROVAL') {
+                    throw new Error('Quest is not pending approval');
                 }
-            });
 
-            // Calculate and award experience
-            const experienceGained = calculateQuestExperience(quest.bounty);
-            const oldExperience = userUpdate.experience;
-            const newExperience = oldExperience + experienceGained;
-            const leveledUp = checkLevelUp(oldExperience, newExperience);
+                if (!quest.claimedBy) {
+                    throw new Error('Quest has no claimant');
+                }
 
-            // Update user's experience
-            await prisma.user.update({
-                where: { id: quest.claimedBy },
-                data: {
-                    experience: newExperience,
-                },
-            });
+                const canApprove = approverRole === 'ADMIN' || quest.createdBy === approverId;
+                if (!canApprove) {
+                    throw new Error('You are not authorized to approve this quest');
+                }
 
-            // Award bonus bounty if leveled up
-            let levelUpBonus = 0;
-            if (leveledUp) {
-                levelUpBonus = 100;
-                await prisma.user.update({
-                    where: { id: quest.claimedBy },
+                const claimer = await tx.user.findUnique({ where: { id: quest.claimedBy! } });
+                if (!claimer) {
+                    throw new Error('Claimer not found');
+                }
+
+                const updatedClaimer = await tx.user.update({
+                    where: { id: claimer.id },
                     data: {
-                        bountyBalance: {
-                            increment: levelUpBonus,
-                        },
-                    },
+                        bountyBalance: { increment: quest.bounty },
+                        experience: { increment: calculateQuestExperience(quest.bounty) }
+                    }
                 });
-                // Send notification for bounty bonus
-                await NotificationService.createNotification(
-                  quest.claimedBy,
-                  'LEVEL_UP',
-                  'Level Up Bonus! 🎁',
-                  `You received a 100 bounty bonus for leveling up!`,
-                  { bonus: levelUpBonus }
-                );
-            }
 
-            // Prepare response with level up information
-            const response = {
-                quest: updatedQuest,
-                experienceGained,
-                leveledUp,
-                newLevel: leveledUp ? getLevelInfo(newExperience).level : null,
-                levelUpBonus,
-            };
+                const hasLeveledUp = checkLevelUp(claimer.experience, updatedClaimer.experience);
+                const { level: newLevel } = getLevelInfo(updatedClaimer.experience);
 
-            res.json({ success: true, data: response } as ApiResponse);
+                const updateData: any = {
+                    status: 'APPROVED',
+                    lastCompletedAt: new Date(),
+                };
+
+                if (quest.isRepeatable) {
+                    updateData.status = 'COOLDOWN';
+                    updateData.claimedBy = null;
+                    updateData.claimedAt = null;
+                    updateData.completedAt = null;
+                }
+
+                const updatedQuest = await tx.quest.update({
+                    where: { id: questId },
+                    data: updateData
+                });
+
+                await tx.questCompletion.create({
+                    data: {
+                        questId: quest.id,
+                        userId: claimer.id,
+                        completedAt: quest.completedAt || new Date(),
+                        approvedAt: new Date(),
+                        status: 'APPROVED'
+                    }
+                });
+
+                await NotificationService.createNotification(claimer.id, 'QUEST_APPROVED', 'Quest Approved', `Your quest "${quest.title}" has been approved. You've earned ${quest.bounty} bounty!`, undefined, tx);
+                if (hasLeveledUp) {
+                    const levelUpBonus = 100;
+                    await tx.user.update({
+                        where: { id: claimer.id },
+                        data: { bountyBalance: { increment: levelUpBonus } },
+                    });
+                    await NotificationService.createNotification(claimer.id, 'LEVEL_UP', 'Level Up!', `Congratulations! You've reached level ${newLevel} and received a bonus of ${levelUpBonus} bounty!`, undefined, tx);
+                }
+                return updatedQuest;
+            });
+
+            res.json({ success: true, data: { quest: result } });
         } catch (error) {
-            console.error('Error approving quest:', error);
-            res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+            if (error instanceof Error) {
+                const message = error.message;
+                let statusCode = 500;
+                if (message === 'Quest not found' || message === 'Claimer not found') {
+                    statusCode = 404;
+                } else if (message === 'Quest is not pending approval' || message === 'Quest has no claimant') {
+                    statusCode = 400;
+                } else if (message === 'You are not authorized to approve this quest') {
+                    statusCode = 403;
+                }
+
+                if (statusCode >= 500) {
+                    console.error('Error approving quest:', error);
+                }
+
+                res.status(statusCode).json({ success: false, error: { message } });
+            } else {
+                console.error('Error approving quest:', error);
+                res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+            }
         }
     }
 
     /**
-     * Reject quest completion (admin/editor only)
+     * Reject a completed quest (admin/editor only)
      */
     static async rejectQuest(req: Request, res: Response): Promise<void> {
         try {
-            const { questId, reason } = req.body;
-            if (!questId) {
-                res.status(400).json({ success: false, error: { message: 'Quest ID is required' } });
-                return;
-            }
-            const questIdNum = parseInt(questId);
-            if (isNaN(questIdNum)) {
-                res.status(400).json({ success: false, error: { message: 'Invalid quest ID' } });
-                return;
-            }
-            const userId = (req as any).user?.userId;
-            if (!userId) {
-                res.status(401).json({ success: false, error: { message: 'User not authenticated' } });
-                return;
-            }
-            const quest = await prisma.quest.findUnique({ where: { id: questIdNum } });
-            if (!quest) {
-                res.status(404).json({ success: false, error: { message: 'Quest not found' } });
-                return;
-            }
-            if (quest.status !== 'PENDING_APPROVAL') {
-                res.status(400).json({ success: false, error: { message: 'Quest is not completed and ready for approval' } });
-                return;
-            }
-            if (!quest.claimedBy) {
-                res.status(400).json({ success: false, error: { message: 'Quest has no claimant' } });
-                return;
-            }
+            const questId = parseInt(req.params['id']);
+            const { rejectionReason } = req.body;
+            const approverId = (req as any).user?.userId;
+            const approverRole = (req as any).user?.role as UserRole;
 
-            // Check authorization - only admins or quest creators can reject
-            const user = (req as any).user;
-            const isAdmin = user?.role === 'ADMIN';
-            const isQuestCreator = quest.createdBy === userId;
-
-            if (!isAdmin && !isQuestCreator) {
-                res.status(403).json({ success: false, error: { message: 'Access denied. Only admins or quest creators can reject quests.' } });
-                return;
-            }
-
-            // Validate rejection reason
-            if (!reason || typeof reason !== 'string' || reason.trim() === '') {
+            if (!rejectionReason || typeof rejectionReason !== 'string' || rejectionReason.trim() === '') {
                 res.status(400).json({ success: false, error: { message: 'Rejection reason is required' } });
                 return;
             }
 
-            // Use a transaction to ensure data consistency
-            const result = await prisma.$transaction(async (tx) => {
-                // Create completion record for the user who completed the quest
-                await tx.questCompletion.create({
-                    data: {
-                        questId: questIdNum,
-                        userId: quest.claimedBy!, // We already checked that claimedBy is not null above
-                        completedAt: quest.completedAt || new Date(),
-                        status: 'REJECTED'
-                    }
+            const updatedQuest = await prisma.$transaction(async (tx) => {
+                const quest = await tx.quest.findUnique({ where: { id: questId } });
+                if (!quest) {
+                    throw new Error('Quest not found');
+                }
+
+                if (quest.status !== 'PENDING_APPROVAL') {
+                    throw new Error('Quest is not pending approval');
+                }
+
+                const canApprove = approverRole === 'ADMIN' || quest.createdBy === approverId;
+                if (!canApprove) {
+                    throw new Error('You are not authorized to reject this quest');
+                }
+
+                const rejectedQuest = await tx.quest.update({
+                    where: { id: questId },
+                    data: { status: 'AVAILABLE', claimedBy: null, completedAt: null }
                 });
 
-                // Update quest status to rejected
-                const updatedQuest = await tx.quest.update({
-                    where: { id: questIdNum },
-                    data: {
-                        status: 'REJECTED',
-                    },
-                });
-
-                return updatedQuest;
+                if (quest.claimedBy) {
+                    await tx.questCompletion.create({
+                        data: {
+                            questId: quest.id,
+                            userId: quest.claimedBy,
+                            completedAt: quest.completedAt || new Date(),
+                            status: 'REJECTED'
+                        }
+                    });
+                    await NotificationService.createNotification(quest.claimedBy, 'QUEST_REJECTED', 'Quest Rejected', `Your submission for "${quest.title}" was rejected. Reason: ${rejectionReason}`, undefined, tx);
+                }
+                return rejectedQuest;
             });
 
-            res.json({ success: true, data: { quest: result } } as ApiResponse);
+            res.json({ success: true, data: { quest: updatedQuest } });
         } catch (error) {
-            console.error('Error rejecting quest:', error);
-            res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+            if (error instanceof Error) {
+                const message = error.message;
+                let statusCode = 500;
+                if (message === 'Quest not found') {
+                    statusCode = 404;
+                } else if (message === 'Quest is not pending approval') {
+                    statusCode = 400;
+                } else if (message === 'You are not authorized to reject this quest') {
+                    statusCode = 403;
+                }
+
+                if (statusCode >= 500) {
+                    console.error('Error rejecting quest:', error);
+                }
+
+                res.status(statusCode).json({ success: false, error: { message } });
+            } else {
+                console.error('Error rejecting quest:', error);
+                res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+            }
         }
     }
 

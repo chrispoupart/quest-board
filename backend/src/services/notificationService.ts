@@ -1,6 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
+import { prisma } from '../db';
 
-const prisma = new PrismaClient();
+export type PrismaTransactionalClient = Prisma.TransactionClient;
 
 export interface NotificationData {
     questId?: number;
@@ -35,10 +36,12 @@ export class NotificationService {
         type: NotificationType,
         title: string,
         message: string,
-        data?: NotificationData
+        data?: NotificationData,
+        tx?: PrismaTransactionalClient
     ): Promise<void> {
+        const db = tx || prisma;
         try {
-            await prisma.notification.create({
+            await db.notification.create({
                 data: {
                     userId,
                     type,

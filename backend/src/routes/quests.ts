@@ -20,6 +20,8 @@ router.get('/:id', validateQuestId, QuestController.getQuestById);
 // Quest workflow routes (authenticated users) - using PUT to match tests
 router.put('/:id/claim', validateQuestId, QuestController.claimQuest);
 router.put('/:id/complete', validateQuestId, QuestController.completeQuest);
+router.put('/:id/approve', validateQuestId, QuestController.approveQuest);
+router.put('/:id/reject', validateQuestId, QuestController.rejectQuest);
 router.post('/:id/claim', validateQuestId, QuestController.claimQuest);  // Keep POST for backward compatibility
 router.post('/:id/complete', validateQuestId, QuestController.completeQuest);  // Keep POST for backward compatibility
 
@@ -31,16 +33,12 @@ router.post('/', isEditorOrAdmin, QuestController.createQuest);
 router.post('/with-skills', isEditorOrAdmin, QuestController.createQuestWithSkills);
 router.put('/:id', isEditorOrAdmin, validateQuestId, QuestController.updateQuest);
 router.put('/:id/with-skills', isEditorOrAdmin, validateQuestId, QuestController.updateQuestWithSkills);
-router.post('/approve-quest', QuestController.approveQuest);
-router.post('/reject-quest', QuestController.rejectQuest);
+router.delete('/:id', isAdmin, validateQuestId, QuestController.deleteQuest);
 
 // Quest required skills routes (admin/editor only)
 router.get('/:id/required-skills', isEditorOrAdmin, validateQuestId, QuestController.getQuestRequiredSkills);
 router.post('/:id/required-skills', isEditorOrAdmin, validateQuestId, QuestController.addQuestRequiredSkill);
 router.put('/:id/required-skills/:skillId', isEditorOrAdmin, validateQuestId, QuestController.updateQuestRequiredSkill);
 router.delete('/:id/required-skills/:skillId', isEditorOrAdmin, validateQuestId, QuestController.removeQuestRequiredSkill);
-
-// Admin only routes
-router.delete('/:id', isAdmin, validateQuestId, QuestController.deleteQuest);
 
 export default router;
