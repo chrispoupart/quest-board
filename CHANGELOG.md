@@ -1,3 +1,16 @@
+## [2.16.0](https://github.com/chrispoupart/quest-board/compare/v2.15.0...v2.16.0) (2025-07-03)
+
+### Features
+
+* **header:** 💄 add Scroll icon to Quest Board logo ([31b73be](https://github.com/chrispoupart/quest-board/commit/31b73beb1281a69bd801758edce2291fbf5b4d27))
+* **quest:** 💸 Add bounty bonus when users level up ([fdb55eb](https://github.com/chrispoupart/quest-board/commit/fdb55eb6c4ff9af4a9253c9ac32a8b65b9f80f88))
+
+### Bug Fixes
+
+* **notification:** 🥅 prevent notification errors from breaking main flow ([16abea5](https://github.com/chrispoupart/quest-board/commit/16abea5453fb67707bb8dcf0c12fff24ae19dce9))
+* **quest:** 👔 update quest status flow for repeatable and non-repeatable quests ([555e264](https://github.com/chrispoupart/quest-board/commit/555e26429043a9c87a59eaace4dd209696ff4355))
+* **quest:** 🧵 implement database transactions for quest operations ([0686990](https://github.com/chrispoupart/quest-board/commit/0686990925315f1ac518050a3667106222a9e4d9))
+
 ## [2.15.0](https://github.com/chrispoupart/quest-board/compare/v2.14.0...v2.15.0) (2025-07-03)
 
 ### Features
