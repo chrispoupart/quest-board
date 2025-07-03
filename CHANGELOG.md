@@ -1,3 +1,10 @@
+## [2.13.0](https://github.com/chrispoupart/quest-board/compare/v2.12.0...v2.13.0) (2025-07-03)
+
+### Features
+
+* **quests:** 👔 Add personalized quest assignment functionality ([5ebf9b9](https://github.com/chrispoupart/quest-board/commit/5ebf9b953b1fdecb2551c09e6b64bd92de2b0123))
+* **quests:** 👔 add personalized quests functionality ([9b678c4](https://github.com/chrispoupart/quest-board/commit/9b678c4d8371de46296bc502c7f1fae32d485814))
+
 ## [2.12.0](https://github.com/chrispoupart/quest-board/compare/v2.11.0...v2.12.0) (2025-07-03)
 
 ### Features
