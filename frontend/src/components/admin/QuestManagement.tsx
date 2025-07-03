@@ -149,6 +149,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             // Use atomic operation to update quest with skill requirements
             await questService.updateQuestWithSkills(editingQuest.id, {
                 ...formData,
+                userId: assignedUserId ?? undefined,
                 skillRequirements: skillRequirements.length > 0 ? skillRequirements : undefined
             });
 

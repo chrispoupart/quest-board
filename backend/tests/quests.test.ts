@@ -118,6 +118,71 @@ describe('Quest Endpoints', () => {
             expect(response.status).toBe(401);
             expect(response.body.success).toBe(false);
         });
+
+        it('should only show personalized quests to the assigned user', async () => {
+            const questGiver = await createTestUser({ role: 'EDITOR' });
+            const assignedPlayer = await createTestUser({ role: 'PLAYER', email: 'assigned@test.com' });
+            const otherPlayer = await createTestUser({ role: 'PLAYER', email: 'other@test.com' });
+
+            await createTestQuest(questGiver.id, {
+                title: 'Public Quest',
+                status: 'AVAILABLE',
+                bounty: 100
+            });
+
+            await createTestQuest(questGiver.id, {
+                title: 'Personalized Quest',
+                status: 'AVAILABLE',
+                bounty: 150,
+                userId: assignedPlayer.id
+            });
+
+            // Assigned player should see both quests
+            const assignedPlayerToken = createTestToken(assignedPlayer.id, assignedPlayer.email, assignedPlayer.role);
+            let response = await request(app)
+                .get('/quests')
+                .set('Authorization', `Bearer ${assignedPlayerToken}`);
+
+            expect(response.status).toBe(200);
+            expect(response.body.data.quests).toHaveLength(2);
+
+            // Other player should only see the public quest
+            const otherPlayerToken = createTestToken(otherPlayer.id, otherPlayer.email, otherPlayer.role);
+            response = await request(app)
+                .get('/quests')
+                .set('Authorization', `Bearer ${otherPlayerToken}`);
+
+            expect(response.status).toBe(200);
+            expect(response.body.data.quests).toHaveLength(1);
+            expect(response.body.data.quests[0].title).toBe('Public Quest');
+        });
+
+        it('admin should see all quests including personalized ones', async () => {
+            const questGiver = await createTestUser({ role: 'EDITOR' });
+            const assignedPlayer = await createTestUser({ role: 'PLAYER', email: 'assigned@test.com' });
+            const admin = await createTestUser({ role: 'ADMIN', email: 'admin@test.com' });
+
+            await createTestQuest(questGiver.id, {
+                title: 'Public Quest',
+                status: 'AVAILABLE',
+                bounty: 100
+            });
+
+            await createTestQuest(questGiver.id, {
+                title: 'Personalized Quest',
+                status: 'AVAILABLE',
+                bounty: 150,
+                userId: assignedPlayer.id
+            });
+
+            const adminToken = createTestToken(admin.id, admin.email, admin.role);
+            const response = await request(app)
+                .get('/quests')
+                .set('Authorization', `Bearer ${adminToken}`);
+
+            expect(response.status).toBe(200);
+            expect(response.body.data.quests).toHaveLength(2);
+        });
     });
 
     describe('POST /quests', () => {
@@ -194,6 +259,31 @@ describe('Quest Endpoints', () => {
                 .send(invalidQuestData);
 
             expect(response.status).toBe(400);
+        });
+    });
+
+    describe('POST /quests/with-skills', () => {
+        it('should create a personalized quest assigned to a specific user', async () => {
+            const questGiver = await createTestUser({ role: 'EDITOR' });
+            const assignedPlayer = await createTestUser({ role: 'PLAYER', email: 'assigned@test.com' });
+            const token = createTestToken(questGiver.id, questGiver.email, questGiver.role);
+
+            const questData = {
+                title: 'Personalized Quest',
+                description: 'This quest is for a specific user',
+                bounty: 150,
+                userId: assignedPlayer.id,
+            };
+
+            const response = await request(app)
+                .post('/quests/with-skills')
+                .set('Authorization', `Bearer ${token}`)
+                .send(questData);
+
+            expect(response.status).toBe(201);
+            expect(response.body.success).toBe(true);
+            expect(response.body.data.title).toBe(questData.title);
+            expect(response.body.data.userId).toBe(assignedPlayer.id);
         });
     });
 
