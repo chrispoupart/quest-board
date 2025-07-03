@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ApiResponse, UserRole } from '../types';
 import { calculateQuestExperience, checkLevelUp, getLevelInfo } from '../utils/leveling';
 import { prisma } from '../db';
+import { NotificationService } from '../services/notificationService';
 
 export class QuestController {
     /**
@@ -503,12 +504,35 @@ export class QuestController {
                 },
             });
 
+            // Award bonus bounty if leveled up
+            let levelUpBonus = 0;
+            if (leveledUp) {
+                levelUpBonus = 100;
+                await prisma.user.update({
+                    where: { id: quest.claimedBy },
+                    data: {
+                        bountyBalance: {
+                            increment: levelUpBonus,
+                        },
+                    },
+                });
+                // Send notification for bounty bonus
+                await NotificationService.createNotification(
+                  quest.claimedBy,
+                  'LEVEL_UP',
+                  'Level Up Bonus! 🎁',
+                  `You received a 100 bounty bonus for leveling up!`,
+                  { bonus: levelUpBonus }
+                );
+            }
+
             // Prepare response with level up information
             const response = {
                 quest: updatedQuest,
                 experienceGained,
                 leveledUp,
                 newLevel: leveledUp ? getLevelInfo(newExperience).level : null,
+                levelUpBonus,
             };
 
             res.json({ success: true, data: response } as ApiResponse);
