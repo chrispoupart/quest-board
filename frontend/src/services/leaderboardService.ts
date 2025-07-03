@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+// In production, always use relative paths. In development, use the proxy.
 const API_BASE_URL = import.meta.env.PROD ? '' : '';
 
 const api = axios.create({
@@ -23,11 +24,11 @@ api.interceptors.request.use(
 
 export const leaderboardService = {
   async getBountyLeaderboard(month: string): Promise<any[]> {
-    const response = await api.get(`/dashboard/leaderboard/bounty?month=${month}`);
+    const response = await api.get(`/api/dashboard/leaderboard/bounty?month=${month}`);
     return Array.isArray(response.data) ? response.data : [];
   },
   async getQuestsLeaderboard(month: string): Promise<any[]> {
-    const response = await api.get(`/dashboard/leaderboard/quests?month=${month}`);
+    const response = await api.get(`/api/dashboard/leaderboard/quests?month=${month}`);
     return Array.isArray(response.data) ? response.data : [];
   },
-}; 
+};
