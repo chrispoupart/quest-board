@@ -423,13 +423,18 @@ export class QuestController {
                 return;
             }
 
+            if (!quest.claimedBy) {
+                res.status(400).json({ success: false, error: { message: 'Quest has no claimant' } });
+                return;
+            }
+
             const canApprove = approverRole === 'ADMIN' || quest.createdBy === approverId;
             if (!canApprove) {
                 res.status(403).json({ success: false, error: { message: 'You are not authorized to approve this quest' } });
                 return;
             }
 
-            const claimer = await prisma.user.findUnique({ where: { id: quest.claimedBy! } });
+            const claimer = await prisma.user.findUnique({ where: { id: quest.claimedBy } });
             if (!claimer) {
                 res.status(404).json({ success: false, error: { message: 'Claimer not found' } });
                 return;
@@ -468,7 +473,12 @@ export class QuestController {
 
             await NotificationService.createNotification(claimer.id, 'QUEST_APPROVED', 'Quest Approved', `Your quest "${quest.title}" has been approved. You've earned ${quest.bounty} bounty!`);
             if (hasLeveledUp) {
-                await NotificationService.createNotification(claimer.id, 'LEVEL_UP', 'Level Up!', `Congratulations! You've reached level ${newLevel}!`);
+                const levelUpBonus = 100;
+                await prisma.user.update({
+                    where: { id: claimer.id },
+                    data: { bountyBalance: { increment: levelUpBonus } },
+                });
+                await NotificationService.createNotification(claimer.id, 'LEVEL_UP', 'Level Up!', `Congratulations! You've reached level ${newLevel} and received a bonus of ${levelUpBonus} bounty!`);
             }
 
             res.json({ success: true, data: { quest: updatedQuest } });

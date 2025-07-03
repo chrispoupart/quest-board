@@ -74,7 +74,7 @@ describe('Admin Quest Approval Endpoints', () => {
             const updatedPlayer = await getTestPrisma().user.findUnique({
                 where: { id: player.id }
             });
-            expect(updatedPlayer?.bountyBalance).toBe(600); // 100 + 500
+            expect(updatedPlayer?.bountyBalance).toBe(700); // 100 (initial) + 500 (quest) + 100 (level up bonus)
         });
 
         it('should allow quest creator to approve their own quest', async () => {
@@ -119,7 +119,7 @@ describe('Admin Quest Approval Endpoints', () => {
             const updatedPlayer = await getTestPrisma().user.findUnique({
                 where: { id: player.id }
             });
-            expect(updatedPlayer?.bountyBalance).toBe(300);
+            expect(updatedPlayer?.bountyBalance).toBe(400); // 100 (initial) + 300 (quest), no level up
         });
 
         it('should return 403 for non-admin/non-creator users', async () => {
