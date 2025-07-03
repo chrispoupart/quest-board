@@ -2,9 +2,15 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Leaderboard from '../Leaderboard';
+import { vi } from 'vitest';
+import { leaderboardService } from '../../services/leaderboardService';
 
-// Mock fetch
-global.fetch = vi.fn();
+vi.mock('../../services/leaderboardService', () => ({
+  leaderboardService: {
+    getBountyLeaderboard: vi.fn(),
+    getQuestsLeaderboard: vi.fn(),
+  },
+}));
 
 const bountyData = [
   { name: 'Alice', bounty: 100 },
@@ -26,15 +32,8 @@ afterEach(() => {
 });
 
 test('renders both leaderboards with correct data', async () => {
-  (fetch as any).mockImplementation((url: string) => {
-    if (url.includes('/leaderboard/bounty')) {
-      return Promise.resolve({ ok: true, json: () => Promise.resolve(bountyData) });
-    }
-    if (url.includes('/leaderboard/quests')) {
-      return Promise.resolve({ ok: true, json: () => Promise.resolve(questsData) });
-    }
-    return Promise.reject('Unknown endpoint');
-  });
+  (leaderboardService.getBountyLeaderboard as any).mockResolvedValue(bountyData);
+  (leaderboardService.getQuestsLeaderboard as any).mockResolvedValue(questsData);
 
   render(<Leaderboard />);
 
@@ -63,7 +62,8 @@ test('renders both leaderboards with correct data', async () => {
 });
 
 test('shows error state if API fails', async () => {
-  (fetch as any).mockRejectedValue(new Error('API error'));
+  (leaderboardService.getBountyLeaderboard as any).mockRejectedValue(new Error('API error'));
+  (leaderboardService.getQuestsLeaderboard as any).mockRejectedValue(new Error('API error'));
   render(<Leaderboard />);
   await waitFor(() => {
     expect(screen.getByText(/error/i)).toBeInTheDocument();
@@ -71,9 +71,8 @@ test('shows error state if API fails', async () => {
 });
 
 test('shows empty state if no data', async () => {
-  (fetch as any).mockImplementation(() => {
-    return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
-  });
+  (leaderboardService.getBountyLeaderboard as any).mockResolvedValue([]);
+  (leaderboardService.getQuestsLeaderboard as any).mockResolvedValue([]);
   render(<Leaderboard />);
   await waitFor(() => {
     expect(screen.getAllByText(/no data/i).length).toBeGreaterThanOrEqual(2);

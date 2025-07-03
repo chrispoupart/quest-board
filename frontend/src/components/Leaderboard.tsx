@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { leaderboardService } from '../services/leaderboardService';
 
 function getCurrentMonth() {
   const now = new Date();
@@ -16,8 +17,8 @@ export default function Leaderboard() {
     setError(null);
     const month = getCurrentMonth();
     Promise.all([
-      fetch(`/dashboard/leaderboard/bounty?month=${month}`).then(r => r.ok ? r.json() : Promise.reject('Bounty error')),
-      fetch(`/dashboard/leaderboard/quests?month=${month}`).then(r => r.ok ? r.json() : Promise.reject('Quests error')),
+      leaderboardService.getBountyLeaderboard(month),
+      leaderboardService.getQuestsLeaderboard(month),
     ])
       .then(([bountyData, questsData]) => {
         setBounty(bountyData);
@@ -45,7 +46,7 @@ export default function Leaderboard() {
         aria-label="Top 5 by Bounty"
       >
         <h2 className="text-xl font-bold mb-4 text-center">Top 5 by Bounty</h2>
-        {bounty && bounty.length > 0 ? (
+        {Array.isArray(bounty) && bounty.length > 0 ? (
           <ol className="space-y-2">
             {bounty.map((user, idx) => (
               <li key={user.name} className="flex justify-between items-center border-b last:border-b-0 py-2">
@@ -64,7 +65,7 @@ export default function Leaderboard() {
         aria-label="Top 5 by Quests Completed"
       >
         <h2 className="text-xl font-bold mb-4 text-center">Top 5 by Quests Completed</h2>
-        {quests && quests.length > 0 ? (
+        {Array.isArray(quests) && quests.length > 0 ? (
           <ol className="space-y-2">
             {quests.map((user, idx) => (
               <li key={user.name} className="flex justify-between items-center border-b last:border-b-0 py-2">

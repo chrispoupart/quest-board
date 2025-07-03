@@ -16,4 +16,4 @@ router.post('/config', isAdmin, RewardsController.updateConfig);
 // GET /rewards/collective-progress - get collective reward progress for the quarter (any authenticated user)
 router.get('/collective-progress', RewardsController.getCollectiveProgress);
 
-export default router; 
+export default router;

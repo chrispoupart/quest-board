@@ -27,6 +27,22 @@ export class RewardsController {
     static async updateConfig(req: Request, res: Response): Promise<void> {
         try {
             const { monthlyBountyReward, monthlyQuestReward, quarterlyCollectiveGoal, quarterlyCollectiveReward } = req.body;
+
+            // Input validation
+            if (
+                typeof monthlyBountyReward !== 'number' ||
+                typeof monthlyQuestReward !== 'number' ||
+                typeof quarterlyCollectiveGoal !== 'number' ||
+                typeof quarterlyCollectiveReward !== 'string' ||
+                quarterlyCollectiveReward.trim() === ''
+            ) {
+                res.status(400).json({
+                    success: false,
+                    error: 'All fields are required and must be of the correct type.'
+                });
+                return;
+            }
+
             let config = await prisma.rewardConfig.findFirst();
             if (config) {
                 await prisma.rewardConfig.update({
