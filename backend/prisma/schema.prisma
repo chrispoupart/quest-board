@@ -212,3 +212,13 @@ model Notification {
 
   @@map("notifications")
 }
+
+model RewardConfig {
+  id                      Int      @id @default(autoincrement())
+  monthlyBountyReward     Float    @default(0)
+  monthlyQuestReward      Float    @default(0)
+  quarterlyCollectiveGoal Float    @default(0)
+  quarterlyCollectiveReward String  // Description or prize for the collective reward
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+}

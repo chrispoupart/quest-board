@@ -4,7 +4,7 @@
   "description": "Quest Board Backend API",
   "main": "dist/src/index.js",
   "scripts": {
-    "pretest": "rm -f prisma/test.db prisma/test.db-journal",
+    "pretest": "prisma generate && rm -f prisma/test.db prisma/test.db-journal",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
     "start": "node dist/src/index.js",
@@ -13,11 +13,13 @@
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "db:generate": "prisma generate",
+    "db:backup": "ts-node src/utils/backupDb.ts",
     "db:migrate": "prisma migrate dev",
     "db:seed": "ts-node prisma/seed.ts",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
-    "promote-admin": "node scripts/promote-to-admin.js"
+    "promote-admin": "node scripts/promote-to-admin.js",
+    "db:migrate:backup": "ts-node db-migrate-with-backup.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

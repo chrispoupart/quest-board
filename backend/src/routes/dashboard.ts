@@ -18,4 +18,8 @@ router.get('/active-quests', DashboardController.getActiveQuests);
 // Admin dashboard routes
 router.get('/admin', isAdmin, DashboardController.getAdminDashboard);
 
+// New leaderboard endpoint
+router.get('/leaderboard/bounty', DashboardController.getBountyLeaderboard);
+router.get('/leaderboard/quests', DashboardController.getQuestLeaderboard);
+
 export default router;

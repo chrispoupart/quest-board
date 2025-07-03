@@ -12,11 +12,16 @@ import dashboardRoutes from './routes/dashboard';
 import jobRoutes from './routes/jobs';
 import storeRoutes from './routes/store';
 import skillRoutes from './routes/skills';
+import rewardsRoutes from './routes/rewards';
 import { prisma } from './db';
 import './config'; // This will load and validate environment variables
+import cron from 'node-cron';
+import { backupDatabase } from './utils/backupDb';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables only if not in test environment
+if (process.env['NODE_ENV'] !== 'test') {
+  dotenv.config();
+}
 
 const app = express();
 const PORT = process.env['PORT'] || 8000;
@@ -39,6 +44,7 @@ app.use('/dashboard', dashboardRoutes);
 app.use('/jobs', jobRoutes);
 app.use('/store', storeRoutes);
 app.use('/skills', skillRoutes);
+app.use('/rewards', rewardsRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -51,6 +57,11 @@ app.use(errorHandler);
 // Initialize scheduled jobs (only if not in test environment)
 if (process.env['NODE_ENV'] !== 'test') {
   JobService.initializeJobs();
+  // Schedule daily SQLite backup at 2:00 AM
+  cron.schedule('0 2 * * *', () => {
+    console.log('Starting scheduled SQLite backup...');
+    backupDatabase();
+  });
 }
 
 export { app };

@@ -38,46 +38,54 @@ async function waitForFile(path: string, timeoutMs = 3000): Promise<void> {
     }
 }
 
+// Helper for conditional debug logging
+function debugLog(...args: any[]) {
+    if (process.env['DEBUG'] === 'true') {
+        // eslint-disable-next-line no-console
+        console.log(...args);
+    }
+}
+
 // Setup function to run before all tests
 export const setupTestDatabase = async (): Promise<void> => {
     try {
         const dbPath = 'prisma/test.db';
 
-        console.log('🗃️  Using DATABASE_URL:', process.env['DATABASE_URL']);
-        console.log('🗃️  Current working directory:', process.cwd());
+        debugLog('🗃️  Using DATABASE_URL:', process.env['DATABASE_URL']);
+        debugLog('🗃️  Current working directory:', process.cwd());
 
         // Remove any old test DB files
         await execAsync('rm -f prisma/test.db prisma/test.db-journal');
-        console.log('🧹 Cleaned up old test database files');
+        debugLog('🧹 Cleaned up old test database files');
 
         // Run migrations from the prisma directory, using a relative path
-        console.log('🔄 Running database migrations...');
+        debugLog('🔄 Running database migrations...');
         await execAsync(`npx prisma migrate deploy`);
 
         // Wait for the test DB file to appear
-        console.log('⏳ Waiting for test database file...');
+        debugLog('⏳ Waiting for test database file...');
         await waitForFile(dbPath, 20000);
-        console.log('✅ Test database file created');
+        debugLog('✅ Test database file created');
 
         // Verify the file exists and get its stats
         const fullPath = `${process.cwd()}/${dbPath}`;
-        console.log('📁 Full database path:', fullPath);
-        console.log('📊 File exists:', fs.existsSync(fullPath));
+        debugLog('📁 Full database path:', fullPath);
+        debugLog('📊 File exists:', fs.existsSync(fullPath));
         if (fs.existsSync(fullPath)) {
             const stats = fs.statSync(fullPath);
-            console.log('📊 File size:', stats.size, 'bytes');
+            debugLog('📊 File size:', stats.size, 'bytes');
         }
 
         // Small delay to ensure file is fully written
         await new Promise(res => setTimeout(res, 500));
 
         // Connect Prisma client
-        console.log('🔌 Connecting Prisma client...');
-        testPrisma = new PrismaClient();
+        debugLog('🔌 Connecting Prisma client...');
+        testPrisma = new PrismaClient({ log: [] });
         await testPrisma.$connect();
-        console.log('✅ Test database setup complete');
+        debugLog('✅ Test database setup complete');
     } catch (error) {
-        console.error('❌ Test database setup failed:', error);
+        debugLog('❌ Test database setup failed:', error);
         throw error;
     }
 };
@@ -90,9 +98,9 @@ export const teardownTestDatabase = async (): Promise<void> => {
             testPrisma = undefined;
         }
         await execAsync('rm -f prisma/test.db prisma/test.db-journal');
-        console.log('✅ Test database cleanup complete');
+        debugLog('✅ Test database cleanup complete');
     } catch (error) {
-        console.error('❌ Test database cleanup failed:', error);
+        debugLog('❌ Test database cleanup failed:', error);
     }
 };
 
@@ -114,6 +122,7 @@ export const clearTestData = async (): Promise<void> => {
         await prisma.skill.deleteMany();
         await prisma.quest.deleteMany();
         await prisma.user.deleteMany();
+        await prisma.rewardConfig.deleteMany();
 
         // Re-enable foreign key constraints
         await prisma.$executeRaw`PRAGMA foreign_keys = ON;`;
@@ -121,7 +130,7 @@ export const clearTestData = async (): Promise<void> => {
         // Force a brief delay to ensure transactions are committed
         await new Promise(resolve => setTimeout(resolve, 10));
     } catch (error) {
-        console.error('❌ Failed to clear test data:', error);
+        debugLog('❌ Failed to clear test data:', error);
         throw error;
     }
 };

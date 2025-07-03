@@ -1,16 +1,28 @@
 // Set environment before importing app
 process.env['NODE_ENV'] = 'test';
 
-import request from 'supertest';
-import { app } from '../src/index';
 import {
     setupTestDatabase,
     clearTestData,
     createTestUser,
     createTestQuest,
     createTestToken,
-    getTestPrisma
+    getTestPrisma,
+    teardownTestDatabase,
+    resetUserCounter
 } from './setup';
+
+// Mock the db module BEFORE importing the app.
+// This ensures the app uses the same Prisma client instance as the tests.
+jest.mock('../src/db', () => ({
+  __esModule: true,
+  get prisma() {
+    return getTestPrisma();
+  },
+}));
+
+import request from 'supertest';
+import { app } from '../src/index';
 
 jest.setTimeout(30000);
 
@@ -236,5 +248,320 @@ describe('Dashboard Endpoints', () => {
             // Should limit to 10 most recent
             expect(response.body.data.quests.length).toBeLessThanOrEqual(10);
         });
+    });
+});
+
+describe('Leaderboard API', () => {
+    beforeAll(async () => {
+        await setupTestDatabase();
+    });
+
+    afterAll(async () => {
+        await teardownTestDatabase();
+    });
+
+    beforeEach(async () => {
+        await clearTestData();
+        resetUserCounter();
+    });
+
+    it('should return the top 5 users by bounty earned for the current month', async () => {
+        const now = new Date();
+        const users = [];
+        // Create 6 users
+        for (let i = 0; i < 6; i++) {
+            users.push(await createTestUser({ name: `User${i + 1}` }));
+        }
+        // Give each user a different bounty total for the current month
+        const prisma = getTestPrisma();
+        for (let i = 0; i < 6; i++) {
+            // Each user completes i+1 quests, each worth 10 bounty
+            for (let j = 0; j < i + 1; j++) {
+                const quest = await prisma.quest.create({
+                    data: {
+                        title: `Quest for User${i + 1}`,
+                        bounty: 10,
+                        status: 'COMPLETED',
+                        createdBy: users[i].id,
+                        claimedBy: users[i].id,
+                        claimedAt: now,
+                        completedAt: now,
+                    },
+                });
+                await prisma.questCompletion.create({
+                    data: {
+                        questId: quest.id,
+                        userId: users[i].id,
+                        completedAt: now,
+                        status: 'APPROVED',
+                    },
+                });
+            }
+        }
+
+        // Diagnostic query
+        const diagnosticPrisma = getTestPrisma();
+        const monthForDiag = now.toISOString().slice(0, 7);
+        const [year, mon] = monthForDiag.split('-').map(Number);
+        const start = new Date(year, mon - 1, 1);
+        const end = new Date(year, mon, 1);
+        const completionsInTest = await diagnosticPrisma.questCompletion.findMany({
+            where: {
+                completedAt: { gte: start, lt: end },
+                status: 'APPROVED'
+            }
+        });
+        console.log('DIAGNOSTIC: Completions found in test right before API call:', completionsInTest.length);
+
+        // Authenticate as the first user
+        const authUser = users[0];
+        const token = createTestToken(authUser.id, authUser.email, authUser.role);
+        // Call the leaderboard endpoint
+        const month = now.toISOString().slice(0, 7); // YYYY-MM
+        const res = await request(app)
+            .get(`/dashboard/leaderboard/bounty?month=${month}`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200);
+        expect(res.body).toBeInstanceOf(Array);
+        expect(res.body.length).toBe(5);
+        // The user with the most completions should be first
+        expect(res.body[0].name).toBe('User6');
+        expect(res.body[0].bounty).toBe(60);
+        expect(res.body[4].name).toBe('User2');
+        expect(res.body[4].bounty).toBe(20);
+        // User1 should not be in the top 5
+        expect(res.body.find((u: { name: string }) => u.name === 'User1')).toBeUndefined();
+    });
+
+    it('should return the top 5 users by quests completed for the current month', async () => {
+        const now = new Date();
+        const users = [];
+        // Create 6 users
+        for (let i = 0; i < 6; i++) {
+            users.push(await createTestUser({ name: `User${i + 1}` }));
+        }
+
+        const prisma = getTestPrisma();
+        // Give each user a different number of completed quests
+        for (let i = 0; i < 6; i++) {
+            // User i+1 completes i+1 quests
+            for (let j = 0; j < i + 1; j++) {
+                const quest = await prisma.quest.create({
+                    data: {
+                        title: `Quest ${j} for User${i + 1}`,
+                        bounty: 10,
+                        status: 'COMPLETED',
+                        createdBy: users[i].id,
+                    },
+                });
+                await prisma.questCompletion.create({
+                    data: {
+                        questId: quest.id,
+                        userId: users[i].id,
+                        completedAt: now,
+                        status: 'APPROVED',
+                    },
+                });
+            }
+        }
+
+        // Authenticate as any user
+        const authUser = users[0];
+        const token = createTestToken(authUser.id, authUser.email, authUser.role);
+
+        // Call the leaderboard endpoint
+        const month = now.toISOString().slice(0, 7); // YYYY-MM
+        const res = await request(app)
+            .get(`/dashboard/leaderboard/quests?month=${month}`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200);
+
+        expect(res.body).toBeInstanceOf(Array);
+        expect(res.body.length).toBe(5);
+
+        // User6 should be first with 6 quests
+        expect(res.body[0].name).toBe('User6');
+        expect(res.body[0].questsCompleted).toBe(6);
+
+        // User2 should be last in the top 5 with 2 quests
+        expect(res.body[4].name).toBe('User2');
+        expect(res.body[4].questsCompleted).toBe(2);
+
+        // User1 (with 1 quest) should not be in the top 5
+        expect(res.body.find((u: { name: string }) => u.name === 'User1')).toBeUndefined();
+    });
+});
+
+describe('Reward Config API', () => {
+    let adminUser: any;
+    let regularUser: any;
+    let adminToken: string;
+    let userToken: string;
+
+    beforeAll(async () => {
+        await setupTestDatabase();
+        adminUser = await createTestUser({ role: 'ADMIN', email: 'admin@example.com' });
+        regularUser = await createTestUser({ role: 'PLAYER', email: 'user@example.com' });
+        adminToken = createTestToken(adminUser.id, adminUser.email, adminUser.role);
+        userToken = createTestToken(regularUser.id, regularUser.email, regularUser.role);
+    });
+
+    afterAll(async () => {
+        await teardownTestDatabase();
+    });
+
+    beforeEach(async () => {
+        await clearTestData();
+        resetUserCounter();
+    });
+
+    it('should allow admin to get and update reward config', async () => {
+        // Admin can get config (should be default or empty)
+        let res = await request(app)
+            .get('/rewards/config')
+            .set('Authorization', `Bearer ${adminToken}`)
+            .expect(200);
+        expect(res.body).toHaveProperty('monthlyBountyReward');
+        expect(res.body).toHaveProperty('monthlyQuestReward');
+        expect(res.body).toHaveProperty('quarterlyCollectiveGoal');
+        expect(res.body).toHaveProperty('quarterlyCollectiveReward');
+
+        // Admin can update config
+        const newConfig = {
+            monthlyBountyReward: 100,
+            monthlyQuestReward: 50,
+            quarterlyCollectiveGoal: 1000,
+            quarterlyCollectiveReward: 'Pizza Party!'
+        };
+        res = await request(app)
+            .post('/rewards/config')
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send(newConfig)
+            .expect(200);
+        expect(res.body.success).toBe(true);
+
+        // Admin can get updated config
+        res = await request(app)
+            .get('/rewards/config')
+            .set('Authorization', `Bearer ${adminToken}`)
+            .expect(200);
+        expect(res.body.monthlyBountyReward).toBe(100);
+        expect(res.body.monthlyQuestReward).toBe(50);
+        expect(res.body.quarterlyCollectiveGoal).toBe(1000);
+        expect(res.body.quarterlyCollectiveReward).toBe('Pizza Party!');
+    });
+
+    it('should not allow non-admins to update reward config', async () => {
+        const newConfig = {
+            monthlyBountyReward: 200,
+            monthlyQuestReward: 100,
+            quarterlyCollectiveGoal: 2000,
+            quarterlyCollectiveReward: 'Ice Cream Social!'
+        };
+        // Non-admin cannot update
+        const res = await request(app)
+            .post('/rewards/config')
+            .set('Authorization', `Bearer ${userToken}`)
+            .send(newConfig)
+            .expect(403);
+        expect(res.body.success).toBe(false);
+    });
+
+    it('should not allow unauthenticated users to get or update config', async () => {
+        await request(app)
+            .get('/rewards/config')
+            .expect(401);
+        await request(app)
+            .post('/rewards/config')
+            .send({})
+            .expect(401);
+    });
+});
+
+describe('Collective Reward Progress API', () => {
+    let user: any;
+    let token: string;
+
+    beforeAll(async () => {
+        await setupTestDatabase();
+        user = await createTestUser({ role: 'PLAYER', email: 'user@example.com' });
+        token = createTestToken(user.id, user.email, user.role);
+    });
+
+    afterAll(async () => {
+        await teardownTestDatabase();
+    });
+
+    beforeEach(async () => {
+        await clearTestData();
+        resetUserCounter();
+    });
+
+    it('should return the collective reward progress for the quarter', async () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const quarter = Math.floor(month / 3) + 1;
+        const quarterParam = `${year}-Q${quarter}`;
+
+        // Set a collective goal in the reward config
+        const prisma = getTestPrisma();
+        await prisma.rewardConfig.create({
+            data: {
+                monthlyBountyReward: 0,
+                monthlyQuestReward: 0,
+                quarterlyCollectiveGoal: 1000,
+                quarterlyCollectiveReward: 'Team Pizza Party!'
+            }
+        });
+
+        // Seed users and completions in the current quarter
+        let totalBounty = 0;
+        for (let i = 0; i < 3; i++) {
+            const u = await createTestUser({ name: `User${i + 1}` });
+            for (let j = 0; j < i + 1; j++) {
+                const quest = await prisma.quest.create({
+                    data: {
+                        title: `Quest ${j} for User${i + 1}`,
+                        bounty: 100,
+                        status: 'COMPLETED',
+                        createdBy: u.id,
+                    },
+                });
+                await prisma.questCompletion.create({
+                    data: {
+                        questId: quest.id,
+                        userId: u.id,
+                        completedAt: now,
+                        status: 'APPROVED',
+                    },
+                });
+                totalBounty += 100;
+            }
+        }
+
+        // Call the endpoint
+        const res = await request(app)
+            .get(`/rewards/collective-progress?quarter=${quarterParam}`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200);
+
+        expect(res.body).toHaveProperty('goal', 1000);
+        expect(res.body).toHaveProperty('reward', 'Team Pizza Party!');
+        expect(res.body).toHaveProperty('progress', totalBounty);
+        expect(res.body).toHaveProperty('percent');
+        expect(typeof res.body.percent).toBe('number');
+        expect(res.body.percent).toBeCloseTo((totalBounty / 1000) * 100, 1);
+    });
+
+    it('should require authentication', async () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const quarter = Math.floor(month / 3) + 1;
+        const quarterParam = `${year}-Q${quarter}`;
+        await request(app)
+            .get(`/rewards/collective-progress?quarter=${quarterParam}`)
+            .expect(401);
     });
 });
