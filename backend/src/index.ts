@@ -15,6 +15,8 @@ import skillRoutes from './routes/skills';
 import rewardsRoutes from './routes/rewards';
 import { prisma } from './db';
 import './config'; // This will load and validate environment variables
+import cron from 'node-cron';
+import { backupDatabase } from './utils/backupDb';
 
 // Load environment variables only if not in test environment
 if (process.env['NODE_ENV'] !== 'test') {
@@ -55,6 +57,11 @@ app.use(errorHandler);
 // Initialize scheduled jobs (only if not in test environment)
 if (process.env['NODE_ENV'] !== 'test') {
   JobService.initializeJobs();
+  // Schedule daily SQLite backup at 2:00 AM
+  cron.schedule('0 2 * * *', () => {
+    console.log('Starting scheduled SQLite backup...');
+    backupDatabase();
+  });
 }
 
 export { app };
