@@ -35,6 +35,9 @@ model User {
   claimedQuests Quest[]    @relation("QuestClaimer")
   approvals     Approval[]
 
+  // Personalized quests assigned to this user
+  personalizedQuests Quest[] @relation("PersonalizedQuestUser")
+
   // Store relations
   createdStoreItems StoreItem[]        @relation("StoreItemCreator")
   storeTransactions StoreTransaction[] @relation("StoreTransactionBuyer")
@@ -98,6 +101,9 @@ model Quest {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
+  // Personalized quest: only visible to this user if set
+  userId      Int?      @map("user_id")
+
   // Repeat functionality
   isRepeatable    Boolean   @default(false) @map("is_repeatable")
   cooldownDays    Int?      @map("cooldown_days") // Number of days before quest can be repeated
@@ -109,9 +115,11 @@ model Quest {
   // Relations
   creator         User              @relation("QuestCreator", fields: [createdBy], references: [id])
   claimer         User?             @relation("QuestClaimer", fields: [claimedBy], references: [id])
+  personalizedFor User?             @relation("PersonalizedQuestUser", fields: [userId], references: [id])
   approval        Approval?
   QuestCompletion QuestCompletion[]
 
+  @@index([userId])
   @@map("quests")
 }
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { questService } from '../../services/questService';
 import { skillService } from '../../services/skillService';
-import { Quest, CreateQuestRequest, Skill, CreateQuestRequiredSkillRequest } from '../../types';
+import { userService } from '../../services/userService';
+import { Quest, CreateQuestRequest, Skill, CreateQuestRequiredSkillRequest, User } from '../../types';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -17,7 +18,7 @@ import {
     Loader2,
     Trash2
 } from 'lucide-react';
-import { Pagination } from '@/components/ui/pagination';
+import { Pagination } from '../ui/pagination';
 
 interface QuestManagementProps { }
 
@@ -41,6 +42,8 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
     const [submitting, setSubmitting] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [allUsers, setAllUsers] = useState<User[]>([]);
+    const [assignedUserId, setAssignedUserId] = useState<number | undefined>(undefined);
 
     // Fetch all quests and skills for management
     const fetchData = async (page: number = 1) => {
@@ -94,6 +97,13 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
         return () => clearTimeout(timeoutId);
     }, [searchTerm]);
 
+    // Fetch all users when showing the create form
+    useEffect(() => {
+        if (showCreateForm) {
+            userService.getAllUsers().then(setAllUsers).catch(() => setAllUsers([]));
+        }
+    }, [showCreateForm]);
+
     const handleCreateQuest = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.title || formData.bounty <= 0) {
@@ -108,11 +118,13 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             // Use atomic operation to create quest with skill requirements
             await questService.createQuestWithSkills({
                 ...formData,
+                userId: assignedUserId ?? undefined,
                 skillRequirements: skillRequirements.length > 0 ? skillRequirements : undefined
             });
 
             setFormData({ title: '', description: '', bounty: 0, isRepeatable: false, cooldownDays: undefined });
             setSkillRequirements([]);
+            setAssignedUserId(undefined);
             setShowCreateForm(false);
             await fetchData(currentPage);
         } catch (err) {
@@ -176,6 +188,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             isRepeatable: quest.isRepeatable,
             cooldownDays: quest.cooldownDays
         });
+        setAssignedUserId((quest as any).userId ?? undefined);
 
         // Load existing skill requirements
         try {
@@ -196,6 +209,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
         setEditingQuest(null);
         setFormData({ title: '', description: '', bounty: 0, isRepeatable: false, cooldownDays: undefined });
         setSkillRequirements([]);
+        setAssignedUserId(undefined);
         setShowCreateForm(false);
     };
 
@@ -381,6 +395,23 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                                 <Button type="button" variant="outline" onClick={addSkillRequirement}>
                                     Add Skill Requirement
                                 </Button>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label htmlFor="assignUser" className="font-medium text-foreground">Assign to User (optional)</label>
+                                <select
+                                    id="assignUser"
+                                    value={assignedUserId ?? ''}
+                                    onChange={e => setAssignedUserId(e.target.value ? Number(e.target.value) : undefined)}
+                                    className="p-2 border rounded-md bg-background border-border w-full"
+                                >
+                                    <option value="">None (Global Quest)</option>
+                                    {allUsers.map(user => (
+                                        <option key={user.id} value={user.id}>
+                                            {user.name} ({user.email})
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
 
                             <div className="flex justify-end gap-4">

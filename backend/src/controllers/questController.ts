@@ -15,7 +15,9 @@ export class QuestController {
             const search = req.query['search'] as string;
             const skip = (page - 1) * limit;
 
-            const where: any = {};
+            const userId = (req as any).user?.userId;
+            const userRole = (req as any).user?.role;
+            let where: any = {};
             if (status) {
                 if (status.includes(',')) {
                     where.status = { in: status.split(',') };
@@ -29,6 +31,19 @@ export class QuestController {
                     { title: { contains: search, mode: 'insensitive' } },
                     { description: { contains: search, mode: 'insensitive' } }
                 ];
+            }
+
+            // Personalized quest filtering
+            if (userRole === 'ADMIN') {
+                // Admins see all quests
+            } else {
+                if (Object.keys(where).length > 0) {
+                    where.AND = [
+                        { OR: [ { userId: null }, { userId: userId } ] }
+                    ];
+                } else {
+                    where = { OR: [ { userId: null }, { userId: userId } ] };
+                }
             }
 
             const [quests, total] = await Promise.all([
@@ -108,9 +123,9 @@ export class QuestController {
      */
     static async createQuest(req: Request, res: Response): Promise<void> {
         try {
-            const { title, description, bounty, isRepeatable, cooldownDays } = req.body;
-            const userId = (req as any).user?.userId;
-            if (!userId) {
+            const { title, description, bounty, isRepeatable, cooldownDays, userId } = req.body;
+            const creatorId = (req as any).user?.userId;
+            if (!creatorId) {
                 res.status(401).json({ success: false, error: { message: 'User not authenticated' } });
                 return;
             }
@@ -132,9 +147,10 @@ export class QuestController {
                     description,
                     bounty,
                     status: 'AVAILABLE',
-                    createdBy: userId,
+                    createdBy: creatorId,
                     isRepeatable: isRepeatable || false,
                     cooldownDays: isRepeatable ? cooldownDays : null,
+                    userId: userId ?? null,
                 },
             });
             res.status(201).json({ success: true, data: { quest } } as any);
@@ -247,6 +263,12 @@ export class QuestController {
 
             if (!quest) {
                 res.status(404).json({ success: false, error: { message: 'Quest not found' } });
+                return;
+            }
+
+            // Personalized quest: only the specified user can claim
+            if (quest.userId !== null && quest.userId !== undefined && quest.userId !== userId) {
+                res.status(403).json({ success: false, error: { message: 'You are not allowed to claim this personalized quest.' } });
                 return;
             }
 
