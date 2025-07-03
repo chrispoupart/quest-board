@@ -20,6 +20,7 @@ import {
     AlertCircle,
     Eye
 } from 'lucide-react';
+import Leaderboard from '../Leaderboard';
 
 interface DashboardProps { }
 
@@ -292,6 +293,20 @@ const Dashboard: React.FC<DashboardProps> = () => {
                                     ))}
                                 </div>
                             )}
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <div className="mt-8">
+                    <Card className="border-2 border-border bg-card shadow-lg">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-foreground font-serif">
+                                <Trophy className="w-6 h-6" />
+                                Monthly Leaderboard
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Leaderboard />
                         </CardContent>
                     </Card>
                 </div>
