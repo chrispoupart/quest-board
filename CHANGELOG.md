@@ -1,3 +1,10 @@
+## [2.15.0](https://github.com/chrispoupart/quest-board/compare/v2.14.0...v2.15.0) (2025-07-03)
+
+### Features
+
+* **quest:** 💸 add bounty bonus reward for user level-up ([7789c87](https://github.com/chrispoupart/quest-board/commit/7789c87548ac8f102fc7a035cf553fa155a4e51f))
+* **ui:** 💄 add level and experience progress card to character sheet ([e91feab](https://github.com/chrispoupart/quest-board/commit/e91feabd2ee7b89dfef5d8a0ad417612e41fa27c))
+
 ## [2.14.0](https://github.com/chrispoupart/quest-board/compare/v2.13.0...v2.14.0) (2025-07-03)
 
 ### Features
