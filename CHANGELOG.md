@@ -1,3 +1,13 @@
+## [2.14.0](https://github.com/chrispoupart/quest-board/compare/v2.13.0...v2.14.0) (2025-07-03)
+
+### Features
+
+* **dashboard:** 🏆 Add monthly leaderboard section ([87fd025](https://github.com/chrispoupart/quest-board/commit/87fd0259f3eb0ed717d6aa5ce30c94129a9cc13c))
+
+### Bug Fixes
+
+* **api:** 👽️ update userService to match new API response structure ([85ed505](https://github.com/chrispoupart/quest-board/commit/85ed5052f8cef7fef13c3adeb998e0c5e25fe89e))
+
 ## [2.13.0](https://github.com/chrispoupart/quest-board/compare/v2.12.0...v2.13.0) (2025-07-03)
 
 ### Features
