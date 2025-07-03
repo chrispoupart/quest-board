@@ -1,3 +1,10 @@
+## [2.16.1](https://github.com/chrispoupart/quest-board/compare/v2.16.0...v2.16.1) (2025-07-03)
+
+### Bug Fixes
+
+* **quest:** 🩹 Use null instead of undefined for userId in quest assignments ([8b3b9c3](https://github.com/chrispoupart/quest-board/commit/8b3b9c362c57efb4453136e90bf5723ce15afd1f))
+* **quests:** 👔 user-assigned quests not properly created ([4711ebd](https://github.com/chrispoupart/quest-board/commit/4711ebd31e106c0d8f336815f1329e49ee3f96f8))
+
 ## [2.16.0](https://github.com/chrispoupart/quest-board/compare/v2.15.0...v2.16.0) (2025-07-03)
 
 ### Features
