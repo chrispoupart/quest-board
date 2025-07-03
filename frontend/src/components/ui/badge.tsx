@@ -1,6 +1,6 @@
 import * as React from "react"
 
-import { cn } from "@/lib/utils"
+import { cn } from "../../lib/utils"
 
 const badgeVariants = {
   default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",

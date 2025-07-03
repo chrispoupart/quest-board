@@ -73,6 +73,7 @@ export interface CreateQuestRequest {
     bounty: number;
     isRepeatable?: boolean;
     cooldownDays?: number;
+    userId?: number;
 }
 
 export interface UpdateQuestRequest {
@@ -82,6 +83,7 @@ export interface UpdateQuestRequest {
     status?: QuestStatus;
     isRepeatable?: boolean;
     cooldownDays?: number;
+    userId?: number;
 }
 
 export interface UserStats {
