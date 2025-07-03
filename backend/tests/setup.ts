@@ -122,6 +122,7 @@ export const clearTestData = async (): Promise<void> => {
         await prisma.skill.deleteMany();
         await prisma.quest.deleteMany();
         await prisma.user.deleteMany();
+        await prisma.rewardConfig.deleteMany();
 
         // Re-enable foreign key constraints
         await prisma.$executeRaw`PRAGMA foreign_keys = ON;`;
