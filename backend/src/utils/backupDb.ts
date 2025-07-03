@@ -13,7 +13,7 @@ export function backupDatabase() {
     ? dbPath
     : path.resolve(__dirname, '../../prisma', dbPath);
   const backupDir = path.resolve(__dirname, '../../backups');
-  const timestamp = new Date().toISOString().replace(/.[-:T]/g, '').slice(0, 15);
+  const timestamp = new Date().toISOString().replace(/[.:\-T]/g, '').slice(0, 15);
   const backupFile = path.join(backupDir, `sqlite_backup_${timestamp}.db`);
 
   fs.mkdirSync(backupDir, { recursive: true });
@@ -24,4 +24,8 @@ export function backupDatabase() {
   } catch (err) {
     console.error('SQLite backup failed:', err);
   }
+}
+
+if (require.main === module) {
+  backupDatabase();
 }
