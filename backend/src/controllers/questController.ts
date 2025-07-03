@@ -450,7 +450,7 @@ export class QuestController {
                 const updatedQuest = await tx.quest.update({
                     where: { id: questId },
                     data: {
-                        status: quest.isRepeatable ? 'AVAILABLE' : 'COMPLETED',
+                        status: quest.isRepeatable ? 'COOLDOWN' : 'APPROVED',
                         claimedBy: null,
                         completedAt: null,
                         lastCompletedAt: new Date()

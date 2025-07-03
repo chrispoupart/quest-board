@@ -68,7 +68,7 @@ describe('Admin Quest Approval Endpoints', () => {
 
             expect(response.status).toBe(200);
             expect(response.body.success).toBe(true);
-            expect(response.body.data.quest.status).toBe('AVAILABLE');
+            expect(response.body.data.quest.status).toBe('COOLDOWN');
 
             // Check if bounty was added to player
             const updatedPlayer = await getTestPrisma().user.findUnique({
@@ -113,13 +113,42 @@ describe('Admin Quest Approval Endpoints', () => {
 
             expect(response.status).toBe(200);
             expect(response.body.success).toBe(true);
-            expect(response.body.data.quest.status).toBe('AVAILABLE');
+            expect(response.body.data.quest.status).toBe('COOLDOWN');
 
             // Check if bounty was added to player
             const updatedPlayer = await getTestPrisma().user.findUnique({
                 where: { id: player.id }
             });
             expect(updatedPlayer?.bountyBalance).toBe(400); // 0 (initial) + 300 (quest) + 100 (level up bonus)
+        });
+
+        it('should set status to APPROVED for non-repeatable quests', async () => {
+            const admin = await createTestUser({ role: 'ADMIN', email: 'admin@test.com' });
+            const questGiver = await createTestUser({ role: 'EDITOR', email: 'questgiver@test.com' });
+            const player = await createTestUser({ role: 'PLAYER', email: 'player@test.com' });
+
+            const quest = await createTestQuest(questGiver.id, {
+                bounty: 100,
+                isRepeatable: false // This is a non-repeatable quest
+            });
+
+            const playerToken = createTestToken(player.id, player.email, player.role);
+            await request(app)
+                .put(`/quests/${quest.id}/claim`)
+                .set('Authorization', `Bearer ${playerToken}`);
+            await request(app)
+                .put(`/quests/${quest.id}/complete`)
+                .set('Authorization', `Bearer ${playerToken}`);
+
+            const adminToken = createTestToken(admin.id, admin.email, admin.role);
+            const response = await request(app)
+                .put(`/quests/${quest.id}/approve`)
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send();
+
+            expect(response.status).toBe(200);
+            expect(response.body.success).toBe(true);
+            expect(response.body.data.quest.status).toBe('APPROVED');
         });
 
         it('should return 403 for non-admin/non-creator users', async () => {
