@@ -1,3 +1,21 @@
+## [2.12.0](https://github.com/chrispoupart/quest-board/compare/v2.11.0...v2.12.0) (2025-07-03)
+
+### Features
+
+* **db:** 🗃️ add automated database backup functionality ([98f2e86](https://github.com/chrispoupart/quest-board/commit/98f2e863ccec8422ce0c8153ea06ab7b85f3f5e4))
+* **db:** 🗃️ add database backup script and CLI entry point ([1a6ad3d](https://github.com/chrispoupart/quest-board/commit/1a6ad3d9c4501e82593a90106c1e26fd34550ba1))
+* **frontend:** 💄 add Leaderboard component with tests ([c82e0e7](https://github.com/chrispoupart/quest-board/commit/c82e0e799ac2a1ae69f78d1f42660b37805f38cf))
+* **leaderboard:** 📈 add monthly quest leaderboard endpoint ([f7ef904](https://github.com/chrispoupart/quest-board/commit/f7ef9048cfacbad34f7bd1fe274759de41b083aa))
+* **rewards:** ✨ add rewards configuration system for admins ([9a20add](https://github.com/chrispoupart/quest-board/commit/9a20add193be897118e16ee2e0cc8271e679dc39))
+* **rewards:** 📈 add collective progress API endpoint for quarterly tracking ([633852b](https://github.com/chrispoupart/quest-board/commit/633852b75cec1407e17e7fa08dae2e3cf0ef9723))
+* **rewards:** 🗃️ add reward configuration model and bounty leaderboard ([fe4c381](https://github.com/chrispoupart/quest-board/commit/fe4c381281b5aa8ef3c24888da6e6016834b8286))
+
+### Bug Fixes
+
+* **api:** 🚚 Update API endpoint paths with /api prefix ([f2703cc](https://github.com/chrispoupart/quest-board/commit/f2703cc7c89fd2ca802a355a67ee988f954802c2))
+* **db:** 🏗️ improve path resolution for database backup functionality ([d5f17d4](https://github.com/chrispoupart/quest-board/commit/d5f17d4dcf5b7bbb84a0f0366085d649d642273c))
+* **rewards:** 🎨 improve default config handling and validation logic ([0752ba3](https://github.com/chrispoupart/quest-board/commit/0752ba32d18734a983a0f6008728eb59385c5443))
+
 ## [2.11.0](https://github.com/chrispoupart/quest-board/compare/v2.10.1...v2.11.0) (2025-07-02)
 
 ### Features
