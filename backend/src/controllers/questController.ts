@@ -447,14 +447,21 @@ export class QuestController {
                 const hasLeveledUp = checkLevelUp(claimer.experience, updatedClaimer.experience);
                 const { level: newLevel } = getLevelInfo(updatedClaimer.experience);
 
+                const updateData: any = {
+                    status: 'APPROVED',
+                    lastCompletedAt: new Date(),
+                };
+
+                if (quest.isRepeatable) {
+                    updateData.status = 'COOLDOWN';
+                    updateData.claimedBy = null;
+                    updateData.claimedAt = null;
+                    updateData.completedAt = null;
+                }
+
                 const updatedQuest = await tx.quest.update({
                     where: { id: questId },
-                    data: {
-                        status: quest.isRepeatable ? 'COOLDOWN' : 'APPROVED',
-                        claimedBy: null,
-                        completedAt: null,
-                        lastCompletedAt: new Date()
-                    }
+                    data: updateData
                 });
 
                 await tx.questCompletion.create({
