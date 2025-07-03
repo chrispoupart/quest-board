@@ -329,4 +329,109 @@ describe('Quest Endpoints', () => {
             expect(response.body.data.quests).toHaveLength(2);
         });
     });
+
+    describe('Personalized Quests', () => {
+        it('should allow creation of a quest for a specific user', async () => {
+            const admin = await createTestUser({ role: 'ADMIN' });
+            const player = await createTestUser({ role: 'PLAYER' });
+            const token = createTestToken(admin.id, admin.email, admin.role);
+
+            const questData = {
+                title: 'Personal Quest',
+                description: 'A quest just for one user',
+                bounty: 150,
+                userId: player.id
+            };
+
+            const response = await request(app)
+                .post('/quests')
+                .set('Authorization', `Bearer ${token}`)
+                .send(questData);
+
+            expect(response.status).toBe(201);
+            expect(response.body.success).toBe(true);
+            expect(response.body.data.quest.userId).toBe(player.id);
+        });
+
+        it('should show personalized quests only to the specified user', async () => {
+            const admin = await createTestUser({ role: 'ADMIN' });
+            const player1 = await createTestUser({ role: 'PLAYER' });
+            const player2 = await createTestUser({ role: 'PLAYER' });
+            const adminToken = createTestToken(admin.id, admin.email, admin.role);
+            const player1Token = createTestToken(player1.id, player1.email, player1.role);
+            const player2Token = createTestToken(player2.id, player2.email, player2.role);
+
+            // Create a personalized quest for player1
+            await request(app)
+                .post('/quests')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({
+                    title: 'Personal Quest',
+                    description: 'For player1 only',
+                    bounty: 200,
+                    userId: player1.id
+                });
+            // Create a global quest
+            await request(app)
+                .post('/quests')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({
+                    title: 'Global Quest',
+                    description: 'For everyone',
+                    bounty: 100
+                });
+
+            // Player1 should see both quests
+            const res1 = await request(app)
+                .get('/quests')
+                .set('Authorization', `Bearer ${player1Token}`);
+            expect(res1.status).toBe(200);
+            const titles1 = res1.body.data.quests.map((q: any) => q.title);
+            expect(titles1).toContain('Personal Quest');
+            expect(titles1).toContain('Global Quest');
+
+            // Player2 should only see the global quest
+            const res2 = await request(app)
+                .get('/quests')
+                .set('Authorization', `Bearer ${player2Token}`);
+            expect(res2.status).toBe(200);
+            const titles2 = res2.body.data.quests.map((q: any) => q.title);
+            expect(titles2).not.toContain('Personal Quest');
+            expect(titles2).toContain('Global Quest');
+        });
+
+        it('should only allow the specified user to claim a personalized quest', async () => {
+            const admin = await createTestUser({ role: 'ADMIN' });
+            const player1 = await createTestUser({ role: 'PLAYER' });
+            const player2 = await createTestUser({ role: 'PLAYER' });
+            const adminToken = createTestToken(admin.id, admin.email, admin.role);
+            const player1Token = createTestToken(player1.id, player1.email, player1.role);
+            const player2Token = createTestToken(player2.id, player2.email, player2.role);
+
+            // Create a personalized quest for player1
+            const questRes = await request(app)
+                .post('/quests')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({
+                    title: 'Personal Quest',
+                    description: 'For player1 only',
+                    bounty: 200,
+                    userId: player1.id
+                });
+            const questId = questRes.body.data.quest.id;
+
+            // Player1 can claim
+            const claimRes1 = await request(app)
+                .put(`/quests/${questId}/claim`)
+                .set('Authorization', `Bearer ${player1Token}`);
+            expect(claimRes1.status).toBe(200);
+            expect(claimRes1.body.data.quest.status).toBe('CLAIMED');
+
+            // Player2 cannot claim
+            const claimRes2 = await request(app)
+                .put(`/quests/${questId}/claim`)
+                .set('Authorization', `Bearer ${player2Token}`);
+            expect(claimRes2.status).toBe(403);
+        });
+    });
 });

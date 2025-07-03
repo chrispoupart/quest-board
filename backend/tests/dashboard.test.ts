@@ -249,6 +249,105 @@ describe('Dashboard Endpoints', () => {
             expect(response.body.data.quests.length).toBeLessThanOrEqual(10);
         });
     });
+
+    describe('Personalized Quests in Dashboard', () => {
+        it('should count personalized quests only for the specified user', async () => {
+            const admin = await createTestUser({ role: 'ADMIN' });
+            const player1 = await createTestUser({ role: 'PLAYER' });
+            const player2 = await createTestUser({ role: 'PLAYER' });
+            const adminToken = createTestToken(admin.id, admin.email, admin.role);
+            const player1Token = createTestToken(player1.id, player1.email, player1.role);
+            const player2Token = createTestToken(player2.id, player2.email, player2.role);
+
+            // Create a personalized quest for player1 and a global quest
+            await request(app)
+                .post('/quests')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({
+                    title: 'Personal Quest',
+                    description: 'For player1 only',
+                    bounty: 200,
+                    userId: player1.id
+                });
+            await request(app)
+                .post('/quests')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({
+                    title: 'Global Quest',
+                    description: 'For everyone',
+                    bounty: 100
+                });
+
+            // Player1 stats should include both quests
+            const statsRes1 = await request(app)
+                .get('/dashboard/stats')
+                .set('Authorization', `Bearer ${player1Token}`);
+            expect(statsRes1.status).toBe(200);
+            expect(statsRes1.body.success).toBe(true);
+            expect(statsRes1.body.data.stats.questsCreated).toBe(0); // Not creator
+            // Should see both quests as available
+            const questsRes1 = await request(app)
+                .get('/quests')
+                .set('Authorization', `Bearer ${player1Token}`);
+            const titles1 = questsRes1.body.data.quests.map((q: any) => q.title);
+            expect(titles1).toContain('Personal Quest');
+            expect(titles1).toContain('Global Quest');
+
+            // Player2 stats should not include the personalized quest
+            const statsRes2 = await request(app)
+                .get('/dashboard/stats')
+                .set('Authorization', `Bearer ${player2Token}`);
+            expect(statsRes2.status).toBe(200);
+            expect(statsRes2.body.success).toBe(true);
+            // Should only see the global quest
+            const questsRes2 = await request(app)
+                .get('/quests')
+                .set('Authorization', `Bearer ${player2Token}`);
+            const titles2 = questsRes2.body.data.quests.map((q: any) => q.title);
+            expect(titles2).not.toContain('Personal Quest');
+            expect(titles2).toContain('Global Quest');
+        });
+
+        it('should show personalized quests as active only for the specified user', async () => {
+            const admin = await createTestUser({ role: 'ADMIN' });
+            const player1 = await createTestUser({ role: 'PLAYER' });
+            const player2 = await createTestUser({ role: 'PLAYER' });
+            const adminToken = createTestToken(admin.id, admin.email, admin.role);
+            const player1Token = createTestToken(player1.id, player1.email, player1.role);
+            const player2Token = createTestToken(player2.id, player2.email, player2.role);
+
+            // Create a personalized quest for player1
+            const questRes = await request(app)
+                .post('/quests')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({
+                    title: 'Personal Quest',
+                    description: 'For player1 only',
+                    bounty: 200,
+                    userId: player1.id
+                });
+            const questId = questRes.body.data.quest.id;
+
+            // Player1 claims the quest
+            await request(app)
+                .put(`/quests/${questId}/claim`)
+                .set('Authorization', `Bearer ${player1Token}`);
+
+            // Player1 should see it as active
+            const activeRes1 = await request(app)
+                .get('/dashboard/active-quests')
+                .set('Authorization', `Bearer ${player1Token}`);
+            const titles1 = activeRes1.body.data.quests.map((q: any) => q.title);
+            expect(titles1).toContain('Personal Quest');
+
+            // Player2 should not see it as active
+            const activeRes2 = await request(app)
+                .get('/dashboard/active-quests')
+                .set('Authorization', `Bearer ${player2Token}`);
+            const titles2 = activeRes2.body.data.quests.map((q: any) => q.title);
+            expect(titles2).not.toContain('Personal Quest');
+        });
+    });
 });
 
 describe('Leaderboard API', () => {

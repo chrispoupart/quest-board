@@ -65,6 +65,7 @@ export interface Quest {
     isRepeatable: boolean;
     cooldownDays?: number;
     lastCompletedAt?: Date;
+    userId?: number;
     // Required skills
     requiredSkills?: QuestRequiredSkill[];
 }
@@ -76,6 +77,7 @@ export interface CreateQuestRequest {
     isRepeatable?: boolean;
     cooldownDays?: number;
     requiredSkills?: CreateQuestRequiredSkillRequest[];
+    userId?: number;
 }
 
 export interface UpdateQuestRequest {
@@ -86,6 +88,7 @@ export interface UpdateQuestRequest {
     isRepeatable?: boolean;
     cooldownDays?: number;
     requiredSkills?: CreateQuestRequiredSkillRequest[];
+    userId?: number;
 }
 
 // Approval types
