@@ -1106,7 +1106,7 @@ export class QuestController {
                     updateFields.cooldownDays = isRepeatable ? cooldownDays : null;
                 }
                 if ('userId' in req.body) {
-                    updateFields.userId = userId;
+                    updateFields.userId = userId ?? null;
                 }
 
                 const quest = await tx.quest.update({

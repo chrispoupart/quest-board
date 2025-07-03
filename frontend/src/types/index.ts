@@ -83,7 +83,7 @@ export interface UpdateQuestRequest {
     status?: QuestStatus;
     isRepeatable?: boolean;
     cooldownDays?: number;
-    userId?: number;
+    userId?: number | null;
 }
 
 export interface UserStats {
