@@ -4,20 +4,20 @@ import { prisma } from '../db';
 export class RewardsController {
     static async getConfig(req: Request, res: Response): Promise<void> {
         try {
-            let config = await prisma.rewardConfig.findFirst();
+            const config = await prisma.rewardConfig.findFirst();
             if (!config) {
-                // Return default config if none exists
-                config = {
-                    id: 0,
+                // Return default config if none exists.
+                // This object is a template for a new config, so it shouldn't have an id
+                // or other DB-generated fields.
+                res.status(200).json({
                     monthlyBountyReward: 0,
                     monthlyQuestReward: 0,
                     quarterlyCollectiveGoal: 0,
                     quarterlyCollectiveReward: '',
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                };
+                });
+            } else {
+                res.status(200).json(config);
             }
-            res.status(200).json(config);
         } catch (error) {
             console.error('Error getting reward config:', error);
             res.status(500).json({ success: false, error: 'Internal server error' });
@@ -33,8 +33,7 @@ export class RewardsController {
                 typeof monthlyBountyReward !== 'number' ||
                 typeof monthlyQuestReward !== 'number' ||
                 typeof quarterlyCollectiveGoal !== 'number' ||
-                typeof quarterlyCollectiveReward !== 'string' ||
-                quarterlyCollectiveReward.trim() === ''
+                typeof quarterlyCollectiveReward !== 'string'
             ) {
                 res.status(400).json({
                     success: false,
@@ -123,4 +122,4 @@ export class RewardsController {
             res.status(500).json({ error: 'Internal server error' });
         }
     }
-} 
+}
