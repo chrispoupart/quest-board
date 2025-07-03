@@ -119,7 +119,7 @@ describe('Admin Quest Approval Endpoints', () => {
             const updatedPlayer = await getTestPrisma().user.findUnique({
                 where: { id: player.id }
             });
-            expect(updatedPlayer?.bountyBalance).toBe(400); // 100 (initial) + 300 (quest), no level up
+            expect(updatedPlayer?.bountyBalance).toBe(400); // 0 (initial) + 300 (quest) + 100 (level up bonus)
         });
 
         it('should return 403 for non-admin/non-creator users', async () => {
