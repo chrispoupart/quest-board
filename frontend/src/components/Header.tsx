@@ -36,9 +36,6 @@ const Header: React.FC = () => {
                         <Link to="/store" className="text-foreground hover:text-primary font-medium transition-colors">
                             Store
                         </Link>
-                        <Link to="/profile" className="text-foreground hover:text-primary font-medium transition-colors">
-                            Character
-                        </Link>
                         {(user?.role === "ADMIN" || user?.role === "EDITOR") && (
                             <Link to="/admin" className="text-foreground hover:text-primary font-medium transition-colors">
                                 Admin

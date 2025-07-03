@@ -31,13 +31,13 @@ export const userService = {
      * Get all users (admin only)
      */
     async getAllUsers(): Promise<User[]> {
-        const response = await api.get<ApiResponse<User[]>>('/api/users');
+        const response = await api.get<ApiResponse<{ users: User[] }>>('/api/users');
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to fetch users');
         }
 
-        return response.data.data!;
+        return response.data.data!.users;
     },
 
     /**

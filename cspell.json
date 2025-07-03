@@ -7,8 +7,10 @@
         "autoincrement",
         "cooldown",
         "Eldoria",
+        "headlessui",
         "Reqs",
-        "shellcheck"
+        "shellcheck",
+        "sonner"
     ],
     "ignoreWords": [],
     "import": []
