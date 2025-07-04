@@ -442,7 +442,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                     <p className="mt-2 text-muted-foreground">Loading quests...</p>
                 </div>
             ) : (
-                <div className="space-y-4">
+                <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {quests.map((quest) => (
                         <Card key={quest.id} className="border-2 border-border bg-card shadow-md">
                             <CardContent className="p-4 flex justify-between items-center">
@@ -481,12 +481,14 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                     ))}
 
                     {totalPages > 1 && (
-                        <Pagination
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            onPageChange={handlePageChange}
-                            className="mt-6"
-                        />
+                        <div className="col-span-full">
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={handlePageChange}
+                                className="mt-6"
+                            />
+                        </div>
                     )}
                 </div>
             )}
