@@ -1,3 +1,14 @@
+## [2.19.0](https://github.com/chrispoupart/quest-board/compare/v2.18.0...v2.19.0) (2025-07-04)
+
+### Features
+
+* **quest:** ✨ add rejection reason display for claimed quests ([b64f387](https://github.com/chrispoupart/quest-board/commit/b64f387246e6da6333076c4ba8ee3b8c57f1d8a2))
+
+### Bug Fixes
+
+* **auth:** 🛂 Update user identification from name to ID in quest claims ([d2c183c](https://github.com/chrispoupart/quest-board/commit/d2c183c00d16477f7255044c0c30b0c322ede0cf))
+* **quest:** 🚸 Keep rejected quests in CLAIMED state and show rejection reason ([7d0cefb](https://github.com/chrispoupart/quest-board/commit/7d0cefb2a3f1a7183434210e9bef4478e50fc5ef))
+
 ## [2.18.0](https://github.com/chrispoupart/quest-board/compare/v2.17.1...v2.18.0) (2025-07-04)
 
 ### Features
