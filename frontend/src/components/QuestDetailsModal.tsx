@@ -10,6 +10,7 @@ interface QuestDetailsModalProps {
     onClose: () => void;
     onAction?: (questId: number, action: string) => Promise<void>;
     currentUser?: {
+        id: number;
         name: string;
         role: string;
     };
@@ -302,7 +303,14 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                                 </Button>
                             )}
 
-                            {quest.status === "CLAIMED" && quest.claimer?.name === currentUser.name && (
+                            {quest.status === "CLAIMED" && (quest as any).rejectionReason && currentUser && currentUser.id === quest.claimedBy && (
+                                <div className="bg-red-50 dark:bg-red-900 border border-red-300 dark:border-red-700 rounded p-3 text-sm text-red-700 dark:text-red-200 mb-2">
+                                    <X className="inline w-4 h-4 mr-1 align-text-bottom" />
+                                    <span className="font-semibold">Rejected:</span> {(quest as any).rejectionReason}
+                                </div>
+                            )}
+
+                            {quest.status === "CLAIMED" && currentUser && currentUser.id === quest.claimedBy && (
                                 <Button
                                     onClick={() => onAction(quest.id, "complete")}
                                     className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 text-white dark:text-green-100 font-medium"

@@ -76,8 +76,33 @@ export class QuestController {
                 prisma.quest.count({ where })
             ]);
 
+            // Batch fetch rejection reasons for claimed quests
+            const claimedQuests = quests.filter(q => q.status === 'CLAIMED' && q.claimedBy);
+            let rejectionMap: Record<string, string | undefined> = {};
+            if (claimedQuests.length > 0) {
+                const completions = await prisma.questCompletion.findMany({
+                    where: {
+                        status: 'REJECTED',
+                        OR: claimedQuests.map(q => ({ questId: q.id, userId: q.claimedBy! }))
+                    },
+                    orderBy: { completedAt: 'desc' },
+                });
+                // Only keep the latest for each (questId, userId)
+                for (const q of claimedQuests) {
+                    const found = completions.find(c => c.questId === q.id && c.userId === q.claimedBy);
+                    if (found) {
+                        rejectionMap[`${q.id}_${q.claimedBy}`] = found.rejectionReason || undefined;
+                    }
+                }
+            }
+            const questsWithRejection = quests.map(q => {
+                if (q.status === 'CLAIMED' && q.claimedBy) {
+                    return { ...q, rejectionReason: rejectionMap[`${q.id}_${q.claimedBy}`] };
+                }
+                return q;
+            });
             const response = {
-                quests,
+                quests: questsWithRejection,
                 pagination: {
                     currentPage: page,
                     limit,
@@ -85,7 +110,6 @@ export class QuestController {
                     totalPages: Math.ceil(total / limit)
                 }
             };
-
             res.json({ success: true, data: response } as ApiResponse);
         } catch (error) {
             console.error('Error getting quests:', error);
@@ -113,7 +137,17 @@ export class QuestController {
                 res.status(404).json({ success: false, error: { message: 'Quest not found' } });
                 return;
             }
-            res.json({ success: true, data: quest } as ApiResponse);
+            let rejectionReason: string | undefined = undefined;
+            if (quest.status === 'CLAIMED' && quest.claimedBy) {
+                const completion = await prisma.questCompletion.findFirst({
+                    where: { questId: quest.id, userId: quest.claimedBy, status: 'REJECTED' },
+                    orderBy: { completedAt: 'desc' },
+                });
+                if (completion) {
+                    rejectionReason = completion.rejectionReason || undefined;
+                }
+            }
+            res.json({ success: true, data: { ...quest, rejectionReason } } as ApiResponse);
         } catch (error) {
             console.error('Error getting quest by ID:', error);
             res.status(500).json({ success: false, error: { message: 'Internal server error' } });
@@ -559,7 +593,7 @@ export class QuestController {
 
                 const rejectedQuest = await tx.quest.update({
                     where: { id: questId },
-                    data: { status: 'AVAILABLE', claimedBy: null, completedAt: null }
+                    data: { status: 'CLAIMED', completedAt: null }
                 });
 
                 if (quest.claimedBy) {
@@ -663,8 +697,32 @@ export class QuestController {
                 prisma.quest.count({ where })
             ]);
 
+            // Batch fetch rejection reasons for claimed quests
+            const claimedQuests = quests.filter(q => q.status === 'CLAIMED' && q.claimedBy);
+            let rejectionMap: Record<string, string | undefined> = {};
+            if (claimedQuests.length > 0) {
+                const completions = await prisma.questCompletion.findMany({
+                    where: {
+                        status: 'REJECTED',
+                        OR: claimedQuests.map(q => ({ questId: q.id, userId: q.claimedBy! }))
+                    },
+                    orderBy: { completedAt: 'desc' },
+                });
+                for (const q of claimedQuests) {
+                    const found = completions.find(c => c.questId === q.id && c.userId === q.claimedBy);
+                    if (found) {
+                        rejectionMap[`${q.id}_${q.claimedBy}`] = found.rejectionReason || undefined;
+                    }
+                }
+            }
+            const questsWithRejection = quests.map(q => {
+                if (q.status === 'CLAIMED' && q.claimedBy) {
+                    return { ...q, rejectionReason: rejectionMap[`${q.id}_${q.claimedBy}`] };
+                }
+                return q;
+            });
             const response = {
-                quests,
+                quests: questsWithRejection,
                 pagination: {
                     currentPage: page,
                     limit,
@@ -672,7 +730,6 @@ export class QuestController {
                     totalPages: Math.ceil(total / limit)
                 }
             };
-
             res.json({ success: true, data: response } as ApiResponse);
         } catch (error) {
             console.error('Error getting my created quests:', error);
@@ -735,9 +792,7 @@ export class QuestController {
                         }
                     },
                     orderBy: [
-                        // For completed/approved quests, order by completion date (newest first)
                         { completedAt: 'desc' },
-                        // For other quests, order by creation date
                         { createdAt: 'desc' }
                     ],
                     skip,
@@ -746,8 +801,32 @@ export class QuestController {
                 prisma.quest.count({ where })
             ]);
 
+            // Batch fetch rejection reasons for claimed quests
+            const claimedQuests = quests.filter(q => q.status === 'CLAIMED' && q.claimedBy);
+            let rejectionMap: Record<string, string | undefined> = {};
+            if (claimedQuests.length > 0) {
+                const completions = await prisma.questCompletion.findMany({
+                    where: {
+                        status: 'REJECTED',
+                        OR: claimedQuests.map(q => ({ questId: q.id, userId: q.claimedBy! }))
+                    },
+                    orderBy: { completedAt: 'desc' },
+                });
+                for (const q of claimedQuests) {
+                    const found = completions.find(c => c.questId === q.id && c.userId === q.claimedBy);
+                    if (found) {
+                        rejectionMap[`${q.id}_${q.claimedBy}`] = found.rejectionReason || undefined;
+                    }
+                }
+            }
+            const questsWithRejection = quests.map(q => {
+                if (q.status === 'CLAIMED' && q.claimedBy) {
+                    return { ...q, rejectionReason: rejectionMap[`${q.id}_${q.claimedBy}`] };
+                }
+                return q;
+            });
             const response = {
-                quests,
+                quests: questsWithRejection,
                 pagination: {
                     currentPage: page,
                     limit,
@@ -755,7 +834,6 @@ export class QuestController {
                     totalPages: Math.ceil(total / limit)
                 }
             };
-
             res.json({ success: true, data: response } as ApiResponse);
         } catch (error) {
             console.error('Error getting my claimed quests:', error);

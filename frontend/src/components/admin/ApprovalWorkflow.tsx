@@ -29,7 +29,7 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await questService.getQuests({ status: 'COMPLETED' });
+            const response = await questService.getQuests({ status: 'PENDING_APPROVAL' });
             setCompletedQuests(response.quests);
         } catch (err) {
             console.error('Failed to fetch completed quests:', err);

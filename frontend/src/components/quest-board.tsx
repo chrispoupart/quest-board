@@ -23,6 +23,7 @@ interface QuestWithExtras extends Quest {
   creatorName?: string
   claimerName?: string
   requiredSkills?: QuestRequiredSkill[]
+  rejectionReason?: string
 }
 
 interface UserStats {
@@ -308,6 +309,14 @@ const QuestCard: React.FC<{
 
       <CardContent className="space-y-4">
         <p className="text-sm text-foreground leading-relaxed">{quest.description}</p>
+
+        {/* Show rejection reason for in-progress (claimed) quests */}
+        {quest.status === 'CLAIMED' && quest.rejectionReason && currentUser.id === quest.claimedBy && (
+          <div className="bg-red-50 dark:bg-red-900 border border-red-300 dark:border-red-700 rounded p-3 text-sm text-red-700 dark:text-red-200 mb-2">
+            <X className="inline w-4 h-4 mr-1 align-text-bottom" />
+            <span className="font-semibold">Rejected:</span> {quest.rejectionReason}
+          </div>
+        )}
 
         {/* Skill Requirements */}
         {requiredSkills.length > 0 && (
@@ -754,7 +763,8 @@ const QuestBoard: React.FC = () => {
         timeLimit: 48, // Default 48 hours
         creatorName: quest.creator?.characterName || quest.creator?.name,
         claimerName: quest.claimer?.characterName || quest.claimer?.name,
-        requiredSkills: [] // Initialize empty, will be loaded on demand
+        requiredSkills: [], // Initialize empty, will be loaded on demand
+        rejectionReason: undefined // Initialize rejectionReason as undefined
       }));
 
       console.log('Transformed quests:', transformedQuests)
