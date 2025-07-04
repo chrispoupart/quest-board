@@ -14,6 +14,7 @@ import { skillService } from "../services/skillService"
 import { useAuth } from "../contexts/AuthContext"
 import { questService } from "../services/questService"
 import { Quest, QuestListingResponse, QuestRequiredSkill } from "../types"
+import QuestEditModal from "./QuestEditModal"
 
 // TypeScript Interfaces (extended from the API types)
 interface QuestWithExtras extends Quest {
@@ -138,6 +139,7 @@ const QuestCard: React.FC<{
   const [userSkillLevels, setUserSkillLevels] = useState<{[skillId: number]: number}>({})
   const [skillRequirementsLoaded, setSkillRequirementsLoaded] = useState(false)
   const [requiredSkills, setRequiredSkills] = useState<QuestRequiredSkill[]>([])
+  const [editModalOpen, setEditModalOpen] = useState(false)
 
   const difficulty = quest.difficulty || getDifficultyFromBounty(quest.bounty)
   const timeLimit = quest.timeLimit || 48
@@ -218,6 +220,17 @@ const QuestCard: React.FC<{
           <div className="flex items-center gap-1 text-muted-foreground font-bold">
             <Coins className="w-4 h-4" />
             <span>{quest.bounty}</span>
+            {(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="ml-2"
+                onClick={e => { e.stopPropagation(); setEditModalOpen(true); }}
+                title="Edit Quest"
+              >
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pencil"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+              </Button>
+            )}
           </div>
         </div>
 
@@ -495,6 +508,16 @@ const QuestCard: React.FC<{
           </Button>
         </div>
       </CardContent>
+
+      {/* Edit Modal */}
+      {(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") && (
+        <QuestEditModal
+          quest={quest}
+          isOpen={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
+          onSave={() => window.location.reload()} // or trigger a refetch if available
+        />
+      )}
     </Card>
   )
 }
