@@ -200,6 +200,7 @@ model QuestCompletion {
   completedAt DateTime
   approvedAt  DateTime?
   status      String // APPROVED, REJECTED
+  rejectionReason String? // Reason for rejection, if any
 
   quest Quest @relation(fields: [questId], references: [id])
   user  User  @relation(fields: [userId], references: [id])
@@ -229,4 +230,10 @@ model RewardConfig {
   quarterlyCollectiveReward String  // Description or prize for the collective reward
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
+}
+
+model GroupPool {
+  id    Int    @id @default(autoincrement())
+  pool  Float  @default(0)
+  // Only one row should exist for global pool
 }
