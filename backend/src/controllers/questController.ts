@@ -31,11 +31,10 @@ export class QuestController {
             }
 
             if (search) {
-                const lowerCaseSearch = search.toLowerCase();
                 whereConditions.push({
                     OR: [
-                        { title: { contains: lowerCaseSearch } },
-                        { description: { contains: lowerCaseSearch } },
+                        { title: { contains: search, mode: 'insensitive' } },
+                        { description: { contains: search, mode: 'insensitive' } },
                     ],
                 });
             }
@@ -663,10 +662,9 @@ export class QuestController {
             }
 
             if (search) {
-                const lowerCaseSearch = search.toLowerCase();
                 where.OR = [
-                    { title: { contains: lowerCaseSearch } },
-                    { description: { contains: lowerCaseSearch } }
+                    { title: { contains: search, mode: 'insensitive' } },
+                    { description: { contains: search, mode: 'insensitive' } }
                 ];
             }
 
@@ -765,10 +763,9 @@ export class QuestController {
             }
 
             if (search) {
-                const lowerCaseSearch = search.toLowerCase();
                 where.OR = [
-                    { title: { contains: lowerCaseSearch } },
-                    { description: { contains: lowerCaseSearch } }
+                    { title: { contains: search, mode: 'insensitive' } },
+                    { description: { contains: search, mode: 'insensitive' } }
                 ];
             }
 
@@ -1265,11 +1262,10 @@ export class QuestController {
             };
 
             if (search) {
-                const lowerCaseSearch = search.toLowerCase();
                 where.quest = {
                     OR: [
-                        { title: { contains: lowerCaseSearch } },
-                        { description: { contains: lowerCaseSearch } }
+                        { title: { contains: search, mode: 'insensitive' } },
+                        { description: { contains: search, mode: 'insensitive' } }
                     ]
                 };
             }
