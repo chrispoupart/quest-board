@@ -1,3 +1,13 @@
+## [2.17.0](https://github.com/chrispoupart/quest-board/compare/v2.16.1...v2.17.0) (2025-07-04)
+
+### Features
+
+* **modal:** 🚸 add quest cloning functionality to QuestEditModal ([3eeecb8](https://github.com/chrispoupart/quest-board/commit/3eeecb8ea0adaa97b1269b4091e105ca50c652a7))
+* **quests:** 💄 add quest edit modal for admin and editor users ([900e793](https://github.com/chrispoupart/quest-board/commit/900e79373050ce12316f6ffe2a8ffac1fe5716d1))
+* **quests:** 📋 add ability to clone quests for admins and editors ([4bbbe23](https://github.com/chrispoupart/quest-board/commit/4bbbe236d60a628345a22c0cfe2d381978fc6514))
+* **ui:** 💄 add claimer information display to quest components ([0ed8466](https://github.com/chrispoupart/quest-board/commit/0ed846618901ed47feb7c9c6016f808d734df7b8))
+* **ui:** 💄 display assigned users for quests to admin/editor roles ([122a9aa](https://github.com/chrispoupart/quest-board/commit/122a9aabf84241ea1a93d7bef7b09443377d9a2a))
+
 ## [2.16.1](https://github.com/chrispoupart/quest-board/compare/v2.16.0...v2.16.1) (2025-07-03)
 
 ### Bug Fixes
