@@ -1,3 +1,11 @@
+## [2.19.1](https://github.com/chrispoupart/quest-board/compare/v2.19.0...v2.19.1) (2025-07-04)
+
+### Bug Fixes
+
+* **api:** 👽️ Update quest approval/rejection to match API changes ([42b6235](https://github.com/chrispoupart/quest-board/commit/42b6235f2c6a88cc4b256502c00bdb45329ea421))
+* **search:** 🔍️ Implement case-insensitive search for quest queries ([fb2f53f](https://github.com/chrispoupart/quest-board/commit/fb2f53f866e60bcb052af8ca1c9996712fbaaa8c))
+* **search:** 🔍️ remove case insensitive mode from quest search queries ([bf192cf](https://github.com/chrispoupart/quest-board/commit/bf192cf4bf0a36ef8bce254e94502f5c7d53f342))
+
 ## [2.19.0](https://github.com/chrispoupart/quest-board/compare/v2.18.0...v2.19.0) (2025-07-04)
 
 ### Features
