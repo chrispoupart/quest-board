@@ -1,3 +1,13 @@
+## [2.18.0](https://github.com/chrispoupart/quest-board/compare/v2.17.1...v2.18.0) (2025-07-04)
+
+### Features
+
+* **quest:** 🗃️ add group pool and quest rejection reasons ([2327597](https://github.com/chrispoupart/quest-board/commit/23275972af51feded7781d4aa1516261aad8d563))
+
+### Bug Fixes
+
+* **quest-board:** 🩹 Update pending quests status filter to PENDING_APPROVAL ([2475931](https://github.com/chrispoupart/quest-board/commit/2475931a144a389f2e1b87dbfbcd44a54202cad4))
+
 ## [2.17.1](https://github.com/chrispoupart/quest-board/compare/v2.17.0...v2.17.1) (2025-07-04)
 
 ### Performance Improvements
