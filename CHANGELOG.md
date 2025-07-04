@@ -1,3 +1,9 @@
+## [2.19.2](https://github.com/chrispoupart/quest-board/compare/v2.19.1...v2.19.2) (2025-07-04)
+
+### Performance Improvements
+
+* **search:** ⚡️ Optimize quest search with manual case conversion ([d020ae2](https://github.com/chrispoupart/quest-board/commit/d020ae295b46aa3b6eb06886a851254e900c044f))
+
 ## [2.19.1](https://github.com/chrispoupart/quest-board/compare/v2.19.0...v2.19.1) (2025-07-04)
 
 ### Bug Fixes
