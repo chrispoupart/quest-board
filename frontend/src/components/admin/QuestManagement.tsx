@@ -446,12 +446,30 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                     {quests.map((quest) => {
                         const assignedUser = (quest as any).user || (quest as any).assignedUser;
                         const assignedUserId = (quest as any).userId;
+                        const claimer = (quest as any).claimer;
+                        const claimedById = (quest as any).claimedBy;
                         return (
                             <Card key={quest.id} className="border-2 border-border bg-card shadow-md">
                                 <CardContent className="p-4 flex justify-between items-center">
                                     <div className="space-y-1">
                                         <h3 className="font-bold text-foreground text-lg">{quest.title}</h3>
                                         <p className="text-sm text-muted-foreground">{quest.description}</p>
+                                        {/* Claimer info for everyone */}
+                                        {(claimer || claimedById) && (
+                                            <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                                                <span className="font-medium">Claimed by:</span>
+                                                {claimer ? (
+                                                    <>
+                                                        {claimer.avatarUrl && (
+                                                            <img src={claimer.avatarUrl} alt={claimer.name} className="w-5 h-5 rounded-full inline-block mr-1" />
+                                                        )}
+                                                        <span>{claimer.name || claimer.email || `User #${claimer.id}`}</span>
+                                                    </>
+                                                ) : (
+                                                    <span>User #{claimedById}</span>
+                                                )}
+                                            </div>
+                                        )}
                                         {/* Assigned user info for permitted users */}
                                         {(user?.role === 'ADMIN' || user?.role === 'EDITOR') && (assignedUser || assignedUserId) && (
                                             <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">

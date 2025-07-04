@@ -210,6 +210,10 @@ const QuestCard: React.FC<{
   const assignedUser = (quest as any).user || (quest as any).assignedUser;
   const assignedUserId = (quest as any).userId;
 
+  // Claimer display logic
+  const claimer = (quest as any).claimer;
+  const claimedById = (quest as any).claimedBy;
+
   return (
     <Card className="relative overflow-hidden border-2 border-border bg-card shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
       {/* Decorative corner elements */}
@@ -237,6 +241,22 @@ const QuestCard: React.FC<{
             )}
           </div>
         </div>
+        {/* Claimer info for everyone */}
+        {(claimer || claimedById) && (
+          <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+            <span className="font-medium">Claimed by:</span>
+            {claimer ? (
+              <>
+                {claimer.avatarUrl && (
+                  <img src={claimer.avatarUrl} alt={claimer.name} className="w-5 h-5 rounded-full inline-block mr-1" />
+                )}
+                <span>{claimer.name || claimer.email || `User #${claimer.id}`}</span>
+              </>
+            ) : (
+              <span>User #{claimedById}</span>
+            )}
+          </div>
+        )}
         {/* Assigned user info for permitted users */}
         {(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") && (assignedUser || assignedUserId) && (
           <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
