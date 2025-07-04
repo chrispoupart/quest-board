@@ -226,11 +226,13 @@ const QuestCard: React.FC<{
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start gap-2">
           <CardTitle className="text-lg font-bold text-foreground leading-tight font-serif">{quest.title}</CardTitle>
-          <div className="flex items-center gap-1 text-muted-foreground font-bold">
-            <Coins className="w-4 h-4" />
-            <span>{quest.bounty}</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 text-muted-foreground font-bold">
+              <Coins className="w-4 h-4" />
+              <span>{quest.bounty}</span>
+            </div>
             {(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") && (
-              <>
+              <div className="flex items-center gap-1">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -249,7 +251,7 @@ const QuestCard: React.FC<{
                 >
                   <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy"><rect x="9" y="9" width="13" height="13" rx="2"/><rect x="3" y="3" width="13" height="13" rx="2"/></svg>
                 </Button>
-              </>
+              </div>
             )}
           </div>
         </div>
