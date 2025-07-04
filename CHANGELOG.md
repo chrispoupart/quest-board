@@ -1,3 +1,9 @@
+## [2.17.1](https://github.com/chrispoupart/quest-board/compare/v2.17.0...v2.17.1) (2025-07-04)
+
+### Performance Improvements
+
+* **admin:** ⚡️ implement lazy loading for AdminPanel component ([16d8457](https://github.com/chrispoupart/quest-board/commit/16d8457ae34ba901f7211e767143c1761ccd3ae7))
+
 ## [2.17.0](https://github.com/chrispoupart/quest-board/compare/v2.16.1...v2.17.0) (2025-07-04)
 
 ### Features
