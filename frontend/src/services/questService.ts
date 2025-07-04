@@ -158,10 +158,12 @@ export const questService = {
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to approve quest');
         }
-        if (!response.data.data) {
-            throw new Error('No data returned from approve quest API');
+
+        const quest = response.data.data?.quest;
+        if (!quest) {
+            throw new Error('No quest data returned from approve quest API');
         }
-        return response.data.data.quest || (response.data.data as any);
+        return quest;
     },
 
     /**
@@ -173,10 +175,12 @@ export const questService = {
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to reject quest');
         }
-        if (!response.data.data) {
-            throw new Error('No data returned from reject quest API');
+
+        const quest = response.data.data?.quest;
+        if (!quest) {
+            throw new Error('No quest data returned from reject quest API');
         }
-        return response.data.data.quest || (response.data.data as any);
+        return quest;
     },
 
     /**
