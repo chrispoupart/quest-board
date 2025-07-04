@@ -8,9 +8,9 @@ import Header from './components/Header';
 import LoginPage from './pages/LoginPage';
 import QuestBoard from './components/quest-board';
 import Dashboard from './components/dashboard/Dashboard';
-import AdminPanel from './components/admin/AdminPanel';
 import { Store } from './components/Store';
 import CharacterSheet from './components/CharacterSheet';
+import { lazy } from 'react';
 
 // Placeholder components for other pages with fantasy theme
 
@@ -89,6 +89,8 @@ const AuthCallback: React.FC = () => {
   );
 };
 
+const AdminPanel = lazy(() => import('./components/admin/AdminPanel'));
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -151,7 +153,9 @@ const App: React.FC = () => {
                     <div>
                       <Header />
                       <main>
-                        <AdminPanel />
+                        <React.Suspense fallback={<div className="p-8 text-center">Loading admin panel...</div>}>
+                          <AdminPanel />
+                        </React.Suspense>
                       </main>
                     </div>
                   </ProtectedRoute>
