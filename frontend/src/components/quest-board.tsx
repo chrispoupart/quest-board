@@ -14,6 +14,7 @@ import { skillService } from "../services/skillService"
 import { useAuth } from "../contexts/AuthContext"
 import { questService } from "../services/questService"
 import { Quest, QuestListingResponse, QuestRequiredSkill } from "../types"
+import QuestEditModal from "./QuestEditModal"
 
 // TypeScript Interfaces (extended from the API types)
 interface QuestWithExtras extends Quest {
@@ -138,6 +139,8 @@ const QuestCard: React.FC<{
   const [userSkillLevels, setUserSkillLevels] = useState<{[skillId: number]: number}>({})
   const [skillRequirementsLoaded, setSkillRequirementsLoaded] = useState(false)
   const [requiredSkills, setRequiredSkills] = useState<QuestRequiredSkill[]>([])
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [cloneModalOpen, setCloneModalOpen] = useState(false)
 
   const difficulty = quest.difficulty || getDifficultyFromBounty(quest.bounty)
   const timeLimit = quest.timeLimit || 48
@@ -204,6 +207,14 @@ const QuestCard: React.FC<{
     });
   };
 
+  // Assigned user display logic
+  const assignedUser = (quest as any).user || (quest as any).assignedUser;
+  const assignedUserId = (quest as any).userId;
+
+  // Claimer display logic
+  const claimer = (quest as any).claimer;
+  const claimedById = (quest as any).claimedBy;
+
   return (
     <Card className="relative overflow-hidden border-2 border-border bg-card shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
       {/* Decorative corner elements */}
@@ -215,12 +226,67 @@ const QuestCard: React.FC<{
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start gap-2">
           <CardTitle className="text-lg font-bold text-foreground leading-tight font-serif">{quest.title}</CardTitle>
-          <div className="flex items-center gap-1 text-muted-foreground font-bold">
-            <Coins className="w-4 h-4" />
-            <span>{quest.bounty}</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 text-muted-foreground font-bold">
+              <Coins className="w-4 h-4" />
+              <span>{quest.bounty}</span>
+            </div>
+            {(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") && (
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-2"
+                  onClick={e => { e.stopPropagation(); setEditModalOpen(true); }}
+                  title="Edit Quest"
+                >
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pencil"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-1"
+                  onClick={e => { e.stopPropagation(); setCloneModalOpen(true); }}
+                  title="Clone Quest"
+                >
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy"><rect x="9" y="9" width="13" height="13" rx="2"/><rect x="3" y="3" width="13" height="13" rx="2"/></svg>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
-
+        {/* Claimer info for everyone */}
+        {(claimer || claimedById) && (
+          <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+            <span className="font-medium">Claimed by:</span>
+            {claimer ? (
+              <>
+                {claimer.avatarUrl && (
+                  <img src={claimer.avatarUrl} alt={claimer.name} className="w-5 h-5 rounded-full inline-block mr-1" />
+                )}
+                <span>{claimer.name || claimer.email || `User #${claimer.id}`}</span>
+              </>
+            ) : (
+              <span>User #{claimedById}</span>
+            )}
+          </div>
+        )}
+        {/* Assigned user info for permitted users */}
+        {(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") && (assignedUser || assignedUserId) && (
+          <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+            <span className="font-medium">Assigned to:</span>
+            {assignedUser ? (
+              <>
+                {assignedUser.avatarUrl && (
+                  <img src={assignedUser.avatarUrl} alt={assignedUser.name} className="w-5 h-5 rounded-full inline-block mr-1" />
+                )}
+                <span>{assignedUser.name || assignedUser.email || `User #${assignedUser.id}`}</span>
+              </>
+            ) : (
+              <span>User #{assignedUserId}</span>
+            )}
+          </div>
+        )}
         <div className="flex gap-2 flex-wrap">
           <Badge className={`text-xs font-medium border ${getDifficultyColor(difficulty)}`}>
             {difficulty}
@@ -495,6 +561,33 @@ const QuestCard: React.FC<{
           </Button>
         </div>
       </CardContent>
+
+      {/* Edit Modal */}
+      {(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") && (
+        <>
+          <QuestEditModal
+            quest={quest}
+            isOpen={editModalOpen}
+            onClose={() => setEditModalOpen(false)}
+            onSave={() => window.location.reload()} // or trigger a refetch if available
+          />
+          {/* Clone Modal: pass a new quest object with fields copied from the original, but no id/status/claimed/assigned/timestamps */}
+          <QuestEditModal
+            quest={cloneModalOpen ? {
+              title: quest.title,
+              description: quest.description,
+              bounty: quest.bounty,
+              status: 'AVAILABLE',
+              isRepeatable: quest.isRepeatable,
+              cooldownDays: quest.cooldownDays,
+              // Do not include id, claimedBy, claimedAt, completedAt, createdAt, updatedAt, creator, claimer, userId, lastCompletedAt
+            } as any : null}
+            isOpen={cloneModalOpen}
+            onClose={() => setCloneModalOpen(false)}
+            onSave={() => window.location.reload()} // or trigger a refetch if available
+          />
+        </>
+      )}
     </Card>
   )
 }
