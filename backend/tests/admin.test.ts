@@ -254,7 +254,7 @@ describe('Admin Quest Approval Endpoints', () => {
 
             expect(response.status).toBe(200);
             expect(response.body.success).toBe(true);
-            expect(response.body.data.quest.status).toBe('AVAILABLE');
+            expect(response.body.data.quest.status).toBe('CLAIMED');
 
             // Player balance should remain unchanged
             const updatedPlayer = await getTestPrisma().user.findUnique({

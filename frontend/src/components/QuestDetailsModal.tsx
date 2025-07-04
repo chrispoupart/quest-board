@@ -302,6 +302,13 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                                 </Button>
                             )}
 
+                            {quest.status === "CLAIMED" && (quest as any).rejectionReason && currentUser && quest.claimer?.name === currentUser.name && (
+                                <div className="bg-red-50 dark:bg-red-900 border border-red-300 dark:border-red-700 rounded p-3 text-sm text-red-700 dark:text-red-200 mb-2">
+                                    <X className="inline w-4 h-4 mr-1 align-text-bottom" />
+                                    <span className="font-semibold">Rejected:</span> {(quest as any).rejectionReason}
+                                </div>
+                            )}
+
                             {quest.status === "CLAIMED" && quest.claimer?.name === currentUser.name && (
                                 <Button
                                     onClick={() => onAction(quest.id, "complete")}

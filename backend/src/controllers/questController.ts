@@ -559,7 +559,7 @@ export class QuestController {
 
                 const rejectedQuest = await tx.quest.update({
                     where: { id: questId },
-                    data: { status: 'AVAILABLE', claimedBy: null, completedAt: null }
+                    data: { status: 'CLAIMED', completedAt: null }
                 });
 
                 if (quest.claimedBy) {
