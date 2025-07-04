@@ -31,10 +31,11 @@ export class QuestController {
             }
 
             if (search) {
+                const lowerCaseSearch = search.toLowerCase();
                 whereConditions.push({
                     OR: [
-                        { title: { contains: search, mode: 'insensitive' } },
-                        { description: { contains: search, mode: 'insensitive' } },
+                        { title: { contains: lowerCaseSearch } },
+                        { description: { contains: lowerCaseSearch } },
                     ],
                 });
             }
@@ -662,9 +663,10 @@ export class QuestController {
             }
 
             if (search) {
+                const lowerCaseSearch = search.toLowerCase();
                 where.OR = [
-                    { title: { contains: search, mode: 'insensitive' } },
-                    { description: { contains: search, mode: 'insensitive' } }
+                    { title: { contains: lowerCaseSearch } },
+                    { description: { contains: lowerCaseSearch } }
                 ];
             }
 
@@ -763,9 +765,10 @@ export class QuestController {
             }
 
             if (search) {
+                const lowerCaseSearch = search.toLowerCase();
                 where.OR = [
-                    { title: { contains: search, mode: 'insensitive' } },
-                    { description: { contains: search, mode: 'insensitive' } }
+                    { title: { contains: lowerCaseSearch } },
+                    { description: { contains: lowerCaseSearch } }
                 ];
             }
 
@@ -1262,10 +1265,11 @@ export class QuestController {
             };
 
             if (search) {
+                const lowerCaseSearch = search.toLowerCase();
                 where.quest = {
                     OR: [
-                        { title: { contains: search, mode: 'insensitive' } },
-                        { description: { contains: search, mode: 'insensitive' } }
+                        { title: { contains: lowerCaseSearch } },
+                        { description: { contains: lowerCaseSearch } }
                     ]
                 };
             }
