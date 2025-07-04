@@ -153,26 +153,34 @@ export const questService = {
      * Approve a quest
      */
     async approveQuest(id: number): Promise<Quest> {
-        const response = await api.post<ApiResponse<Quest>>(`/api/quests/${id}/approve`);
+        const response = await api.put<ApiResponse<{ quest: Quest }>>(`/api/quests/${id}/approve`);
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to approve quest');
         }
 
-        return response.data.data!;
+        const quest = response.data.data?.quest;
+        if (!quest) {
+            throw new Error('No quest data returned from approve quest API');
+        }
+        return quest;
     },
 
     /**
      * Reject a quest
      */
     async rejectQuest(id: number, reason?: string): Promise<Quest> {
-        const response = await api.post<ApiResponse<Quest>>(`/api/quests/${id}/reject`, { reason });
+        const response = await api.put<ApiResponse<{ quest: Quest }>>(`/api/quests/${id}/reject`, { rejectionReason: reason });
 
         if (!response.data.success) {
             throw new Error(response.data.error?.message || 'Failed to reject quest');
         }
 
-        return response.data.data!;
+        const quest = response.data.data?.quest;
+        if (!quest) {
+            throw new Error('No quest data returned from reject quest API');
+        }
+        return quest;
     },
 
     /**
