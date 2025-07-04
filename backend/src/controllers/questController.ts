@@ -19,34 +19,33 @@ export class QuestController {
 
             const userId = (req as any).user?.userId;
             const userRole = (req as any).user?.role;
-            let where: any = {};
+            
+            const whereConditions: any[] = [];
+
             if (status) {
                 if (status.includes(',')) {
-                    where.status = { in: status.split(',') };
+                    whereConditions.push({ status: { in: status.split(',') } });
                 } else {
-                    where.status = status;
+                    whereConditions.push({ status: status });
                 }
             }
 
             if (search) {
-                where.OR = [
-                    { title: { contains: search, mode: 'insensitive' } },
-                    { description: { contains: search, mode: 'insensitive' } }
-                ];
+                whereConditions.push({
+                    OR: [
+                        { title: { contains: search, mode: 'insensitive' } },
+                        { description: { contains: search, mode: 'insensitive' } },
+                    ],
+                });
             }
 
-            // Personalized quest filtering
-            if (userRole === 'ADMIN') {
-                // Admins see all quests
-            } else {
-                if (Object.keys(where).length > 0) {
-                    where.AND = [
-                        { OR: [ { userId: null }, { userId: userId } ] }
-                    ];
-                } else {
-                    where = { OR: [ { userId: null }, { userId: userId } ] };
-                }
+            if (userRole !== 'ADMIN') {
+                whereConditions.push({
+                    OR: [{ userId: null }, { userId: userId }],
+                });
             }
+            
+            const where = whereConditions.length > 0 ? { AND: whereConditions } : {};
 
             const [quests, total] = await Promise.all([
                 prisma.quest.findMany({
