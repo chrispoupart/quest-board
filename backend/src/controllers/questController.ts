@@ -33,8 +33,8 @@ export class QuestController {
             if (search) {
                 whereConditions.push({
                     OR: [
-                        { title: { contains: search, mode: 'insensitive' } },
-                        { description: { contains: search, mode: 'insensitive' } },
+                        { title: { contains: search } },
+                        { description: { contains: search } },
                     ],
                 });
             }
@@ -663,8 +663,8 @@ export class QuestController {
 
             if (search) {
                 where.OR = [
-                    { title: { contains: search, mode: 'insensitive' } },
-                    { description: { contains: search, mode: 'insensitive' } }
+                    { title: { contains: search } },
+                    { description: { contains: search } }
                 ];
             }
 
@@ -764,8 +764,8 @@ export class QuestController {
 
             if (search) {
                 where.OR = [
-                    { title: { contains: search, mode: 'insensitive' } },
-                    { description: { contains: search, mode: 'insensitive' } }
+                    { title: { contains: search } },
+                    { description: { contains: search } }
                 ];
             }
 
@@ -1264,8 +1264,8 @@ export class QuestController {
             if (search) {
                 where.quest = {
                     OR: [
-                        { title: { contains: search, mode: 'insensitive' } },
-                        { description: { contains: search, mode: 'insensitive' } }
+                        { title: { contains: search } },
+                        { description: { contains: search } }
                     ]
                 };
             }
