@@ -140,6 +140,7 @@ const QuestCard: React.FC<{
   const [skillRequirementsLoaded, setSkillRequirementsLoaded] = useState(false)
   const [requiredSkills, setRequiredSkills] = useState<QuestRequiredSkill[]>([])
   const [editModalOpen, setEditModalOpen] = useState(false)
+  const [cloneModalOpen, setCloneModalOpen] = useState(false)
 
   const difficulty = quest.difficulty || getDifficultyFromBounty(quest.bounty)
   const timeLimit = quest.timeLimit || 48
@@ -229,15 +230,26 @@ const QuestCard: React.FC<{
             <Coins className="w-4 h-4" />
             <span>{quest.bounty}</span>
             {(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="ml-2"
-                onClick={e => { e.stopPropagation(); setEditModalOpen(true); }}
-                title="Edit Quest"
-              >
-                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pencil"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
-              </Button>
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-2"
+                  onClick={e => { e.stopPropagation(); setEditModalOpen(true); }}
+                  title="Edit Quest"
+                >
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pencil"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-1"
+                  onClick={e => { e.stopPropagation(); setCloneModalOpen(true); }}
+                  title="Clone Quest"
+                >
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy"><rect x="9" y="9" width="13" height="13" rx="2"/><rect x="3" y="3" width="13" height="13" rx="2"/></svg>
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -550,12 +562,29 @@ const QuestCard: React.FC<{
 
       {/* Edit Modal */}
       {(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") && (
-        <QuestEditModal
-          quest={quest}
-          isOpen={editModalOpen}
-          onClose={() => setEditModalOpen(false)}
-          onSave={() => window.location.reload()} // or trigger a refetch if available
-        />
+        <>
+          <QuestEditModal
+            quest={quest}
+            isOpen={editModalOpen}
+            onClose={() => setEditModalOpen(false)}
+            onSave={() => window.location.reload()} // or trigger a refetch if available
+          />
+          {/* Clone Modal: pass a new quest object with fields copied from the original, but no id/status/claimed/assigned/timestamps */}
+          <QuestEditModal
+            quest={cloneModalOpen ? {
+              title: quest.title,
+              description: quest.description,
+              bounty: quest.bounty,
+              status: 'AVAILABLE',
+              isRepeatable: quest.isRepeatable,
+              cooldownDays: quest.cooldownDays,
+              // Do not include id, claimedBy, claimedAt, completedAt, createdAt, updatedAt, creator, claimer, userId, lastCompletedAt
+            } as any : null}
+            isOpen={cloneModalOpen}
+            onClose={() => setCloneModalOpen(false)}
+            onSave={() => window.location.reload()} // or trigger a refetch if available
+          />
+        </>
       )}
     </Card>
   )

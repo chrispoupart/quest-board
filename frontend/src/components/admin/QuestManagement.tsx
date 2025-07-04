@@ -19,6 +19,7 @@ import {
     Trash2
 } from 'lucide-react';
 import { Pagination } from '../ui/pagination';
+import QuestEditModal from '../QuestEditModal';
 
 interface QuestManagementProps { }
 
@@ -44,6 +45,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [allUsers, setAllUsers] = useState<User[]>([]);
     const [assignedUserId, setAssignedUserId] = useState<number | undefined>(undefined);
+    const [cloneModalOpen, setCloneModalOpen] = useState<{ open: boolean, quest: Quest | null }>({ open: false, quest: null });
 
     // Fetch all quests and skills for management
     const fetchData = async (page: number = 1) => {
@@ -512,6 +514,11 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                                         <Button variant="destructive" size="sm" onClick={() => handleDeleteQuest(quest.id)}>
                                             <Trash2 className="w-4 h-4" />
                                         </Button>
+                                        {(user?.role === 'ADMIN' || user?.role === 'EDITOR') && (
+                                            <Button variant="ghost" size="icon" title="Clone Quest" onClick={() => setCloneModalOpen({ open: true, quest })}>
+                                                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy"><rect x="9" y="9" width="13" height="13" rx="2"/><rect x="3" y="3" width="13" height="13" rx="2"/></svg>
+                                            </Button>
+                                        )}
                                     </div>
                                 </CardContent>
                             </Card>
@@ -530,6 +537,21 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                     )}
                 </div>
             )}
+
+            {/* Clone Modal */}
+            <QuestEditModal
+                quest={cloneModalOpen.open && cloneModalOpen.quest ? {
+                    title: cloneModalOpen.quest.title,
+                    description: cloneModalOpen.quest.description,
+                    bounty: cloneModalOpen.quest.bounty,
+                    status: 'AVAILABLE',
+                    isRepeatable: cloneModalOpen.quest.isRepeatable,
+                    cooldownDays: cloneModalOpen.quest.cooldownDays,
+                } as any : null}
+                isOpen={cloneModalOpen.open}
+                onClose={() => setCloneModalOpen({ open: false, quest: null })}
+                onSave={() => window.location.reload()} // or trigger a refetch if available
+            />
         </div>
     );
 };
