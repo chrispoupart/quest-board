@@ -13,7 +13,7 @@ import { skillService } from "../services/skillService"
 
 import { useAuth } from "../contexts/AuthContext"
 import { questService } from "../services/questService"
-import { Quest, QuestListingResponse, QuestRequiredSkill, User } from "../types"
+import { Quest, QuestListingResponse, QuestRequiredSkill } from "../types"
 import QuestEditModal from "./QuestEditModal"
 
 // TypeScript Interfaces (extended from the API types)
