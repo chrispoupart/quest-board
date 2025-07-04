@@ -713,7 +713,7 @@ const QuestBoard: React.FC = () => {
         case "pending":
           // Get quests pending approval (for admins/editors)
           questData = await questService.getQuests({
-            status: "COMPLETED",
+            status: "PENDING_APPROVAL",
             ...params
           })
           break

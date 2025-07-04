@@ -3,6 +3,7 @@ import { ApiResponse, UserRole } from '../types';
 import { calculateQuestExperience, checkLevelUp, getLevelInfo } from '../utils/leveling';
 import { prisma } from '../db';
 import { NotificationService } from '../services/notificationService';
+import { PrismaClient } from '@prisma/client';
 
 export class QuestController {
     /**
@@ -464,13 +465,28 @@ export class QuestController {
                     data: updateData
                 });
 
+                // Increment the group quest pool by the quest bounty
+                const groupPool = await (tx as PrismaClient).groupPool.findFirst();
+                if (groupPool) {
+                    await (tx as PrismaClient).groupPool.update({
+                        where: { id: groupPool.id },
+                        data: { pool: { increment: quest.bounty } }
+                    });
+                } else {
+                    // If no pool exists, create one
+                    await (tx as PrismaClient).groupPool.create({
+                        data: { pool: quest.bounty }
+                    });
+                }
+
                 await tx.questCompletion.create({
                     data: {
                         questId: quest.id,
                         userId: claimer.id,
                         completedAt: quest.completedAt || new Date(),
                         approvedAt: new Date(),
-                        status: 'APPROVED'
+                        status: 'APPROVED',
+                        rejectionReason: null
                     }
                 });
 
@@ -552,7 +568,8 @@ export class QuestController {
                             questId: quest.id,
                             userId: quest.claimedBy,
                             completedAt: quest.completedAt || new Date(),
-                            status: 'REJECTED'
+                            status: 'REJECTED',
+                            rejectionReason: rejectionReason
                         }
                     });
                     await NotificationService.createNotification(quest.claimedBy, 'QUEST_REJECTED', 'Quest Rejected', `Your submission for "${quest.title}" was rejected. Reason: ${rejectionReason}`, undefined, tx);
