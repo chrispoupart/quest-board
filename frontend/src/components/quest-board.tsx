@@ -13,7 +13,7 @@ import { skillService } from "../services/skillService"
 
 import { useAuth } from "../contexts/AuthContext"
 import { questService } from "../services/questService"
-import { Quest, QuestListingResponse, QuestRequiredSkill } from "../types"
+import { Quest, QuestListingResponse, QuestRequiredSkill, User } from "../types"
 import QuestEditModal from "./QuestEditModal"
 
 // TypeScript Interfaces (extended from the API types)
@@ -206,6 +206,10 @@ const QuestCard: React.FC<{
     });
   };
 
+  // Assigned user display logic
+  const assignedUser = (quest as any).user || (quest as any).assignedUser;
+  const assignedUserId = (quest as any).userId;
+
   return (
     <Card className="relative overflow-hidden border-2 border-border bg-card shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
       {/* Decorative corner elements */}
@@ -233,7 +237,22 @@ const QuestCard: React.FC<{
             )}
           </div>
         </div>
-
+        {/* Assigned user info for permitted users */}
+        {(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") && (assignedUser || assignedUserId) && (
+          <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+            <span className="font-medium">Assigned to:</span>
+            {assignedUser ? (
+              <>
+                {assignedUser.avatarUrl && (
+                  <img src={assignedUser.avatarUrl} alt={assignedUser.name} className="w-5 h-5 rounded-full inline-block mr-1" />
+                )}
+                <span>{assignedUser.name || assignedUser.email || `User #${assignedUser.id}`}</span>
+              </>
+            ) : (
+              <span>User #{assignedUserId}</span>
+            )}
+          </div>
+        )}
         <div className="flex gap-2 flex-wrap">
           <Badge className={`text-xs font-medium border ${getDifficultyColor(difficulty)}`}>
             {difficulty}

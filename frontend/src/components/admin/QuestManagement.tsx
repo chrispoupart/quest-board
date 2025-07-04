@@ -443,42 +443,62 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                 </div>
             ) : (
                 <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {quests.map((quest) => (
-                        <Card key={quest.id} className="border-2 border-border bg-card shadow-md">
-                            <CardContent className="p-4 flex justify-between items-center">
-                                <div className="space-y-1">
-                                    <h3 className="font-bold text-foreground text-lg">{quest.title}</h3>
-                                    <p className="text-sm text-muted-foreground">{quest.description}</p>
-                                    <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
-                                        <div className="flex items-center gap-1">
-                                            <Coins className="w-3 h-3" />
-                                            <span>{quest.bounty} Bounty</span>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <Calendar className="w-3 h-3" />
-                                            <span>Created: {formatDate(quest.createdAt)}</span>
-                                        </div>
-                                        <Badge className={`text-xs font-medium border ${getStatusColor(quest.status)}`}>
-                                            {quest.status.replace('_', ' ')}
-                                        </Badge>
-                                        {quest.isRepeatable && (
-                                            <Badge className="text-xs font-medium border text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700">
-                                                Repeatable {quest.cooldownDays ? `(${quest.cooldownDays}d)` : ''}
-                                            </Badge>
+                    {quests.map((quest) => {
+                        const assignedUser = (quest as any).user || (quest as any).assignedUser;
+                        const assignedUserId = (quest as any).userId;
+                        return (
+                            <Card key={quest.id} className="border-2 border-border bg-card shadow-md">
+                                <CardContent className="p-4 flex justify-between items-center">
+                                    <div className="space-y-1">
+                                        <h3 className="font-bold text-foreground text-lg">{quest.title}</h3>
+                                        <p className="text-sm text-muted-foreground">{quest.description}</p>
+                                        {/* Assigned user info for permitted users */}
+                                        {(user?.role === 'ADMIN' || user?.role === 'EDITOR') && (assignedUser || assignedUserId) && (
+                                            <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                                                <span className="font-medium">Assigned to:</span>
+                                                {assignedUser ? (
+                                                    <>
+                                                        {assignedUser.avatarUrl && (
+                                                            <img src={assignedUser.avatarUrl} alt={assignedUser.name} className="w-5 h-5 rounded-full inline-block mr-1" />
+                                                        )}
+                                                        <span>{assignedUser.name || assignedUser.email || `User #${assignedUser.id}`}</span>
+                                                    </>
+                                                ) : (
+                                                    <span>User #{assignedUserId}</span>
+                                                )}
+                                            </div>
                                         )}
+                                        <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
+                                            <div className="flex items-center gap-1">
+                                                <Coins className="w-3 h-3" />
+                                                <span>{quest.bounty} Bounty</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <Calendar className="w-3 h-3" />
+                                                <span>Created: {formatDate(quest.createdAt)}</span>
+                                            </div>
+                                            <Badge className={`text-xs font-medium border ${getStatusColor(quest.status)}`}>
+                                                {quest.status.replace('_', ' ')}
+                                            </Badge>
+                                            {quest.isRepeatable && (
+                                                <Badge className="text-xs font-medium border text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700">
+                                                    Repeatable {quest.cooldownDays ? `(${quest.cooldownDays}d)` : ''}
+                                                </Badge>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="flex gap-2">
-                                    <Button variant="outline" size="sm" onClick={() => handleEditQuest(quest)}>
-                                        <Pencil className="w-4 h-4" />
-                                    </Button>
-                                    <Button variant="destructive" size="sm" onClick={() => handleDeleteQuest(quest.id)}>
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
+                                    <div className="flex gap-2">
+                                        <Button variant="outline" size="sm" onClick={() => handleEditQuest(quest)}>
+                                            <Pencil className="w-4 h-4" />
+                                        </Button>
+                                        <Button variant="destructive" size="sm" onClick={() => handleDeleteQuest(quest.id)}>
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
 
                     {totalPages > 1 && (
                         <div className="col-span-full">
