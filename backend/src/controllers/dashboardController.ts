@@ -18,42 +18,42 @@ export class DashboardController {
             }
 
             // Get user's quest statistics
-            const [totalQuests, completedQuests, currentQuests, totalBounty] = await Promise.all([
+            const completions = await prisma.questCompletion.findMany({
+                where: {
+                    userId: userId,
+                    status: 'APPROVED'
+                },
+                include: {
+                    quest: {
+                        select: {
+                            bounty: true
+                        }
+                    }
+                }
+            });
+
+            const completedQuests = completions.length;
+            const totalBounty = completions.reduce((sum, c) => sum + c.quest.bounty, 0);
+
+            const [totalQuests, currentQuests] = await Promise.all([
                 // Total quests created by user
                 prisma.quest.count({
                     where: { createdBy: userId }
-                }),
-                // Completed quests by user
-                prisma.quest.count({
-                    where: {
-                        claimedBy: userId,
-                        status: 'APPROVED'
-                    }
                 }),
                 // Current claimed quests
                 prisma.quest.count({
                     where: {
                         claimedBy: userId,
-                        status: { in: ['CLAIMED', 'COMPLETED'] }
+                        status: { in: ['CLAIMED', 'PENDING_APPROVAL'] }
                     }
                 }),
-                // Total bounty earned
-                prisma.quest.aggregate({
-                    where: {
-                        claimedBy: userId,
-                        status: 'APPROVED'
-                    },
-                    _sum: {
-                        bounty: true
-                    }
-                })
             ]);
 
             // Get user's current quests
             const currentQuestsList = await prisma.quest.findMany({
                 where: {
                     claimedBy: userId,
-                    status: { in: ['CLAIMED', 'COMPLETED'] }
+                    status: { in: ['CLAIMED', 'PENDING_APPROVAL'] }
                 },
                 orderBy: {
                     claimedAt: 'desc'
@@ -79,7 +79,7 @@ export class DashboardController {
                         totalQuests,
                         completedQuests,
                         currentQuests,
-                        totalBounty: totalBounty._sum.bounty || 0
+                        totalBounty
                     },
                     currentQuests: currentQuestsList,
                     recentCreatedQuests
@@ -109,7 +109,24 @@ export class DashboardController {
             }
 
             // Get comprehensive user statistics
-            const [user, totalQuests, completedQuests, currentQuests, earnedBounty, pendingApproval] = await Promise.all([
+            const completions = await prisma.questCompletion.findMany({
+                where: {
+                    userId: userId,
+                    status: 'APPROVED'
+                },
+                include: {
+                    quest: {
+                        select: {
+                            bounty: true
+                        }
+                    }
+                }
+            });
+
+            const completedQuests = completions.length;
+            const earnedBounty = completions.reduce((sum, c) => sum + c.quest.bounty, 0);
+
+            const [user, totalQuests, currentQuests, pendingApproval] = await Promise.all([
                 // Get user's bounty balance
                 prisma.user.findUnique({
                     where: { id: userId },
@@ -119,35 +136,18 @@ export class DashboardController {
                 prisma.quest.count({
                     where: { createdBy: userId }
                 }),
-                // Completed quests by user
-                prisma.quest.count({
-                    where: {
-                        claimedBy: userId,
-                        status: 'APPROVED'
-                    }
-                }),
                 // Current claimed quests
                 prisma.quest.count({
                     where: {
                         claimedBy: userId,
-                        status: { in: ['CLAIMED', 'COMPLETED'] }
-                    }
-                }),
-                // Total bounty earned from completed quests (for average calculation)
-                prisma.quest.aggregate({
-                    where: {
-                        claimedBy: userId,
-                        status: 'APPROVED'
-                    },
-                    _sum: {
-                        bounty: true
+                        status: { in: ['CLAIMED', 'PENDING_APPROVAL'] }
                     }
                 }),
                 // Quests pending approval
                 prisma.quest.count({
                     where: {
                         claimedBy: userId,
-                        status: 'COMPLETED'
+                        status: 'PENDING_APPROVAL'
                     }
                 })
             ]);
@@ -160,8 +160,8 @@ export class DashboardController {
                         completedQuests,
                         activeQuests: currentQuests,
                         pendingApproval,
-                        totalBounty: earnedBounty._sum.bounty || 0,
-                        averageBounty: completedQuests > 0 ? (earnedBounty._sum.bounty || 0) / completedQuests : 0
+                        totalBounty: earnedBounty,
+                        averageBounty: completedQuests > 0 ? earnedBounty / completedQuests : 0
                     }
                 }
             } as ApiResponse);
