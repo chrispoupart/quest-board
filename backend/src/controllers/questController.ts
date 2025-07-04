@@ -19,7 +19,7 @@ export class QuestController {
 
             const userId = (req as any).user?.userId;
             const userRole = (req as any).user?.role;
-            
+
             const whereConditions: any[] = [];
 
             if (status) {
@@ -31,10 +31,11 @@ export class QuestController {
             }
 
             if (search) {
+                const lowerCaseSearch = search.toLowerCase();
                 whereConditions.push({
                     OR: [
-                        { title: { contains: search } },
-                        { description: { contains: search } },
+                        { title: { contains: lowerCaseSearch } },
+                        { description: { contains: lowerCaseSearch } },
                     ],
                 });
             }
@@ -44,7 +45,7 @@ export class QuestController {
                     OR: [{ userId: null }, { userId: userId }],
                 });
             }
-            
+
             const where = whereConditions.length > 0 ? { AND: whereConditions } : {};
 
             const [quests, total] = await Promise.all([
@@ -662,9 +663,10 @@ export class QuestController {
             }
 
             if (search) {
+                const lowerCaseSearch = search.toLowerCase();
                 where.OR = [
-                    { title: { contains: search } },
-                    { description: { contains: search } }
+                    { title: { contains: lowerCaseSearch } },
+                    { description: { contains: lowerCaseSearch } }
                 ];
             }
 
@@ -763,9 +765,10 @@ export class QuestController {
             }
 
             if (search) {
+                const lowerCaseSearch = search.toLowerCase();
                 where.OR = [
-                    { title: { contains: search } },
-                    { description: { contains: search } }
+                    { title: { contains: lowerCaseSearch } },
+                    { description: { contains: lowerCaseSearch } }
                 ];
             }
 
@@ -1262,10 +1265,11 @@ export class QuestController {
             };
 
             if (search) {
+                const lowerCaseSearch = search.toLowerCase();
                 where.quest = {
                     OR: [
-                        { title: { contains: search } },
-                        { description: { contains: search } }
+                        { title: { contains: lowerCaseSearch } },
+                        { description: { contains: lowerCaseSearch } }
                     ]
                 };
             }
