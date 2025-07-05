@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import QuestManagement from './QuestManagement';
+import QuestManagement from '../admin/QuestManagement';
 import * as questServiceModule from '../../services/questService';
 import * as skillServiceModule from '../../services/skillService';
 import * as userServiceModule from '../../services/userService';
@@ -20,10 +20,23 @@ const mockUsers = [
 const mockSkills = [
   { id: 1, name: 'Swordsmanship', description: '', isActive: true, createdBy: 1, createdAt: '', updatedAt: '' }
 ];
-const mockQuests: any[] = [];
+const mockQuests: any[] = [
+  {
+    id: 1,
+    title: 'Test Quest',
+    bounty: 100,
+    status: 'AVAILABLE',
+    createdBy: 1,
+    createdAt: '',
+    updatedAt: '',
+    isRepeatable: false,
+    skillRequirements: [],
+  } as any
+];
 
 describe('QuestManagement (Personalized Quests)', () => {
   beforeEach(() => {
+    vi.clearAllMocks();
     vi.resetAllMocks();
     vi.mocked(questServiceModule.questService.getQuests).mockResolvedValue({
       quests: mockQuests,
@@ -39,8 +52,9 @@ describe('QuestManagement (Personalized Quests)', () => {
       createdBy: 1,
       createdAt: '',
       updatedAt: '',
-      isRepeatable: false
-    });
+      isRepeatable: false,
+      skillRequirements: [],
+    } as any);
     vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
       user: mockUser,
       loading: false,
@@ -120,24 +134,25 @@ describe('QuestManagement (Personalized Quests)', () => {
       createdBy: 1,
       createdAt: '',
       updatedAt: '',
-      isRepeatable: false
-    };
+      isRepeatable: false,
+      skillRequirements: [],
+    } as any;
     vi.mocked(questServiceModule.questService.getQuests).mockResolvedValueOnce({
       quests: [quest],
       pagination: { page: 1, limit: 10, total: 1, totalPages: 1 }
     });
     vi.mocked(questServiceModule.questService.deleteQuest).mockResolvedValue();
-    // Mock window.confirm to always return true
+    // Mock window.confirm BEFORE rendering
     vi.spyOn(window, 'confirm').mockReturnValue(true);
-
     renderWithAuth();
-    // Wait for quest to appear and click edit
-    await waitFor(() => expect(screen.getByText('Quest to Delete')).toBeInTheDocument());
-    fireEvent.click(screen.getAllByTitle(/edit/i)[0]);
-    // Wait for edit form
-    await waitFor(() => expect(screen.getByText('Delete')).toBeInTheDocument());
-    // Click Delete
-    fireEvent.click(screen.getByText('Delete'));
+    // Click edit button for the quest
+    const editButtons = await screen.findAllByTitle(/edit/i);
+    fireEvent.click(editButtons[0]);
+    // Wait for the edit form to be fully rendered
+    await screen.findByText('Edit Quest');
+    // Now click the Delete button
+    const deleteButton = await screen.findByText(/delete/i);
+    fireEvent.click(deleteButton);
     await waitFor(() => {
       expect(questServiceModule.questService.deleteQuest).toHaveBeenCalledWith(42);
     });
