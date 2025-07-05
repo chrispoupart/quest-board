@@ -417,32 +417,47 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                                 </select>
                             </div>
 
-                            <div className="flex justify-end gap-4">
-                                <Button type="button" variant="ghost" onClick={handleCancelEdit}>
-                                    Cancel
-                                </Button>
-                                {editingQuest && (
+                            <div className="flex justify-between items-center gap-4 mt-8">
+                                {/* Left: Delete button (only when editing) */}
+                                {editingQuest ? (
                                     <Button
                                         type="button"
-                                        variant="outline"
-                                        onClick={() => {
-                                            setShowCreateForm(false);
-                                            setCloneModalOpen({ open: true, quest: editingQuest });
-                                        }}
+                                        variant="destructive"
+                                        className="!ml-0"
+                                        onClick={() => handleDeleteQuest(editingQuest.id)}
+                                        disabled={submitting}
                                     >
-                                        Clone Quest
+                                        Delete
                                     </Button>
-                                )}
-                                <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                                    {submitting ? (
-                                        <>
-                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                            Saving...
-                                        </>
-                                    ) : (
-                                        editingQuest ? 'Save Changes' : 'Create Quest'
+                                ) : <div />}
+                                {/* Right: Cancel, Clone, Save */}
+                                <div className="flex gap-4">
+                                    <Button type="button" variant="ghost" onClick={handleCancelEdit}>
+                                        Cancel
+                                    </Button>
+                                    {editingQuest && (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => {
+                                                setShowCreateForm(false);
+                                                setCloneModalOpen({ open: true, quest: editingQuest });
+                                            }}
+                                        >
+                                            Clone Quest
+                                        </Button>
                                     )}
-                                </Button>
+                                    <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                                        {submitting ? (
+                                            <>
+                                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                                Saving...
+                                            </>
+                                        ) : (
+                                            editingQuest ? 'Save Changes' : 'Create Quest'
+                                        )}
+                                    </Button>
+                                </div>
                             </div>
                         </form>
                     </CardContent>
@@ -518,7 +533,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                                         </div>
                                     </div>
                                     <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
-                                        <Button variant="outline" size="sm" onClick={() => handleEditQuest(quest)}>
+                                        <Button variant="outline" size="sm" title="Edit" onClick={() => handleEditQuest(quest)}>
                                             <Pencil className="w-4 h-4" />
                                         </Button>
                                         <Button variant="destructive" size="sm" onClick={() => handleDeleteQuest(quest.id)}>

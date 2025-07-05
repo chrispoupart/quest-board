@@ -109,4 +109,37 @@ describe('QuestManagement (Personalized Quests)', () => {
       );
     });
   });
+
+  it('shows Delete button in edit form and calls deleteQuest when clicked', async () => {
+    // Add a quest to edit
+    const quest = {
+      id: 42,
+      title: 'Quest to Delete',
+      bounty: 100,
+      status: 'AVAILABLE' as const,
+      createdBy: 1,
+      createdAt: '',
+      updatedAt: '',
+      isRepeatable: false
+    };
+    vi.mocked(questServiceModule.questService.getQuests).mockResolvedValueOnce({
+      quests: [quest],
+      pagination: { page: 1, limit: 10, total: 1, totalPages: 1 }
+    });
+    vi.mocked(questServiceModule.questService.deleteQuest).mockResolvedValue();
+    // Mock window.confirm to always return true
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    renderWithAuth();
+    // Wait for quest to appear and click edit
+    await waitFor(() => expect(screen.getByText('Quest to Delete')).toBeInTheDocument());
+    fireEvent.click(screen.getAllByTitle(/edit/i)[0]);
+    // Wait for edit form
+    await waitFor(() => expect(screen.getByText('Delete')).toBeInTheDocument());
+    // Click Delete
+    fireEvent.click(screen.getByText('Delete'));
+    await waitFor(() => {
+      expect(questServiceModule.questService.deleteQuest).toHaveBeenCalledWith(42);
+    });
+  });
 });
