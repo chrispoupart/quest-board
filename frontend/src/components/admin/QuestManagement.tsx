@@ -192,7 +192,6 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             cooldownDays: quest.cooldownDays,
         });
         setAssignedUserId(quest.userId ?? undefined);
-        setShowCreateForm(true);
 
         try {
             // Always fetch from API for consistency
@@ -207,6 +206,9 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             setSkillRequirements([]);
             setError('Failed to load skill requirements for this quest.');
         }
+
+        // Show the form only after fetching and setting the skill requirements
+        setShowCreateForm(true);
     };
 
     const handleCancelEdit = () => {
