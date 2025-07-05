@@ -22,6 +22,23 @@ router.put('/:id', isAdmin, SkillController.updateSkill);
 router.delete('/:id', isAdmin, SkillController.deleteSkill);
 
 // User skill management routes
+/**
+ * @openapi
+ * /skills/my-skill/{skillId}/level:
+ *   get:
+ *     summary: Get current user's skill level by skill ID
+ *     tags:
+ *       - Skills
+ *     parameters:
+ *       - in: path
+ *         name: skillId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User's skill level
+ */
 router.get('/my-skill/:skillId/level', SkillController.getMySkillLevel);
 router.get('/user/:userId', SkillController.getUserSkills);
 router.get('/user/:userId/:skillId/level', SkillController.getUserSkillLevel);

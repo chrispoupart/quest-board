@@ -18,6 +18,7 @@ import { prisma } from './db';
 import './config'; // This will load and validate environment variables
 import cron from 'node-cron';
 import { backupDatabase } from './utils/backupDb';
+import { setupSwagger } from './swagger';
 
 // Load environment variables only if not in test environment
 if (process.env['NODE_ENV'] !== 'test') {
@@ -65,6 +66,8 @@ if (process.env['NODE_ENV'] !== 'test') {
     backupDatabase();
   });
 }
+
+setupSwagger(app);
 
 export { app };
 

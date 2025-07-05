@@ -9,6 +9,17 @@ router.use(authMiddleware);
 router.use(isAdmin);
 
 // Job management routes
+/**
+ * @openapi
+ * /jobs:
+ *   get:
+ *     summary: Get all jobs (admin only)
+ *     tags:
+ *       - Jobs
+ *     responses:
+ *       200:
+ *         description: List of jobs
+ */
 router.get('/', JobController.getAllJobStatuses);
 router.get('/health', JobController.getSystemHealth);
 router.get('/:name', JobController.getJobStatus);
