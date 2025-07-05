@@ -183,6 +183,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
     };
 
     const handleEditQuest = async (quest: any) => {
+        setError(null);
         setEditingQuest(quest);
         setFormData({
             title: quest.title,
@@ -195,7 +196,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
 
         try {
             // Always fetch from API for consistency
-            const requirements = await skillService.getQuestSkillRequirements(quest.id);
+            const requirements = await skillService.getQuestRequiredSkills(quest.id);
             setSkillRequirements(
                 (requirements ?? []).map((req: any) => ({
                     skillId: req.skillId,
