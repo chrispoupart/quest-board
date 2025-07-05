@@ -72,9 +72,9 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             setTotalPages(questsResponse.pagination.totalPages);
             setCurrentPage(page);
         } catch (err) {
-            console.error('QuestManagement: Failed to fetch data:', err);
+            // console.error('QuestManagement: Failed to fetch data:', err);
             if (err instanceof Error && err.message.includes('401')) {
-                console.error('QuestManagement: 401 error - token might be expired or invalid');
+                // console.error('QuestManagement: 401 error - token might be expired or invalid');
                 setError('Authentication expired. Please log in again.');
             } else {
                 setError(err instanceof Error ? err.message : 'Failed to fetch data');
@@ -130,7 +130,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             setShowCreateForm(false);
             await fetchData(currentPage);
         } catch (err) {
-            console.error('Failed to create quest:', err);
+            // console.error('Failed to create quest:', err);
             setError(err instanceof Error ? err.message : 'Failed to create quest');
         } finally {
             setSubmitting(false);
@@ -160,7 +160,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             setSkillRequirements([]);
             await fetchData(currentPage);
         } catch (err) {
-            console.error('Failed to update quest:', err);
+            // console.error('Failed to update quest:', err);
             setError(err instanceof Error ? err.message : 'Failed to update quest');
         } finally {
             setSubmitting(false);
@@ -177,34 +177,25 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             await questService.deleteQuest(questId);
             await fetchData(currentPage);
         } catch (err) {
-            console.error('Failed to delete quest:', err);
+            // console.error('Failed to delete quest:', err);
             setError(err instanceof Error ? err.message : 'Failed to delete quest');
         }
     };
 
-    const handleEditQuest = async (quest: Quest) => {
+    const handleEditQuest = (quest: any) => {
         setEditingQuest(quest);
         setFormData({
             title: quest.title,
-            description: quest.description || '',
+            description: quest.description,
             bounty: quest.bounty,
             isRepeatable: quest.isRepeatable,
-            cooldownDays: quest.cooldownDays
+            cooldownDays: quest.cooldownDays,
         });
-        setAssignedUserId((quest as any).userId ?? undefined);
-
-        // Load existing skill requirements
-        try {
-            const existingSkills = await skillService.getQuestRequiredSkills(quest.id);
-            setSkillRequirements(existingSkills.map(skill => ({
-                skillId: skill.skillId,
-                minLevel: skill.minLevel
-            })));
-        } catch (error) {
-            console.warn('Failed to load skill requirements:', error);
-            setSkillRequirements([]);
-        }
-
+        setSkillRequirements((quest.skillRequirements ?? []).map((req: any) => ({
+            skillId: req.skillId,
+            requiredLevel: req.requiredLevel,
+        })));
+        setAssignedUserId(quest.userId ?? undefined);
         setShowCreateForm(true);
     };
 
@@ -535,9 +526,6 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                                     <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
                                         <Button variant="outline" size="sm" title="Edit" onClick={() => handleEditQuest(quest)}>
                                             <Pencil className="w-4 h-4" />
-                                        </Button>
-                                        <Button variant="destructive" size="sm" onClick={() => handleDeleteQuest(quest.id)}>
-                                            <Trash2 className="w-4 h-4" />
                                         </Button>
                                     </div>
                                 </CardContent>

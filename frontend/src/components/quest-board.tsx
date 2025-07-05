@@ -714,7 +714,7 @@ const QuestBoard: React.FC = () => {
 
       let questData: QuestListingResponse
 
-      console.log('Fetching quests for tab:', activeTab, 'page:', page, 'search:', searchTerm)
+      // console.log('Fetching quests for tab:', activeTab, 'page:', page, 'search:', searchTerm)
 
       const params = {
         page,
@@ -754,7 +754,7 @@ const QuestBoard: React.FC = () => {
           questData = await questService.getQuests(params)
       }
 
-      console.log('Received quest data:', questData)
+      // console.log('Received quest data:', questData)
 
       // Check if the response has the expected structure
       if (!questData) {
@@ -770,7 +770,7 @@ const QuestBoard: React.FC = () => {
         // In case the API returns an array directly
         questArray = questData as Quest[]
       } else {
-        console.warn('Unexpected API response structure:', questData)
+        // console.warn('Unexpected API response structure:', questData)
         throw new Error('Invalid quest data format received from API')
       }
 
@@ -785,7 +785,7 @@ const QuestBoard: React.FC = () => {
         rejectionReason: undefined // Initialize rejectionReason as undefined
       }));
 
-      console.log('Transformed quests:', transformedQuests)
+      // console.log('Transformed quests:', transformedQuests)
       setQuests(transformedQuests)
 
       // Update pagination state

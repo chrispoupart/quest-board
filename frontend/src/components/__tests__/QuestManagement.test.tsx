@@ -12,7 +12,17 @@ vi.mock('../../services/questService');
 vi.mock('../../services/skillService');
 vi.mock('../../services/userService');
 
-const mockUser = { id: 1, name: 'Admin', email: 'admin@test.com', role: 'ADMIN' as 'ADMIN', googleId: 'admin-google', createdAt: '', updatedAt: '' };
+const mockUser = {
+  id: 1,
+  name: 'Test User',
+  characterName: 'Hero',
+  role: 'ADMIN' as const,
+  avatarUrl: '',
+  bountyBalance: 1234,
+  experience: 1000,
+  googleId: 'mock-google-id',
+  email: 'testuser@example.com',
+};
 const mockUsers = [
   { id: 2, name: 'Alice', email: 'alice@test.com', role: 'PLAYER' as 'PLAYER', googleId: 'alice-google', createdAt: '', updatedAt: '' },
   { id: 3, name: 'Bob', email: 'bob@test.com', role: 'PLAYER' as 'PLAYER', googleId: 'bob-google', createdAt: '', updatedAt: '' }
@@ -33,6 +43,18 @@ const mockQuests: any[] = [
     skillRequirements: [],
   } as any
 ];
+
+beforeAll(() => {
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, 'log').mockImplementation(() => {});
+});
+
+afterAll(() => {
+  (console.error as any).mockRestore();
+  (console.warn as any).mockRestore();
+  (console.log as any).mockRestore();
+});
 
 describe('QuestManagement (Personalized Quests)', () => {
   beforeEach(() => {
@@ -148,10 +170,10 @@ describe('QuestManagement (Personalized Quests)', () => {
     // Click edit button for the quest
     const editButtons = await screen.findAllByTitle(/edit/i);
     fireEvent.click(editButtons[0]);
-    // Wait for the edit form to be fully rendered
-    await screen.findByText('Edit Quest');
+    // Wait for the edit form to be fully rendered by waiting for the Delete button
+    await screen.findByRole('button', { name: /delete/i });
     // Now click the Delete button
-    const deleteButton = await screen.findByText(/delete/i);
+    const deleteButton = await screen.findByRole('button', { name: /delete/i });
     fireEvent.click(deleteButton);
     await waitFor(() => {
       expect(questServiceModule.questService.deleteQuest).toHaveBeenCalledWith(42);
