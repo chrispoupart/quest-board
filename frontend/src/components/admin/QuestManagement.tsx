@@ -182,7 +182,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
         }
     };
 
-    const handleEditQuest = (quest: any) => {
+    const handleEditQuest = async (quest: any) => {
         setEditingQuest(quest);
         setFormData({
             title: quest.title,
@@ -191,12 +191,25 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             isRepeatable: quest.isRepeatable,
             cooldownDays: quest.cooldownDays,
         });
-        setSkillRequirements((quest.skillRequirements ?? []).map((req: any) => ({
-            skillId: req.skillId,
-            requiredLevel: req.requiredLevel,
-        })));
         setAssignedUserId(quest.userId ?? undefined);
         setShowCreateForm(true);
+
+        try {
+            setSubmitting(true);
+            // Always fetch from API for consistency
+            const requirements = await skillService.getQuestSkillRequirements(quest.id);
+            setSkillRequirements(
+                (requirements ?? []).map((req: any) => ({
+                    skillId: req.skillId,
+                    minLevel: req.minLevel,
+                }))
+            );
+        } catch (err) {
+            setSkillRequirements([]);
+            setError('Failed to load skill requirements for this quest.');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const handleCancelEdit = () => {
