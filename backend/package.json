@@ -19,7 +19,7 @@
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
     "promote-admin": "node scripts/promote-to-admin.js",
-    "db:migrate:backup": "ts-node db-migrate-with-backup.ts"
+    "db:migrate:backup": "npm run build && node scripts/db-migrate-with-backup.js"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
