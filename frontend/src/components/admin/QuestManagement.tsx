@@ -463,11 +463,11 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                         const claimer = (quest as any).claimer;
                         const claimedById = (quest as any).claimedBy;
                         return (
-                            <Card key={quest.id} className="border-2 border-border bg-card shadow-md">
-                                <CardContent className="p-4 flex justify-between items-center">
-                                    <div className="space-y-1">
-                                        <h3 className="font-bold text-foreground text-lg">{quest.title}</h3>
-                                        <p className="text-sm text-muted-foreground">{quest.description}</p>
+                            <Card key={quest.id} className="border-2 border-border bg-card shadow-md w-full">
+                                <CardContent className="p-4 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                                    <div className="space-y-1 flex-1 min-w-0">
+                                        <h3 className="font-bold text-foreground text-lg break-words">{quest.title}</h3>
+                                        <p className="text-sm text-muted-foreground break-words">{quest.description}</p>
                                         {/* Claimer info for everyone */}
                                         {(claimer || claimedById) && (
                                             <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
@@ -500,7 +500,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                                                 )}
                                             </div>
                                         )}
-                                        <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
+                                        <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground pt-1">
                                             <div className="flex items-center gap-1">
                                                 <Coins className="w-3 h-3" />
                                                 <span>{quest.bounty} Bounty</span>
@@ -509,9 +509,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                                                 <Calendar className="w-3 h-3" />
                                                 <span>Created: {formatDate(quest.createdAt)}</span>
                                             </div>
-                                            <Badge className={`text-xs font-medium border ${getStatusColor(quest.status)}`}>
-                                                {quest.status.replace('_', ' ')}
-                                            </Badge>
+                                            <Badge className={`text-xs font-medium border ${getStatusColor(quest.status)}`}>{quest.status.replace('_', ' ')}</Badge>
                                             {quest.isRepeatable && (
                                                 <Badge className="text-xs font-medium border text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700">
                                                     Repeatable {quest.cooldownDays ? `(${quest.cooldownDays}d)` : ''}
@@ -519,7 +517,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                                             )}
                                         </div>
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
                                         <Button variant="outline" size="sm" onClick={() => handleEditQuest(quest)}>
                                             <Pencil className="w-4 h-4" />
                                         </Button>
