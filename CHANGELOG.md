@@ -1,3 +1,18 @@
+## [2.20.0](https://github.com/chrispoupart/quest-board/compare/v2.19.2...v2.20.0) (2025-07-05)
+
+### Features
+
+* **admin:** 💄 add Delete button in quest edit form ([8dfc7d5](https://github.com/chrispoupart/quest-board/commit/8dfc7d5f1546a8895cd668b2835f6e558cd548af))
+* **admin:** 🚚 Move clone quest button to edit form interface ([68182d7](https://github.com/chrispoupart/quest-board/commit/68182d71ed611c67c4e850b6ad7990a0573eb0e9))
+* **api:** 📝 add Swagger documentation for API endpoints ([0f99208](https://github.com/chrispoupart/quest-board/commit/0f99208ade0c31968d05c4fac903de5b728522ba))
+* **dashboard:** 📊 integrate dashboardService for user quest stats ([d6a3576](https://github.com/chrispoupart/quest-board/commit/d6a3576b08206af5b365ee9b527a2733edca88a4))
+
+### Bug Fixes
+
+* **admin:** 👽️ update skill requirements API call ([43c1ea6](https://github.com/chrispoupart/quest-board/commit/43c1ea60a6f43544c7421ab0d63b4d2cf6e56f4d))
+* **admin:** 🥅 fetch quest skill requirements from API for consistency ([965419b](https://github.com/chrispoupart/quest-board/commit/965419bad05076ff4b0b0bd547a8ef36172accd1))
+* **frontend:** 🐛 Refresh skills before showing form ([31b15f8](https://github.com/chrispoupart/quest-board/commit/31b15f8bad433e0042a3f192d8ccfd46388b687a))
+
 ## [2.19.2](https://github.com/chrispoupart/quest-board/compare/v2.19.1...v2.19.2) (2025-07-04)
 
 ### Performance Improvements
