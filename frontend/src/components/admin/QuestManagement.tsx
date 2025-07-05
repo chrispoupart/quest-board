@@ -183,29 +183,37 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
     };
 
     const handleEditQuest = async (quest: Quest) => {
-        setEditingQuest(quest);
-        setFormData({
-            title: quest.title,
-            description: quest.description || '',
-            bounty: quest.bounty,
-            isRepeatable: quest.isRepeatable,
-            cooldownDays: quest.cooldownDays
-        });
-        setAssignedUserId((quest as any).userId ?? undefined);
-
-        // Load existing skill requirements
         try {
+            // Show loading state while preparing edit form
+            setLoading(true);
+            setError(null);
+            
+            setEditingQuest(quest);
+            setFormData({
+                title: quest.title,
+                description: quest.description || '',
+                bounty: quest.bounty,
+                isRepeatable: quest.isRepeatable,
+                cooldownDays: quest.cooldownDays
+            });
+            setAssignedUserId((quest as any).userId ?? undefined);
+
+            // Load existing skill requirements before showing the form
             const existingSkills = await skillService.getQuestRequiredSkills(quest.id);
             setSkillRequirements(existingSkills.map(skill => ({
                 skillId: skill.skillId,
                 minLevel: skill.minLevel
             })));
+
+            // Only show the form after all data is loaded
+            setShowCreateForm(true);
         } catch (error) {
             console.warn('Failed to load skill requirements:', error);
             setSkillRequirements([]);
+            setError('Failed to load quest data. Please try again.');
+        } finally {
+            setLoading(false);
         }
-
-        setShowCreateForm(true);
     };
 
     const handleCancelEdit = () => {
