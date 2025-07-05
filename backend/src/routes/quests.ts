@@ -5,6 +5,18 @@ import { validateQuestId } from '../middleware/validationMiddleware';
 
 const router = Router();
 
+/**
+ * @openapi
+ * /quests:
+ *   get:
+ *     summary: Get all quests
+ *     tags:
+ *       - Quests
+ *     responses:
+ *       200:
+ *         description: List of quests
+ */
+
 // Apply authentication middleware to all quest routes
 router.use(authMiddleware);
 
@@ -16,6 +28,24 @@ router.get('/my-claimed', QuestController.getMyClaimedQuests);
 router.get('/my-completion-history', QuestController.getMyCompletionHistory);
 router.get('/pending-approval', isEditorOrAdmin, QuestController.getPendingApprovalQuests);
 router.get('/:id', validateQuestId, QuestController.getQuestById);
+
+/**
+ * @openapi
+ * /quests/{id}:
+ *   get:
+ *     summary: Get quest by ID
+ *     tags:
+ *       - Quests
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Quest details
+ */
 
 // Quest workflow routes (authenticated users) - using PUT to match tests
 router.put('/:id/claim', validateQuestId, QuestController.claimQuest);

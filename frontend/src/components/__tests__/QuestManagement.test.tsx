@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import QuestManagement from './QuestManagement';
+import QuestManagement from '../admin/QuestManagement';
 import * as questServiceModule from '../../services/questService';
 import * as skillServiceModule from '../../services/skillService';
 import * as userServiceModule from '../../services/userService';
@@ -12,7 +12,17 @@ vi.mock('../../services/questService');
 vi.mock('../../services/skillService');
 vi.mock('../../services/userService');
 
-const mockUser = { id: 1, name: 'Admin', email: 'admin@test.com', role: 'ADMIN' as 'ADMIN', googleId: 'admin-google', createdAt: '', updatedAt: '' };
+const mockUser = {
+  id: 1,
+  name: 'Test User',
+  characterName: 'Hero',
+  role: 'ADMIN' as const,
+  avatarUrl: '',
+  bountyBalance: 1234,
+  experience: 1000,
+  googleId: 'mock-google-id',
+  email: 'testuser@example.com',
+};
 const mockUsers = [
   { id: 2, name: 'Alice', email: 'alice@test.com', role: 'PLAYER' as 'PLAYER', googleId: 'alice-google', createdAt: '', updatedAt: '' },
   { id: 3, name: 'Bob', email: 'bob@test.com', role: 'PLAYER' as 'PLAYER', googleId: 'bob-google', createdAt: '', updatedAt: '' }
@@ -20,10 +30,35 @@ const mockUsers = [
 const mockSkills = [
   { id: 1, name: 'Swordsmanship', description: '', isActive: true, createdBy: 1, createdAt: '', updatedAt: '' }
 ];
-const mockQuests: any[] = [];
+const mockQuests: any[] = [
+  {
+    id: 1,
+    title: 'Test Quest',
+    bounty: 100,
+    status: 'AVAILABLE',
+    createdBy: 1,
+    createdAt: '',
+    updatedAt: '',
+    isRepeatable: false,
+    skillRequirements: [],
+  } as any
+];
+
+beforeAll(() => {
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, 'log').mockImplementation(() => {});
+});
+
+afterAll(() => {
+  (console.error as any).mockRestore();
+  (console.warn as any).mockRestore();
+  (console.log as any).mockRestore();
+});
 
 describe('QuestManagement (Personalized Quests)', () => {
   beforeEach(() => {
+    vi.clearAllMocks();
     vi.resetAllMocks();
     vi.mocked(questServiceModule.questService.getQuests).mockResolvedValue({
       quests: mockQuests,
@@ -39,8 +74,9 @@ describe('QuestManagement (Personalized Quests)', () => {
       createdBy: 1,
       createdAt: '',
       updatedAt: '',
-      isRepeatable: false
-    });
+      isRepeatable: false,
+      skillRequirements: [],
+    } as any);
     vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
       user: mockUser,
       loading: false,
@@ -107,6 +143,40 @@ describe('QuestManagement (Personalized Quests)', () => {
           userId: undefined
         })
       );
+    });
+  });
+
+  it('shows Delete button in edit form and calls deleteQuest when clicked', async () => {
+    // Add a quest to edit
+    const quest = {
+      id: 42,
+      title: 'Quest to Delete',
+      bounty: 100,
+      status: 'AVAILABLE' as const,
+      createdBy: 1,
+      createdAt: '',
+      updatedAt: '',
+      isRepeatable: false,
+      skillRequirements: [],
+    } as any;
+    vi.mocked(questServiceModule.questService.getQuests).mockResolvedValueOnce({
+      quests: [quest],
+      pagination: { page: 1, limit: 10, total: 1, totalPages: 1 }
+    });
+    vi.mocked(questServiceModule.questService.deleteQuest).mockResolvedValue();
+    // Mock window.confirm BEFORE rendering
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    renderWithAuth();
+    // Click edit button for the quest
+    const editButtons = await screen.findAllByTitle(/edit/i);
+    fireEvent.click(editButtons[0]);
+    // Wait for the edit form to be fully rendered by waiting for the Delete button
+    await screen.findByRole('button', { name: /delete/i });
+    // Now click the Delete button
+    const deleteButton = await screen.findByRole('button', { name: /delete/i });
+    fireEvent.click(deleteButton);
+    await waitFor(() => {
+      expect(questServiceModule.questService.deleteQuest).toHaveBeenCalledWith(42);
     });
   });
 });

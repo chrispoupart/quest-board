@@ -19,7 +19,7 @@
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
     "promote-admin": "node scripts/promote-to-admin.js",
-    "db:migrate:backup": "ts-node db-migrate-with-backup.ts"
+    "db:migrate:backup": "npm run build && node scripts/db-migrate-with-backup.js"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
@@ -38,6 +38,8 @@
     "morgan": "^1.10.0",
     "node-cron": "^4.2.0",
     "prisma": "^6.11.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "zod": "^3.25.72"
   },
   "devDependencies": {
@@ -50,6 +52,8 @@
     "@types/node": "^24.0.10",
     "@types/node-cron": "^3.0.11",
     "@types/supertest": "^6.0.3",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "@typescript-eslint/eslint-plugin": "^8.35.1",
     "@typescript-eslint/parser": "^8.35.1",
     "eslint": "^9.30.1",

@@ -1,12 +1,12 @@
 import React, { useState, useMemo, useEffect } from "react"
 import { Search, Sword, Shield, Coins, Clock, Scroll, Trophy, Check, X, Eye, Target } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Pagination } from "@/components/ui/pagination"
+import { Button } from "../components/ui/button"
+import { Input } from "../components/ui/input"
+import { Badge } from "../components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
+import { Pagination } from "../components/ui/pagination"
 import QuestDetailsModal from "./QuestDetailsModal"
 import { getLevelInfo } from "../utils/leveling"
 import { skillService } from "../services/skillService"
@@ -15,6 +15,7 @@ import { useAuth } from "../contexts/AuthContext"
 import { questService } from "../services/questService"
 import { Quest, QuestListingResponse, QuestRequiredSkill } from "../types"
 import QuestEditModal from "./QuestEditModal"
+import { dashboardService } from "../services/dashboardService"
 
 // TypeScript Interfaces (extended from the API types)
 interface QuestWithExtras extends Quest {
@@ -666,6 +667,9 @@ const QuestBoard: React.FC = () => {
   const [activeTab, setActiveTab] = useState("available")
   const [error, setError] = useState<string | null>(null)
 
+  // Dashboard stats state
+  const [dashboardStats, setDashboardStats] = useState<{ completedQuests: number; totalBounty: number; currentQuests: number }>({ completedQuests: 0, totalBounty: 0, currentQuests: 0 });
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -676,17 +680,31 @@ const QuestBoard: React.FC = () => {
   const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  // Convert user to UserStats format
+  // Convert user to UserStats format, but use dashboardStats for completed/current/bounty
   const currentUser: UserStats = useMemo(() => ({
     id: user?.id || 0,
-    completedQuests: 0, // Will be fetched from API
-    totalBounty: user?.bountyBalance || 0,
-    currentClaimed: 0, // Will be calculated from quests
+    completedQuests: dashboardStats.completedQuests,
+    totalBounty: dashboardStats.totalBounty || user?.bountyBalance || 0,
+    currentClaimed: dashboardStats.currentQuests,
     role: user?.role || "PLAYER",
     name: user?.characterName || user?.name || "",
     avatar: user?.avatarUrl,
     experience: user?.experience
-  }), [user])
+  }), [user, dashboardStats])
+
+  // Fetch dashboard stats on mount
+  useEffect(() => {
+    if (!user) return;
+    dashboardService.getUserDashboard().then(data => {
+      setDashboardStats({
+        completedQuests: data.stats.completedQuests,
+        totalBounty: data.stats.totalBounty,
+        currentQuests: data.stats.currentQuests
+      });
+    }).catch(() => {
+      setDashboardStats({ completedQuests: 0, totalBounty: user?.bountyBalance || 0, currentQuests: 0 });
+    });
+  }, [user]);
 
   // Fetch quests from API
   const fetchQuests = async (page: number = 1) => {
@@ -696,7 +714,7 @@ const QuestBoard: React.FC = () => {
 
       let questData: QuestListingResponse
 
-      console.log('Fetching quests for tab:', activeTab, 'page:', page, 'search:', searchTerm)
+      // console.log('Fetching quests for tab:', activeTab, 'page:', page, 'search:', searchTerm)
 
       const params = {
         page,
@@ -736,7 +754,7 @@ const QuestBoard: React.FC = () => {
           questData = await questService.getQuests(params)
       }
 
-      console.log('Received quest data:', questData)
+      // console.log('Received quest data:', questData)
 
       // Check if the response has the expected structure
       if (!questData) {
@@ -752,7 +770,7 @@ const QuestBoard: React.FC = () => {
         // In case the API returns an array directly
         questArray = questData as Quest[]
       } else {
-        console.warn('Unexpected API response structure:', questData)
+        // console.warn('Unexpected API response structure:', questData)
         throw new Error('Invalid quest data format received from API')
       }
 
@@ -767,7 +785,7 @@ const QuestBoard: React.FC = () => {
         rejectionReason: undefined // Initialize rejectionReason as undefined
       }));
 
-      console.log('Transformed quests:', transformedQuests)
+      // console.log('Transformed quests:', transformedQuests)
       setQuests(transformedQuests)
 
       // Update pagination state

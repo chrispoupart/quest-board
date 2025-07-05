@@ -20,33 +20,37 @@ export const Pagination: React.FC<PaginationProps> = ({
   }
 
   const getVisiblePages = () => {
-    const delta = 2
-    const range = []
-    const rangeWithDots = []
+    if (totalPages <= 5) {
+      // Show all pages if there are 5 or fewer
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const delta = 2;
+    const range = [];
+    const rangeWithDots = [];
 
     for (
       let i = Math.max(2, currentPage - delta);
       i <= Math.min(totalPages - 1, currentPage + delta);
       i++
     ) {
-      range.push(i)
+      range.push(i);
     }
 
     if (currentPage - delta > 2) {
-      rangeWithDots.push(1, "...")
+      rangeWithDots.push(1, "...");
     } else {
-      rangeWithDots.push(1)
+      rangeWithDots.push(1);
     }
 
-    rangeWithDots.push(...range)
+    rangeWithDots.push(...range);
 
     if (currentPage + delta < totalPages - 1) {
-      rangeWithDots.push("...", totalPages)
+      rangeWithDots.push("...", totalPages);
     } else {
-      rangeWithDots.push(totalPages)
+      rangeWithDots.push(totalPages);
     }
 
-    return rangeWithDots
+    return rangeWithDots;
   }
 
   const visiblePages = getVisiblePages()
@@ -67,7 +71,7 @@ export const Pagination: React.FC<PaginationProps> = ({
       {visiblePages.map((page, index) => (
         <React.Fragment key={index}>
           {page === "..." ? (
-            <span className="flex items-center justify-center w-8 h-8">
+            <span data-testid="pagination-ellipsis" className="flex items-center justify-center w-8 h-8">
               <MoreHorizontal className="h-4 w-4" />
             </span>
           ) : (

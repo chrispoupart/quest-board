@@ -72,9 +72,9 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             setTotalPages(questsResponse.pagination.totalPages);
             setCurrentPage(page);
         } catch (err) {
-            console.error('QuestManagement: Failed to fetch data:', err);
+            // console.error('QuestManagement: Failed to fetch data:', err);
             if (err instanceof Error && err.message.includes('401')) {
-                console.error('QuestManagement: 401 error - token might be expired or invalid');
+                // console.error('QuestManagement: 401 error - token might be expired or invalid');
                 setError('Authentication expired. Please log in again.');
             } else {
                 setError(err instanceof Error ? err.message : 'Failed to fetch data');
@@ -130,7 +130,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             setShowCreateForm(false);
             await fetchData(currentPage);
         } catch (err) {
-            console.error('Failed to create quest:', err);
+            // console.error('Failed to create quest:', err);
             setError(err instanceof Error ? err.message : 'Failed to create quest');
         } finally {
             setSubmitting(false);
@@ -160,7 +160,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             setSkillRequirements([]);
             await fetchData(currentPage);
         } catch (err) {
-            console.error('Failed to update quest:', err);
+            // console.error('Failed to update quest:', err);
             setError(err instanceof Error ? err.message : 'Failed to update quest');
         } finally {
             setSubmitting(false);
@@ -177,34 +177,38 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             await questService.deleteQuest(questId);
             await fetchData(currentPage);
         } catch (err) {
-            console.error('Failed to delete quest:', err);
+            // console.error('Failed to delete quest:', err);
             setError(err instanceof Error ? err.message : 'Failed to delete quest');
         }
     };
 
-    const handleEditQuest = async (quest: Quest) => {
+    const handleEditQuest = async (quest: any) => {
+        setError(null);
         setEditingQuest(quest);
         setFormData({
             title: quest.title,
             description: quest.description || '',
             bounty: quest.bounty,
             isRepeatable: quest.isRepeatable,
-            cooldownDays: quest.cooldownDays
+            cooldownDays: quest.cooldownDays,
         });
-        setAssignedUserId((quest as any).userId ?? undefined);
+        setAssignedUserId(quest.userId ?? undefined);
 
-        // Load existing skill requirements
         try {
-            const existingSkills = await skillService.getQuestRequiredSkills(quest.id);
-            setSkillRequirements(existingSkills.map(skill => ({
-                skillId: skill.skillId,
-                minLevel: skill.minLevel
-            })));
-        } catch (error) {
-            console.warn('Failed to load skill requirements:', error);
+            // Always fetch from API for consistency
+            const requirements = await skillService.getQuestRequiredSkills(quest.id);
+            setSkillRequirements(
+                (requirements ?? []).map((req: any) => ({
+                    skillId: req.skillId,
+                    minLevel: req.minLevel,
+                }))
+            );
+        } catch (err) {
             setSkillRequirements([]);
+            setError('Failed to load skill requirements for this quest.');
         }
 
+        // Show the form only after fetching and setting the skill requirements
         setShowCreateForm(true);
     };
 
@@ -417,20 +421,47 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                                 </select>
                             </div>
 
-                            <div className="flex justify-end gap-4">
-                                <Button type="button" variant="ghost" onClick={handleCancelEdit}>
-                                    Cancel
-                                </Button>
-                                <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                                    {submitting ? (
-                                        <>
-                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                            Saving...
-                                        </>
-                                    ) : (
-                                        editingQuest ? 'Save Changes' : 'Create Quest'
+                            <div className="flex justify-between items-center gap-4 mt-8">
+                                {/* Left: Delete button (only when editing) */}
+                                {editingQuest ? (
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        className="!ml-0"
+                                        onClick={() => handleDeleteQuest(editingQuest.id)}
+                                        disabled={submitting}
+                                    >
+                                        Delete
+                                    </Button>
+                                ) : <div />}
+                                {/* Right: Cancel, Clone, Save */}
+                                <div className="flex gap-4">
+                                    <Button type="button" variant="ghost" onClick={handleCancelEdit}>
+                                        Cancel
+                                    </Button>
+                                    {editingQuest && (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => {
+                                                setShowCreateForm(false);
+                                                setCloneModalOpen({ open: true, quest: editingQuest });
+                                            }}
+                                        >
+                                            Clone Quest
+                                        </Button>
                                     )}
-                                </Button>
+                                    <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                                        {submitting ? (
+                                            <>
+                                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                                Saving...
+                                            </>
+                                        ) : (
+                                            editingQuest ? 'Save Changes' : 'Create Quest'
+                                        )}
+                                    </Button>
+                                </div>
                             </div>
                         </form>
                     </CardContent>
@@ -451,11 +482,11 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                         const claimer = (quest as any).claimer;
                         const claimedById = (quest as any).claimedBy;
                         return (
-                            <Card key={quest.id} className="border-2 border-border bg-card shadow-md">
-                                <CardContent className="p-4 flex justify-between items-center">
-                                    <div className="space-y-1">
-                                        <h3 className="font-bold text-foreground text-lg">{quest.title}</h3>
-                                        <p className="text-sm text-muted-foreground">{quest.description}</p>
+                            <Card key={quest.id} className="border-2 border-border bg-card shadow-md w-full">
+                                <CardContent className="p-4 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                                    <div className="space-y-1 flex-1 min-w-0">
+                                        <h3 className="font-bold text-foreground text-lg break-words">{quest.title}</h3>
+                                        <p className="text-sm text-muted-foreground break-words">{quest.description}</p>
                                         {/* Claimer info for everyone */}
                                         {(claimer || claimedById) && (
                                             <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
@@ -488,7 +519,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                                                 )}
                                             </div>
                                         )}
-                                        <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
+                                        <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground pt-1">
                                             <div className="flex items-center gap-1">
                                                 <Coins className="w-3 h-3" />
                                                 <span>{quest.bounty} Bounty</span>
@@ -497,9 +528,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                                                 <Calendar className="w-3 h-3" />
                                                 <span>Created: {formatDate(quest.createdAt)}</span>
                                             </div>
-                                            <Badge className={`text-xs font-medium border ${getStatusColor(quest.status)}`}>
-                                                {quest.status.replace('_', ' ')}
-                                            </Badge>
+                                            <Badge className={`text-xs font-medium border ${getStatusColor(quest.status)}`}>{quest.status.replace('_', ' ')}</Badge>
                                             {quest.isRepeatable && (
                                                 <Badge className="text-xs font-medium border text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700">
                                                     Repeatable {quest.cooldownDays ? `(${quest.cooldownDays}d)` : ''}
@@ -507,18 +536,10 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                                             )}
                                         </div>
                                     </div>
-                                    <div className="flex gap-2">
-                                        <Button variant="outline" size="sm" onClick={() => handleEditQuest(quest)}>
+                                    <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                                        <Button variant="outline" size="sm" title="Edit" onClick={() => handleEditQuest(quest)}>
                                             <Pencil className="w-4 h-4" />
                                         </Button>
-                                        <Button variant="destructive" size="sm" onClick={() => handleDeleteQuest(quest.id)}>
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                        {(user?.role === 'ADMIN' || user?.role === 'EDITOR') && (
-                                            <Button variant="ghost" size="icon" title="Clone Quest" onClick={() => setCloneModalOpen({ open: true, quest })}>
-                                                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy"><rect x="9" y="9" width="13" height="13" rx="2"/><rect x="3" y="3" width="13" height="13" rx="2"/></svg>
-                                            </Button>
-                                        )}
                                     </div>
                                 </CardContent>
                             </Card>

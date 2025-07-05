@@ -10,6 +10,23 @@ router.use(authMiddleware);
 router.get('/items', StoreController.getStoreItems);
 router.get('/items/:id', StoreController.getStoreItemById);
 
+/**
+ * @openapi
+ * /store/purchase:
+ *   post:
+ *     summary: Purchase an item
+ *     tags:
+ *       - Store
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Purchase successful
+ */
 // Purchase an item (for all authenticated users)
 router.post('/purchase', StoreController.purchaseItem);
 router.get('/purchases', StoreController.getUserPurchases);

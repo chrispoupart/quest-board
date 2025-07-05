@@ -4,6 +4,17 @@ import { NotificationController } from '../controllers/notificationController';
 
 const router = Router();
 
+/**
+ * @openapi
+ * /notifications:
+ *   get:
+ *     summary: Get all notifications for the authenticated user
+ *     tags:
+ *       - Notifications
+ *     responses:
+ *       200:
+ *         description: List of notifications
+ */
 // Get all notifications for the authenticated user
 router.get('/', authMiddleware, NotificationController.getUserNotifications);
 
