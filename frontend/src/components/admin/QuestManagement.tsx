@@ -186,7 +186,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
         setEditingQuest(quest);
         setFormData({
             title: quest.title,
-            description: quest.description,
+            description: quest.description || '',
             bounty: quest.bounty,
             isRepeatable: quest.isRepeatable,
             cooldownDays: quest.cooldownDays,
