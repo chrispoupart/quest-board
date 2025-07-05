@@ -195,7 +195,6 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
         setShowCreateForm(true);
 
         try {
-            setSubmitting(true);
             // Always fetch from API for consistency
             const requirements = await skillService.getQuestSkillRequirements(quest.id);
             setSkillRequirements(
@@ -207,8 +206,6 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
         } catch (err) {
             setSkillRequirements([]);
             setError('Failed to load skill requirements for this quest.');
-        } finally {
-            setSubmitting(false);
         }
     };
 
