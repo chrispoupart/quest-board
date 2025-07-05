@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { vi } from "vitest";
 import { Pagination } from "../ui/pagination";
@@ -36,4 +35,4 @@ describe("Pagination component", () => {
     fireEvent.click(screen.getByText("3"));
     expect(onPageChange).toHaveBeenCalledWith(3);
   });
-}); 
+});

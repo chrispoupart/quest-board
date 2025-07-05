@@ -1,5 +1,4 @@
-import React from "react";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { vi } from "vitest";
 import * as AuthContextModule from "../../contexts/AuthContext";
 import { dashboardService } from "../../services/dashboardService";
@@ -55,4 +54,4 @@ describe("QuestBoard User Info Box", () => {
     expect(completedCard).not.toBeNull();
     expect(within(completedCard!).getByText(/Completed/i)).toBeInTheDocument();
   });
-}); 
+});
