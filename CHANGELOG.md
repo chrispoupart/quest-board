@@ -1,3 +1,12 @@
+## [2.21.0](https://github.com/chrispoupart/quest-board/compare/v2.20.0...v2.21.0) (2025-07-06)
+
+### Features
+
+* **dashboard:** 💫 add quest navigation with search pre-population ([cb4e1bb](https://github.com/chrispoupart/quest-board/commit/cb4e1bb843e4494a81c0db274e66045b0bf23896))
+* **leaderboard:** 🏷️ add userId to bounty aggregation ([4493b37](https://github.com/chrispoupart/quest-board/commit/4493b37a96f6fc6c95dfd2818b288acd1b0d0b61))
+* **notification-system:** enhance otification system ([8bdc6cf](https://github.com/chrispoupart/quest-board/commit/8bdc6cf845493adc3de77ae433d7f85b6b7350a9))
+* **swagger:** 🎨 add file extension based on environment ([a11b423](https://github.com/chrispoupart/quest-board/commit/a11b423d7cf5a4aab3562d13831beb0096982c1c))
+
 ## [2.20.0](https://github.com/chrispoupart/quest-board/compare/v2.19.2...v2.20.0) (2025-07-05)
 
 ### Features
