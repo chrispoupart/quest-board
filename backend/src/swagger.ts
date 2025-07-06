@@ -2,6 +2,8 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { Express } from 'express';
 
+const fileExtension = process.env['NODE_ENV'] === 'production' ? '.js' : '.ts';
+
 const options = {
   definition: {
     openapi: '3.0.0',
@@ -25,7 +27,7 @@ const options = {
       },
     ],
   },
-  apis: [__dirname + '/routes/*'], // Path to your API routes
+  apis: [__dirname + `/routes/*${fileExtension}`], // Path to your API routes
 };
 
 const swaggerSpec = swaggerJsdoc(options);
