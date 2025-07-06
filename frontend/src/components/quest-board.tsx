@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react"
+import { useSearchParams } from "react-router-dom"
 import { Search, Sword, Shield, Coins, Clock, Scroll, Trophy, Check, X, Eye, Target } from "lucide-react"
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
@@ -661,6 +662,7 @@ const UserDashboard: React.FC<{ user: UserStats }> = ({ user }) => {
 
 const QuestBoard: React.FC = () => {
   const { user } = useAuth()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [quests, setQuests] = useState<QuestWithExtras[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
@@ -691,6 +693,14 @@ const QuestBoard: React.FC = () => {
     avatar: user?.avatarUrl,
     experience: user?.experience
   }), [user, dashboardStats])
+
+  // Handle URL parameters on mount
+  useEffect(() => {
+    const searchFromUrl = searchParams.get('search');
+    if (searchFromUrl) {
+      setSearchTerm(searchFromUrl);
+    }
+  }, [searchParams]);
 
   // Fetch dashboard stats on mount
   useEffect(() => {
@@ -813,10 +823,17 @@ const QuestBoard: React.FC = () => {
     const timeoutId = setTimeout(() => {
       setCurrentPage(1) // Reset to first page when searching
       fetchQuests(1)
+
+      // Update URL with search term
+      if (searchTerm) {
+        setSearchParams({ search: searchTerm });
+      } else {
+        setSearchParams({});
+      }
     }, 500) // 500ms delay
 
     return () => clearTimeout(timeoutId)
-  }, [searchTerm])
+  }, [searchTerm, setSearchParams])
 
   // Handle page changes
   const handlePageChange = (page: number) => {

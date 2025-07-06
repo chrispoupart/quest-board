@@ -67,4 +67,4 @@ USER nodejs
 EXPOSE 8000
 
 # Run migrations and then start the application
-CMD npx prisma migrate deploy && npm start
+CMD npm run db:migrate:backup && npm start

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { dashboardService } from '../../services/dashboardService';
 import { DashboardData } from '../../types';
@@ -26,6 +27,7 @@ interface DashboardProps { }
 
 const Dashboard: React.FC<DashboardProps> = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -91,6 +93,11 @@ const Dashboard: React.FC<DashboardProps> = () => {
         if (diffInDays < 7) return `${diffInDays} days ago`;
         if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
         return `${Math.floor(diffInDays / 30)} months ago`;
+    };
+
+    const handleQuestClick = (questTitle: string) => {
+        // Navigate to quests page with search term pre-populated
+        navigate(`/quests?search=${encodeURIComponent(questTitle)}`);
     };
 
     if (loading) {
@@ -212,7 +219,11 @@ const Dashboard: React.FC<DashboardProps> = () => {
                             ) : (
                                 <div className="space-y-4">
                                     {currentQuests.map((quest) => (
-                                        <div key={quest.id} className="border border-border rounded-lg p-4 bg-background">
+                                        <div
+                                            key={quest.id}
+                                            className="border border-border rounded-lg p-4 bg-background hover:bg-muted/50 cursor-pointer transition-colors duration-200"
+                                            onClick={() => handleQuestClick(quest.title)}
+                                        >
                                             <div className="flex items-start justify-between mb-2">
                                                 <h3 className="font-semibold text-foreground leading-tight">{quest.title}</h3>
                                                 <div className="flex items-center gap-1 text-muted-foreground font-bold">
@@ -272,7 +283,11 @@ const Dashboard: React.FC<DashboardProps> = () => {
                             ) : (
                                 <div className="space-y-4">
                                     {recentCreatedQuests.map((quest) => (
-                                        <div key={quest.id} className="border border-border rounded-lg p-4 bg-background">
+                                        <div
+                                            key={quest.id}
+                                            className="border border-border rounded-lg p-4 bg-background hover:bg-muted/50 cursor-pointer transition-colors duration-200"
+                                            onClick={() => handleQuestClick(quest.title)}
+                                        >
                                             <div className="flex items-start justify-between mb-2">
                                                 <h3 className="font-semibold text-foreground leading-tight">{quest.title}</h3>
                                                 <div className="flex items-center gap-1 text-muted-foreground font-bold">

@@ -543,7 +543,7 @@ export class DashboardController {
             });
 
             // Aggregate bounty by userId
-            const bountyByUser: Record<number, { name: string; bounty: number }> = {};
+            const bountyByUser: Record<number, { name: string; bounty: number; userId: number }> = {};
             for (const c of completions) {
                 if (!c.user || !c.quest) continue; // Skip if user or quest is missing
 
@@ -552,17 +552,32 @@ export class DashboardController {
                 const bounty = c.quest.bounty;
 
                 if (!bountyByUser[userId]) {
-                    bountyByUser[userId] = { name: userName, bounty: 0 };
+                    bountyByUser[userId] = { name: userName, bounty: 0, userId };
                 }
                 bountyByUser[userId].bounty += bounty;
             }
 
             // Convert to an array, sort by bounty, and take the top 5
-            const leaderboard = Object.values(bountyByUser)
-                .sort((a, b) => b.bounty - a.bounty || a.name.localeCompare(b.name))
-                .slice(0, 5);
+            let leaderboard = Object.values(bountyByUser)
+                .sort((a, b) => b.bounty - a.bounty || a.name.localeCompare(b.name));
 
-            res.status(200).json(leaderboard);
+            // If fewer than 5, fill with users with 0 bounty
+            if (leaderboard.length < 5) {
+                const excludeIds = leaderboard.map(u => u.userId);
+                const fillUsers = await prisma.user.findMany({
+                    where: excludeIds.length > 0 ? { id: { notIn: excludeIds } } : {},
+                    orderBy: { name: 'asc' },
+                    take: 5 - leaderboard.length
+                });
+
+                leaderboard = leaderboard.concat(
+                    fillUsers.map(u => ({ userId: u.id, name: u.name, bounty: 0 }))
+                );
+            }
+
+            res.status(200).json(
+                leaderboard.slice(0, 5).map(u => ({ name: u.name, bounty: u.bounty }))
+            );
         } catch (error) {
             console.error('Error getting bounty leaderboard:', error);
             res.status(500).json({ error: 'Internal server error' });
