@@ -26,7 +26,7 @@ COPY .eslintrc.js ./
 # Verify scripts directory exists
 RUN ls -la scripts/ || echo "Scripts directory not found in build context"
 
-# Build the application
+# Build the application and scripts
 RUN npm run build
 
 # Production stage
@@ -52,11 +52,12 @@ RUN npm ci --omit=dev
 # Generate Prisma client
 RUN npx prisma generate
 
-# Copy built application from builder stage
+# Copy built application and scripts from builder stage
 COPY --from=builder /app/dist ./dist
 
-# Verify scripts were copied
+# Verify scripts and compiled scripts were copied
 RUN ls -la scripts/ || echo "Scripts directory not found in production stage"
+RUN ls -la dist/scripts/ || echo "Compiled scripts directory not found in production stage"
 
 # Change ownership of the app directory to the nodejs user
 RUN chown -R nodejs:nodejs /app
