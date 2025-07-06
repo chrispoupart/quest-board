@@ -7,6 +7,7 @@
     "pretest": "prisma generate && rm -f prisma/test.db prisma/test.db-journal",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
+    "build:scripts": "tsc --project tsconfig.json",
     "start": "node dist/src/index.js",
     "test": "NODE_OPTIONS='--experimental-vm-modules' JWT_SECRET='a-very-secure-test-secret' JWT_REFRESH_SECRET='another-very-secure-test-secret' GOOGLE_CLIENT_ID=dummy GOOGLE_CLIENT_SECRET=dummy jest",
     "test:watch": "jest --watch",
@@ -18,8 +19,9 @@
     "db:seed": "ts-node prisma/seed.ts",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
-    "promote-admin": "node scripts/promote-to-admin.js",
-    "db:migrate:backup": "npm run build && node scripts/db-migrate-with-backup.js"
+    "promote-admin": "node dist/scripts/promote-to-admin.js",
+    "db:migrate:backup": "node dist/scripts/db-migrate-with-backup.js",
+    "db:migrate:backup:dev": "ts-node scripts/db-migrate-with-backup.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
@@ -40,6 +42,7 @@
     "prisma": "^6.11.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "ts-node": "^10.9.2",
     "zod": "^3.25.72"
   },
   "devDependencies": {
@@ -60,7 +63,6 @@
     "jest": "^30.0.4",
     "supertest": "^7.1.1",
     "ts-jest": "^29.4.0",
-    "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.8.3"
   },

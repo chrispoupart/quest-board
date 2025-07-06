@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Quest/Chore Data Schema",
+  "description": "Schema for loading quests and chores into the quest board system",
+  "type": "object",
+  "properties": {
+    "quests": {
+      "type": "array",
+      "description": "Array of quests to load",
+      "items": {
+        "type": "object",
+        "required": ["title", "bounty"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the quest",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the quest",
+            "maxLength": 1000
+          },
+          "bounty": {
+            "type": "number",
+            "description": "The reward amount for completing the quest",
+            "minimum": 0
+          },
+          "isRepeatable": {
+            "type": "boolean",
+            "description": "Whether this quest can be repeated",
+            "default": false
+          },
+          "cooldownDays": {
+            "type": "integer",
+            "description": "Number of days before quest can be repeated (required if isRepeatable is true)",
+            "minimum": 1,
+            "maximum": 365
+          },
+          "requiredSkills": {
+            "type": "array",
+            "description": "Skills required to complete this quest",
+            "items": {
+              "type": "object",
+              "required": ["skillName", "minLevel"],
+              "properties": {
+                "skillName": {
+                  "type": "string",
+                  "description": "Name of the required skill (must match existing skill names)"
+                },
+                "minLevel": {
+                  "type": "integer",
+                  "description": "Minimum skill level required (1-5)",
+                  "minimum": 1,
+                  "maximum": 5
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "Initial status of the quest",
+            "enum": ["AVAILABLE", "CLAIMED", "COMPLETED", "APPROVED", "REJECTED"],
+            "default": "AVAILABLE"
+          }
+        }
+      }
+    },
+    "skills": {
+      "type": "array",
+      "description": "Array of skills to create (optional - will be created if they don't exist)",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the skill",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the skill",
+            "maxLength": 500
+          }
+        }
+      }
+    }
+  },
+  "required": ["quests"]
+}
