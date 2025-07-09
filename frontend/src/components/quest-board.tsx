@@ -369,6 +369,14 @@ const QuestCard: React.FC<{
             <span>Created by {quest.creatorName || `User ${quest.createdBy}`}</span>
           </div>
 
+          {/* Due date display */}
+          {quest.dueDate && (
+            <div className="flex items-center gap-2">
+              <Clock className="w-3 h-3" />
+              <span>Due: {new Date(quest.dueDate).toLocaleDateString()}</span>
+            </div>
+          )}
+
           {quest.claimerName && (
             <div className="flex items-center gap-2">
               <Shield className="w-3 h-3" />

@@ -528,6 +528,12 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                                                 <Calendar className="w-3 h-3" />
                                                 <span>Created: {formatDate(quest.createdAt)}</span>
                                             </div>
+                                            {quest.dueDate && (
+                                                <div className="flex items-center gap-1">
+                                                    <Calendar className="w-3 h-3" />
+                                                    <span>Due: {formatDate(quest.dueDate)}</span>
+                                                </div>
+                                            )}
                                             <Badge className={`text-xs font-medium border ${getStatusColor(quest.status)}`}>{quest.status.replace('_', ' ')}</Badge>
                                             {quest.isRepeatable && (
                                                 <Badge className="text-xs font-medium border text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700">
