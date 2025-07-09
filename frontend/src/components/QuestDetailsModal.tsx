@@ -189,7 +189,7 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                                         <Shield className="w-4 h-4 text-primary" />
                                         <span className="text-muted-foreground">
                                             <strong>Claimed:</strong> {formatDate(quest.claimedAt)}
-                                            {quest.claimer?.name && ` by ${quest.claimer.name}`}
+                                            {quest.claimer && ` by ${quest.claimer.characterName || quest.claimer.name}`}
                                         </span>
                                     </div>
                                 )}

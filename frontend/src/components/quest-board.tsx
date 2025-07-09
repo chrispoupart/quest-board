@@ -265,9 +265,9 @@ const QuestCard: React.FC<{
             {claimer ? (
               <>
                 {claimer.avatarUrl && (
-                  <img src={claimer.avatarUrl} alt={claimer.name} className="w-5 h-5 rounded-full inline-block mr-1" />
+                  <img src={claimer.avatarUrl} alt={claimer.characterName || claimer.name} className="w-5 h-5 rounded-full inline-block mr-1" />
                 )}
-                <span>{claimer.name || claimer.email || `User #${claimer.id}`}</span>
+                <span>{claimer.characterName || claimer.name || `User #${claimer.id}`}</span>
               </>
             ) : (
               <span>User #{claimedById}</span>
@@ -281,9 +281,9 @@ const QuestCard: React.FC<{
             {assignedUser ? (
               <>
                 {assignedUser.avatarUrl && (
-                  <img src={assignedUser.avatarUrl} alt={assignedUser.name} className="w-5 h-5 rounded-full inline-block mr-1" />
+                  <img src={assignedUser.avatarUrl} alt={assignedUser.characterName || assignedUser.name} className="w-5 h-5 rounded-full inline-block mr-1" />
                 )}
-                <span>{assignedUser.name || assignedUser.email || `User #${assignedUser.id}`}</span>
+                <span>{assignedUser.characterName || assignedUser.name || `User #${assignedUser.id}`}</span>
               </>
             ) : (
               <span>User #{assignedUserId}</span>

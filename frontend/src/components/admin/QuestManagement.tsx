@@ -494,9 +494,9 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                                                 {claimer ? (
                                                     <>
                                                         {claimer.avatarUrl && (
-                                                            <img src={claimer.avatarUrl} alt={claimer.name} className="w-5 h-5 rounded-full inline-block mr-1" />
+                                                            <img src={claimer.avatarUrl} alt={claimer.characterName || claimer.name} className="w-5 h-5 rounded-full inline-block mr-1" />
                                                         )}
-                                                        <span>{claimer.name || claimer.email || `User #${claimer.id}`}</span>
+                                                        <span>{claimer.characterName || claimer.name || `User #${claimer.id}`}</span>
                                                     </>
                                                 ) : (
                                                     <span>User #{claimedById}</span>
