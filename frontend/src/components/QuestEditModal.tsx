@@ -72,10 +72,8 @@ const QuestEditModal: React.FC<QuestEditModalProps> = ({ quest, isOpen, onClose,
         skillRequirements: skillRequirements.length > 0 ? skillRequirements : undefined,
       };
       if (isEditMode) {
-        // For update, only include userId if it's a number, otherwise omit
-        if (typeof assignedUserId === 'number') {
-          submitData.userId = assignedUserId;
-        }
+        // Always include userId: number or null
+        submitData.userId = typeof assignedUserId === 'number' ? assignedUserId : null;
       } else {
         // For create, only include userId if it's a number
         if (typeof assignedUserId === 'number') {
