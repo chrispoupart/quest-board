@@ -68,7 +68,7 @@ const QuestEditModal: React.FC<QuestEditModalProps> = ({ quest, isOpen, onClose,
       setError(null);
       let submitData: any = {
         ...formData,
-        dueDate: formData.dueDate ? new Date(formData.dueDate).toISOString() : undefined,
+        dueDate: formData.dueDate && formData.dueDate.trim() !== '' ? new Date(formData.dueDate).toISOString() : undefined,
         skillRequirements: skillRequirements.length > 0 ? skillRequirements : undefined,
       };
       if (isEditMode) {
