@@ -46,6 +46,14 @@ export class QuestController {
                 });
             }
 
+            // Exclude expired quests (dueDate in the past)
+            whereConditions.push({
+                OR: [
+                    { dueDate: null },
+                    { dueDate: { gte: new Date() } }
+                ]
+            });
+
             const where = whereConditions.length > 0 ? { AND: whereConditions } : {};
 
             const [quests, total] = await Promise.all([
@@ -69,7 +77,11 @@ export class QuestController {
                             }
                         }
                     },
-                    orderBy: { createdAt: 'desc' },
+                    // Sort by dueDate ascending, nulls last
+                    orderBy: [
+                        { dueDate: 'asc' },
+                        { createdAt: 'desc' }
+                    ],
                     skip,
                     take: limit,
                 }),
@@ -159,7 +171,7 @@ export class QuestController {
      */
     static async createQuest(req: Request, res: Response): Promise<void> {
         try {
-            const { title, description, bounty, isRepeatable, cooldownDays, userId } = req.body;
+            const { title, description, bounty, isRepeatable, cooldownDays, userId, dueDate } = req.body;
             const creatorId = (req as any).user?.userId;
             if (!creatorId) {
                 res.status(401).json({ success: false, error: { message: 'User not authenticated' } });
@@ -187,6 +199,7 @@ export class QuestController {
                     isRepeatable: isRepeatable || false,
                     cooldownDays: isRepeatable ? cooldownDays : null,
                     userId: userId ?? null,
+                    dueDate: dueDate ? new Date(dueDate) : null,
                 },
             });
             res.status(201).json({ success: true, data: { quest } } as any);
@@ -211,7 +224,7 @@ export class QuestController {
                 res.status(400).json({ success: false, error: { message: 'Invalid quest ID' } });
                 return;
             }
-            const { title, description, bounty, status, isRepeatable, cooldownDays } = req.body;
+            const { title, description, bounty, status, isRepeatable, cooldownDays, dueDate } = req.body;
             const updateFields: any = {};
             if (title !== undefined) updateFields.title = title;
             if (description !== undefined) updateFields.description = description;
@@ -225,6 +238,7 @@ export class QuestController {
                 }
                 updateFields.cooldownDays = isRepeatable ? cooldownDays : null;
             }
+            if (dueDate !== undefined) updateFields.dueDate = dueDate ? new Date(dueDate) : null;
             const quest = await prisma.quest.update({
                 where: { id: questId },
                 data: updateFields,
@@ -1078,7 +1092,7 @@ export class QuestController {
      */
     static async createQuestWithSkills(req: Request, res: Response): Promise<void> {
         try {
-            const { title, description, bounty, isRepeatable, cooldownDays, skillRequirements, userId: assignedUserId } = req.body;
+            const { title, description, bounty, isRepeatable, cooldownDays, skillRequirements, userId: assignedUserId, dueDate } = req.body;
             const creatorId = (req as any).user?.userId;
 
             if (!creatorId) {
@@ -1128,6 +1142,7 @@ export class QuestController {
                         isRepeatable: isRepeatable || false,
                         cooldownDays: isRepeatable ? cooldownDays : null,
                         userId: assignedUserId ?? null,
+                        dueDate: dueDate ? new Date(dueDate) : null,
                     },
                 });
 
@@ -1171,7 +1186,7 @@ export class QuestController {
                 return;
             }
 
-            const { title, description, bounty, status, isRepeatable, cooldownDays, skillRequirements, userId } = req.body;
+            const { title, description, bounty, status, isRepeatable, cooldownDays, skillRequirements, userId, dueDate } = req.body;
 
             // Validate skill requirements if provided
             if (skillRequirements && Array.isArray(skillRequirements)) {
@@ -1205,6 +1220,7 @@ export class QuestController {
                 if ('userId' in req.body) {
                     updateFields.userId = userId ?? null;
                 }
+                if (dueDate !== undefined) updateFields.dueDate = dueDate ? new Date(dueDate) : null;
 
                 const quest = await tx.quest.update({
                     where: { id: questId },

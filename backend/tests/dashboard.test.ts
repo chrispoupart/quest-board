@@ -47,10 +47,20 @@ describe('Dashboard Endpoints', () => {
             });
 
             // Create test quests with different statuses
-            await createTestQuest(questGiver.id, {
+            const approvedQuest = await createTestQuest(questGiver.id, {
                 status: 'APPROVED',
                 claimedBy: user.id,
                 bounty: 100
+            });
+            // Add questCompletion for the approved quest
+            const prisma = getTestPrisma();
+            await prisma.questCompletion.create({
+                data: {
+                    questId: approvedQuest.id,
+                    userId: user.id,
+                    completedAt: new Date(),
+                    status: 'APPROVED'
+                }
             });
             await createTestQuest(questGiver.id, {
                 status: 'CLAIMED',
