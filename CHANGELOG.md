@@ -1,3 +1,19 @@
+## [2.22.0](https://github.com/chrispoupart/quest-board/compare/v2.21.0...v2.22.0) (2025-07-09)
+
+### Features
+
+* **ci:** 👷 Add Dependabot auto-merge workflow ([c91e961](https://github.com/chrispoupart/quest-board/commit/c91e961da901983aa2e5ca85a17abf3b3c7206fc))
+* **quests:** 💄 add due date functionality to quest system ([887f5db](https://github.com/chrispoupart/quest-board/commit/887f5dbdbb3128e0b4017e595f2ec8e20515ab3c))
+* **quests:** 🗃️ add due date field and expiration handling ([65cb896](https://github.com/chrispoupart/quest-board/commit/65cb896844d03433704d9134bd43c520eca0754f))
+* **ui:** 👤 prioritize character name in user displays ([78f67a1](https://github.com/chrispoupart/quest-board/commit/78f67a1567718dafb247dddb21f1d82c4659c0a3))
+* **workflow:** 🚩 Remove condition for Dependabot auto-merge ([01df955](https://github.com/chrispoupart/quest-board/commit/01df955e0866e0c9e0e542bc6406561d1aeac1d7))
+
+### Bug Fixes
+
+* **form:** 🦺 add validation for empty due date strings ([4d8a277](https://github.com/chrispoupart/quest-board/commit/4d8a277d3c774bbed80e7e14ba9e42e82a0c1008))
+* **modal:** 🩹 Always set userId to null when not a number in edit mode ([db4adf2](https://github.com/chrispoupart/quest-board/commit/db4adf2705c24f59e90439468d56e570582c81b5))
+* **sort:** 🚸 Update dueDate ordering to properly handle null values ([38e1a62](https://github.com/chrispoupart/quest-board/commit/38e1a62d1faa4055652a4304fa28476b8574f4a0))
+
 ## [2.21.0](https://github.com/chrispoupart/quest-board/compare/v2.20.0...v2.21.0) (2025-07-06)
 
 ### Features
