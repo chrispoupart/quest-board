@@ -79,7 +79,7 @@ export class QuestController {
                     },
                     // Sort by dueDate ascending, nulls last
                     orderBy: [
-                        { dueDate: 'asc' },
+                        { dueDate: { sort: 'asc', nulls: 'last' } },
                         { createdAt: 'desc' }
                     ],
                     skip,
