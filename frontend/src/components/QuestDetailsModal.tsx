@@ -183,13 +183,21 @@ const QuestDetailsModal: React.FC<QuestDetailsModalProps> = ({
                                         <strong>Created:</strong> {formatDate(quest.createdAt)}
                                     </span>
                                 </div>
+                                {quest.dueDate && (
+                                    <div className="flex items-center gap-2">
+                                        <Clock className="w-4 h-4 text-primary" />
+                                        <span className="text-muted-foreground">
+                                            <strong>Due:</strong> {formatDate(quest.dueDate)}
+                                        </span>
+                                    </div>
+                                )}
 
                                 {quest.claimedAt && (
                                     <div className="flex items-center gap-2">
                                         <Shield className="w-4 h-4 text-primary" />
                                         <span className="text-muted-foreground">
                                             <strong>Claimed:</strong> {formatDate(quest.claimedAt)}
-                                            {quest.claimer?.name && ` by ${quest.claimer.name}`}
+                                            {quest.claimer && ` by ${quest.claimer.characterName || quest.claimer.name}`}
                                         </span>
                                     </div>
                                 )}

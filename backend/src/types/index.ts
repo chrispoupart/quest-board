@@ -66,6 +66,7 @@ export interface Quest {
     cooldownDays?: number;
     lastCompletedAt?: Date;
     userId?: number;
+    dueDate?: Date;
     // Required skills
     requiredSkills?: QuestRequiredSkill[];
 }
@@ -78,6 +79,7 @@ export interface CreateQuestRequest {
     cooldownDays?: number;
     requiredSkills?: CreateQuestRequiredSkillRequest[];
     userId?: number;
+    dueDate?: Date;
 }
 
 export interface UpdateQuestRequest {

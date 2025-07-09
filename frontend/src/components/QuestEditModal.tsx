@@ -24,6 +24,7 @@ const QuestEditModal: React.FC<QuestEditModalProps> = ({ quest, isOpen, onClose,
     bounty: 0,
     isRepeatable: false,
     cooldownDays: undefined as number | undefined,
+    dueDate: '' as string | undefined,
   });
   const [skillRequirements, setSkillRequirements] = useState<CreateQuestRequiredSkillRequest[]>([]);
   const [skills, setSkills] = useState<Skill[]>([]);
@@ -40,6 +41,7 @@ const QuestEditModal: React.FC<QuestEditModalProps> = ({ quest, isOpen, onClose,
         bounty: quest.bounty,
         isRepeatable: quest.isRepeatable,
         cooldownDays: quest.cooldownDays,
+        dueDate: quest.dueDate ? quest.dueDate.slice(0, 10) : '',
       });
       setAssignedUserId((quest as any).userId ?? undefined);
       skillService.getAllSkills().then(setSkills).catch(() => setSkills([]));
@@ -64,18 +66,24 @@ const QuestEditModal: React.FC<QuestEditModalProps> = ({ quest, isOpen, onClose,
     try {
       setSubmitting(true);
       setError(null);
-      if (isEditMode && quest) {
-        await questService.updateQuestWithSkills((quest as any).id, {
-          ...formData,
-          userId: assignedUserId ?? null,
-          skillRequirements: skillRequirements.length > 0 ? skillRequirements : undefined,
-        });
+      let submitData: any = {
+        ...formData,
+        dueDate: formData.dueDate && formData.dueDate.trim() !== '' ? new Date(formData.dueDate).toISOString() : undefined,
+        skillRequirements: skillRequirements.length > 0 ? skillRequirements : undefined,
+      };
+      if (isEditMode) {
+        // Always include userId: number or null
+        submitData.userId = typeof assignedUserId === 'number' ? assignedUserId : null;
       } else {
-        await questService.createQuestWithSkills({
-          ...formData,
-          userId: assignedUserId ?? undefined,
-          skillRequirements: skillRequirements.length > 0 ? skillRequirements : undefined,
-        });
+        // For create, only include userId if it's a number
+        if (typeof assignedUserId === 'number') {
+          submitData.userId = assignedUserId;
+        }
+      }
+      if (isEditMode && quest) {
+        await questService.updateQuestWithSkills((quest as any).id, submitData);
+      } else {
+        await questService.createQuestWithSkills(submitData);
       }
       onSave();
       onClose();
@@ -169,6 +177,16 @@ const QuestEditModal: React.FC<QuestEditModalProps> = ({ quest, isOpen, onClose,
                   <option key={user.id} value={user.id}>{user.name} ({user.email})</option>
                 ))}
               </select>
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="dueDate" className="font-medium text-foreground">Due Date (optional)</label>
+              <Input
+                id="dueDate"
+                type="date"
+                value={formData.dueDate || ''}
+                onChange={e => setFormData({ ...formData, dueDate: e.target.value })}
+                className="bg-background border-border"
+              />
             </div>
             <div className="flex justify-end gap-4">
               <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>

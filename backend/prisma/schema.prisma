@@ -100,6 +100,7 @@ model Quest {
   completedAt DateTime? @map("completed_at")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
+  dueDate     DateTime? @map("due_date")
 
   // Personalized quest: only visible to this user if set
   userId      Int?      @map("user_id")

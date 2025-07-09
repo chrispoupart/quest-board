@@ -36,6 +36,7 @@ export interface Quest {
     isRepeatable: boolean;
     cooldownDays?: number;
     lastCompletedAt?: string;
+    dueDate?: string;
 }
 
 export type QuestStatus = 'AVAILABLE' | 'CLAIMED' | 'COMPLETED' | 'APPROVED' | 'REJECTED' | 'COOLDOWN';
@@ -74,6 +75,7 @@ export interface CreateQuestRequest {
     isRepeatable?: boolean;
     cooldownDays?: number;
     userId?: number;
+    dueDate?: string;
 }
 
 export interface UpdateQuestRequest {
@@ -84,6 +86,7 @@ export interface UpdateQuestRequest {
     isRepeatable?: boolean;
     cooldownDays?: number;
     userId?: number | null;
+    dueDate?: string;
 }
 
 export interface UserStats {

@@ -14,7 +14,34 @@ permissions:
   contents: write
 
 jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm test
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm test
+
   build-backend:
+    needs: test-backend
     uses: circleeh/workflows-build-containers/.github/workflows/buildah-ci.yaml@v1
     with:
       image_description: "Quest Board - Backend"
@@ -27,6 +54,7 @@ jobs:
       CALLING_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-frontend:
+    needs: test-frontend
     uses: circleeh/workflows-build-containers/.github/workflows/buildah-ci.yaml@v1
     with:
       image_description: "Quest Board - Frontend"
