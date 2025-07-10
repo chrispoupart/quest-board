@@ -219,14 +219,20 @@ export class DashboardController {
                             select: {
                                 id: true,
                                 name: true,
-                                email: true
+                                email: true,
+                                role: true,
+                                characterName: true,
+                                avatarUrl: true,
                             }
                         },
                         claimer: {
                             select: {
                                 id: true,
                                 name: true,
-                                email: true
+                                email: true,
+                                role: true,
+                                characterName: true,
+                                avatarUrl: true,
                             }
                         }
                     }
@@ -307,14 +313,20 @@ export class DashboardController {
                         select: {
                             id: true,
                             name: true,
-                            email: true
+                            email: true,
+                            role: true,
+                            characterName: true,
+                            avatarUrl: true,
                         }
                     },
                     claimer: {
                         select: {
                             id: true,
                             name: true,
-                            email: true
+                            email: true,
+                            role: true,
+                            characterName: true,
+                            avatarUrl: true,
                         }
                     }
                 }
@@ -330,14 +342,20 @@ export class DashboardController {
                         select: {
                             id: true,
                             name: true,
-                            email: true
+                            email: true,
+                            role: true,
+                            characterName: true,
+                            avatarUrl: true,
                         }
                     },
                     claimer: {
                         select: {
                             id: true,
                             name: true,
-                            email: true
+                            email: true,
+                            role: true,
+                            characterName: true,
+                            avatarUrl: true,
                         }
                     }
                 }
@@ -402,14 +420,20 @@ export class DashboardController {
                             select: {
                                 id: true,
                                 name: true,
-                                email: true
+                                email: true,
+                                role: true,
+                                characterName: true,
+                                avatarUrl: true,
                             }
                         },
                         claimer: {
                             select: {
                                 id: true,
                                 name: true,
-                                email: true
+                                email: true,
+                                role: true,
+                                characterName: true,
+                                avatarUrl: true,
                             }
                         }
                     }
@@ -429,14 +453,20 @@ export class DashboardController {
                             select: {
                                 id: true,
                                 name: true,
-                                email: true
+                                email: true,
+                                role: true,
+                                characterName: true,
+                                avatarUrl: true,
                             }
                         },
                         claimer: {
                             select: {
                                 id: true,
                                 name: true,
-                                email: true
+                                email: true,
+                                role: true,
+                                characterName: true,
+                                avatarUrl: true,
                             }
                         }
                     }
@@ -487,14 +517,20 @@ export class DashboardController {
                         select: {
                             id: true,
                             name: true,
-                            email: true
+                            email: true,
+                            role: true,
+                            characterName: true,
+                            avatarUrl: true,
                         }
                     },
                     claimer: {
                         select: {
                             id: true,
                             name: true,
-                            email: true
+                            email: true,
+                            role: true,
+                            characterName: true,
+                            avatarUrl: true,
                         }
                     }
                 }

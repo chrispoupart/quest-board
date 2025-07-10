@@ -66,6 +66,8 @@ export class QuestController {
                                 name: true,
                                 email: true,
                                 role: true,
+                                characterName: true,
+                                avatarUrl: true,
                             }
                         },
                         claimer: {
@@ -74,6 +76,8 @@ export class QuestController {
                                 name: true,
                                 email: true,
                                 role: true,
+                                characterName: true,
+                                avatarUrl: true,
                             }
                         }
                     },
@@ -694,6 +698,8 @@ export class QuestController {
                                 name: true,
                                 email: true,
                                 role: true,
+                                characterName: true,
+                                avatarUrl: true,
                             }
                         },
                         claimer: {
@@ -702,6 +708,8 @@ export class QuestController {
                                 name: true,
                                 email: true,
                                 role: true,
+                                characterName: true,
+                                avatarUrl: true,
                             }
                         }
                     },
@@ -796,6 +804,8 @@ export class QuestController {
                                 name: true,
                                 email: true,
                                 role: true,
+                                characterName: true,
+                                avatarUrl: true,
                             }
                         },
                         claimer: {
@@ -804,6 +814,8 @@ export class QuestController {
                                 name: true,
                                 email: true,
                                 role: true,
+                                characterName: true,
+                                avatarUrl: true,
                             }
                         }
                     },
@@ -885,6 +897,8 @@ export class QuestController {
                             name: true,
                             email: true,
                             role: true,
+                            characterName: true,
+                            avatarUrl: true,
                         }
                     }
                 },
@@ -1302,6 +1316,8 @@ export class QuestController {
                                         name: true,
                                         email: true,
                                         role: true,
+                                        characterName: true,
+                                        avatarUrl: true,
                                     }
                                 },
                                 claimer: {
@@ -1310,6 +1326,8 @@ export class QuestController {
                                         name: true,
                                         email: true,
                                         role: true,
+                                        characterName: true,
+                                        avatarUrl: true,
                                     }
                                 }
                             }
@@ -1386,6 +1404,8 @@ export class QuestController {
                                 name: true,
                                 email: true,
                                 role: true,
+                                characterName: true,
+                                avatarUrl: true,
                             }
                         },
                         claimer: {
@@ -1394,6 +1414,8 @@ export class QuestController {
                                 name: true,
                                 email: true,
                                 role: true,
+                                characterName: true,
+                                avatarUrl: true,
                             }
                         }
                     },
