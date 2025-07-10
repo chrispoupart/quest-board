@@ -1,3 +1,14 @@
+## [2.25.0](https://github.com/chrispoupart/quest-board/compare/v2.24.0...v2.25.0) (2025-07-10)
+
+### Features
+
+* **jobs:** 🛂 Add notify-admins-pending-approvals job handler ([4f9e403](https://github.com/chrispoupart/quest-board/commit/4f9e403dfd13144c2448fa398096d42b973404fa))
+* **notifications:** 🚩 add scheduled job to notify admins of pending approvals ([96e1b90](https://github.com/chrispoupart/quest-board/commit/96e1b90ddb9d6dd97b6724e2c4bd0b220fbc0387))
+
+### Bug Fixes
+
+* **admin:** 🩹 add fallback options for quest user assignment ([9de1509](https://github.com/chrispoupart/quest-board/commit/9de1509a9ddf17a25a8b9e7258d0ec5671f5dee7))
+
 ## [2.24.0](https://github.com/chrispoupart/quest-board/compare/v2.23.0...v2.24.0) (2025-07-10)
 
 ### Features
