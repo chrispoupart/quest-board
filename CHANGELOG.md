@@ -1,3 +1,9 @@
+## [2.24.0](https://github.com/chrispoupart/quest-board/compare/v2.23.0...v2.24.0) (2025-07-10)
+
+### Features
+
+* **quests:** 👔 implement consistent personalizedFor field for user assignment ([06e22ed](https://github.com/chrispoupart/quest-board/commit/06e22ed205e13954315c602fc9544918a7684c3a))
+
 ## [2.23.0](https://github.com/chrispoupart/quest-board/compare/v2.22.0...v2.23.0) (2025-07-10)
 
 ### Features
