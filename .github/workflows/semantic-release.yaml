@@ -21,4 +21,4 @@ jobs:
     with:
       extra-plugins: "conventional-changelog-conventionalcommits semantic-release-major-tag"
     secrets:
-      github-token: ${{ secrets.GITHUB_TOKEN }}
+      github-token: ${{ secrets.GH_RELEASE_TOKEN }}
