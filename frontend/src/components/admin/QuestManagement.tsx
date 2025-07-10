@@ -477,7 +477,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             ) : (
                 <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {quests.map((quest) => {
-                        const assignedUser = (quest as any).personalizedFor;
+                        const assignedUser = (quest as any).personalizedFor || (quest as any).user || (quest as any).assignedUser;
                         const assignedUserId = (quest as any).userId;
                         const claimer = (quest as any).claimer;
                         const claimedById = (quest as any).claimedBy;
