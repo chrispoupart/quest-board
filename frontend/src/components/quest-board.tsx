@@ -101,24 +101,24 @@ const formatTimeRemaining = (claimedAt: string, timeLimit: number = 48) => {
   return `${minutes}m`
 }
 
-// Cooldown utility functions
+// Update getCooldownTimeRemaining to show min/sec fallback
 const getCooldownTimeRemaining = (quest: Quest): string | null => {
   if (quest.status !== 'COOLDOWN' || !quest.lastCompletedAt || !quest.cooldownDays) {
     return null
   }
-
   const lastCompleted = new Date(quest.lastCompletedAt)
   const cooldownEnd = new Date(lastCompleted.getTime() + quest.cooldownDays * 24 * 60 * 60 * 1000)
   const now = new Date()
   const remaining = cooldownEnd.getTime() - now.getTime()
-
   if (remaining <= 0) return null
-
   const days = Math.floor(remaining / (1000 * 60 * 60 * 24))
   const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-
+  const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))
+  const seconds = Math.floor((remaining % (1000 * 60)) / 1000)
   if (days > 0) return `${days}d ${hours}h`
-  return `${hours}h`
+  if (hours > 0) return `${hours}h ${minutes}m`
+  if (minutes > 0) return `${minutes}m ${seconds}s`
+  return `${seconds}s`
 }
 
 const formatCooldownPeriod = (cooldownDays: number): string => {
@@ -132,12 +132,40 @@ const formatCooldownPeriod = (cooldownDays: number): string => {
   return `${cooldownDays} days`
 }
 
+// Add a function to get the quest's age reference date
+const getQuestAgeReference = (quest: Quest) => {
+  // For repeatable quests, use lastCompletedAt if present, otherwise createdAt
+  if (quest.isRepeatable && quest.lastCompletedAt) {
+    return quest.lastCompletedAt
+  }
+  return quest.createdAt
+}
+
+// Add a function to calculate the number of age dots (0-4)
+const getQuestAgeDots = (quest: Quest, allQuests: Quest[]) => {
+  // Get reference date for all quests
+  const getRef = (q: Quest) => new Date(getQuestAgeReference(q)).getTime()
+  const refDate = getRef(quest)
+  // Only consider quests in the current list (visible tab)
+  const refDates = allQuests.map(getRef).filter(Boolean)
+  if (refDates.length < 2) return 0
+  const min = Math.min(...refDates)
+  const max = Math.max(...refDates)
+  if (max === min) return 0
+  // Divide into 5 buckets (0-4 dots)
+  const bucketSize = (max - min) / 5
+  const age = refDate - min
+  const dots = Math.min(4, Math.floor(age / bucketSize))
+  return dots
+}
+
 // Components
 const QuestCard: React.FC<{
   quest: QuestWithExtras;
   onAction: (questId: number, action: string) => Promise<void>;
   currentUser: UserStats;
-}> = ({ quest, onAction, currentUser }) => {
+  allQuests: QuestWithExtras[];
+}> = ({ quest, onAction, currentUser, allQuests }) => {
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [userSkillLevels, setUserSkillLevels] = useState<{[skillId: number]: number}>({})
   const [skillRequirementsLoaded, setSkillRequirementsLoaded] = useState(false)
@@ -228,12 +256,25 @@ const QuestCard: React.FC<{
 
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start gap-2">
-          <CardTitle className="text-lg font-bold text-foreground leading-tight font-serif">{quest.title}</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-lg font-bold text-foreground leading-tight font-serif">{quest.title}</CardTitle>
+            {/* Age dots */}
+            <span className="flex items-center ml-1" title="Quest age">
+              {Array.from({ length: 4 }, (_, i) => (
+                <span
+                  key={i}
+                  className={`inline-block w-2 h-2 rounded-full mx-0.5 ${i < getQuestAgeDots(quest, allQuests) ? 'bg-gray-500 dark:bg-gray-300' : 'bg-gray-300 dark:bg-gray-700 opacity-40'}`}
+                  style={{ transition: 'background 0.2s' }}
+                />
+              ))}
+            </span>
+          </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1 text-muted-foreground font-bold">
               <Coins className="w-4 h-4" />
               <span>{quest.bounty}</span>
             </div>
+            {/* Age badge removed, replaced by dots */}
             {(currentUser.role === "ADMIN" || currentUser.role === "EDITOR") && (
               <div className="flex items-center gap-1">
                 <Button
@@ -1039,14 +1080,18 @@ const QuestBoard: React.FC = () => {
 
                     {/* Quest Cards Grid */}
                     <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-                      {quests.map((quest) => (
-                        <QuestCard
-                          key={quest.id}
-                          quest={quest}
-                          onAction={handleQuestAction}
-                          currentUser={currentUser}
-                        />
-                      ))}
+                      {quests
+                        .slice() // avoid mutating state
+                        .sort((a, b) => new Date(getQuestAgeReference(a)).getTime() - new Date(getQuestAgeReference(b)).getTime())
+                        .map((quest) => (
+                          <QuestCard
+                            key={quest.id}
+                            quest={quest}
+                            onAction={handleQuestAction}
+                            currentUser={currentUser}
+                            allQuests={quests}
+                          />
+                        ))}
                     </div>
 
                     {/* Pagination */}
