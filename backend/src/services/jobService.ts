@@ -403,6 +403,9 @@ export class JobService {
             case 'health-check':
                 await this.handleHealthCheck();
                 break;
+            case 'notify-admins-pending-approvals':
+                await this.handleNotifyAdminsPendingApprovals();
+                break;
             default:
                 throw new Error(`Unknown job: ${name}`);
         }
