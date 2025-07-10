@@ -17,6 +17,7 @@ import { questService } from "../services/questService"
 import { Quest, QuestListingResponse, QuestRequiredSkill } from "../types"
 import QuestEditModal from "./QuestEditModal"
 import { dashboardService } from "../services/dashboardService"
+import { getQuestAgeReference, getQuestAgeDots, formatTimeAgo } from "../utils/questAgeUtils"
 
 // TypeScript Interfaces (extended from the API types)
 interface QuestWithExtras extends Quest {
@@ -132,40 +133,13 @@ const formatCooldownPeriod = (cooldownDays: number): string => {
   return `${cooldownDays} days`
 }
 
-// Add a function to get the quest's age reference date
-const getQuestAgeReference = (quest: Quest) => {
-  // For repeatable quests, use lastCompletedAt if present, otherwise createdAt
-  if (quest.isRepeatable && quest.lastCompletedAt) {
-    return quest.lastCompletedAt
-  }
-  return quest.createdAt
-}
-
-// Add a function to calculate the number of age dots (0-4)
-const getQuestAgeDots = (quest: Quest, allQuests: Quest[]) => {
-  // Get reference date for all quests
-  const getRef = (q: Quest) => new Date(getQuestAgeReference(q)).getTime()
-  const refDate = getRef(quest)
-  // Only consider quests in the current list (visible tab)
-  const refDates = allQuests.map(getRef).filter(Boolean)
-  if (refDates.length < 2) return 0
-  const min = Math.min(...refDates)
-  const max = Math.max(...refDates)
-  if (max === min) return 0
-  // Divide into 5 buckets (0-4 dots)
-  const bucketSize = (max - min) / 5
-  const age = refDate - min
-  const dots = Math.min(4, Math.floor(age / bucketSize))
-  return dots
-}
-
 // Components
 const QuestCard: React.FC<{
   quest: QuestWithExtras;
   onAction: (questId: number, action: string) => Promise<void>;
   currentUser: UserStats;
   allQuests: QuestWithExtras[];
-}> = ({ quest, onAction, currentUser, allQuests }) => {
+}> = ({ quest, onAction, currentUser }) => {
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [userSkillLevels, setUserSkillLevels] = useState<{[skillId: number]: number}>({})
   const [skillRequirementsLoaded, setSkillRequirementsLoaded] = useState(false)
@@ -259,11 +233,11 @@ const QuestCard: React.FC<{
           <div className="flex items-center gap-2">
             <CardTitle className="text-lg font-bold text-foreground leading-tight font-serif">{quest.title}</CardTitle>
             {/* Age dots */}
-            <span className="flex items-center ml-1" title="Quest age">
+            <span className="flex items-center ml-1" title={formatTimeAgo(getQuestAgeReference(quest))}>
               {Array.from({ length: 4 }, (_, i) => (
                 <span
                   key={i}
-                  className={`inline-block w-2 h-2 rounded-full mx-0.5 ${i < getQuestAgeDots(quest, allQuests) ? 'bg-gray-500 dark:bg-gray-300' : 'bg-gray-300 dark:bg-gray-700 opacity-40'}`}
+                  className={`inline-block w-2 h-2 rounded-full mx-0.5 ${i < getQuestAgeDots(quest) ? 'bg-gray-500 dark:bg-gray-300' : 'bg-gray-300 dark:bg-gray-700 opacity-40'}`}
                   style={{ transition: 'background 0.2s' }}
                 />
               ))}
