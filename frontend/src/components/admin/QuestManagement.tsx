@@ -477,7 +477,7 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
             ) : (
                 <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {quests.map((quest) => {
-                        const assignedUser = (quest as any).user || (quest as any).assignedUser;
+                        const assignedUser = (quest as any).personalizedFor || (quest as any).user || (quest as any).assignedUser;
                         const assignedUserId = (quest as any).userId;
                         const claimer = (quest as any).claimer;
                         const claimedById = (quest as any).claimedBy;
@@ -510,9 +510,9 @@ const QuestManagement: React.FC<QuestManagementProps> = () => {
                                                 {assignedUser ? (
                                                     <>
                                                         {assignedUser.avatarUrl && (
-                                                            <img src={assignedUser.avatarUrl} alt={assignedUser.name} className="w-5 h-5 rounded-full inline-block mr-1" />
+                                                            <img src={assignedUser.avatarUrl} alt={assignedUser.characterName || assignedUser.name} className="w-5 h-5 rounded-full inline-block mr-1" />
                                                         )}
-                                                        <span>{assignedUser.name || assignedUser.email || `User #${assignedUser.id}`}</span>
+                                                        <span>{assignedUser.characterName || assignedUser.name || `User #${assignedUser.id}`}</span>
                                                     </>
                                                 ) : (
                                                     <span>User #{assignedUserId}</span>

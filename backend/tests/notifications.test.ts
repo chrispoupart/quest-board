@@ -634,4 +634,71 @@ describe('Notification System', () => {
             expect(admin2Notifications[0]?.type).toBe('ADMIN_APPROVAL_NEEDED');
         });
     });
+
+    describe('Scheduled Job Integration', () => {
+        it('should trigger the scheduled job and notify all admins of pending approvals', async () => {
+            // Create two admin users
+            const adminUser1 = await createTestUser({
+                name: 'Admin User 1',
+                email: 'admin1-jobtest@example.com',
+                role: 'ADMIN'
+            });
+            const adminUser2 = await createTestUser({
+                name: 'Admin User 2',
+                email: 'admin2-jobtest@example.com',
+                role: 'ADMIN'
+            });
+            // Create a user and a pending quest
+            const player = await createTestUser({
+                name: 'Player',
+                email: 'player-jobtest@example.com',
+                role: 'PLAYER'
+            });
+            const prisma = getTestPrisma();
+            await prisma.quest.create({
+                data: {
+                    title: 'Job Test Quest',
+                    description: 'Job test description',
+                    bounty: 50,
+                    status: 'COMPLETED',
+                    createdBy: player.id,
+                    claimedBy: player.id,
+                    completedAt: new Date()
+                }
+            });
+            // Create a store item and a pending transaction
+            const seller = await createTestUser({
+                name: 'Seller',
+                email: 'seller-jobtest@example.com',
+                role: 'EDITOR'
+            });
+            const storeItem = await prisma.storeItem.create({
+                data: {
+                    name: 'Job Test Item',
+                    description: 'Job test item',
+                    cost: 75,
+                    createdBy: seller.id
+                }
+            });
+            await prisma.storeTransaction.create({
+                data: {
+                    itemId: storeItem.id,
+                    buyerId: player.id,
+                    sellerId: seller.id,
+                    amount: 75,
+                    status: 'PENDING'
+                }
+            });
+            // Import JobService and call the handler directly
+            const { JobService } = await import('../src/services/jobService');
+            await JobService['handleNotifyAdminsPendingApprovals']();
+            // Check that both admins received notifications
+            const admin1Notifications = await prisma.notification.findMany({ where: { userId: adminUser1.id, type: 'ADMIN_APPROVAL_NEEDED' } });
+            const admin2Notifications = await prisma.notification.findMany({ where: { userId: adminUser2.id, type: 'ADMIN_APPROVAL_NEEDED' } });
+            expect(admin1Notifications.length).toBeGreaterThanOrEqual(1);
+            expect(admin2Notifications.length).toBeGreaterThanOrEqual(1);
+            expect(admin1Notifications[0]?.message).toContain('items awaiting your approval');
+            expect(admin2Notifications[0]?.message).toContain('items awaiting your approval');
+        });
+    });
 });

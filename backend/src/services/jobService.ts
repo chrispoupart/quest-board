@@ -40,6 +40,9 @@ export class JobService {
         // System health check job (runs every 30 minutes)
         this.scheduleJob('health-check', '*/30 * * * *', this.handleHealthCheck);
 
+        // Notify admins of pending approvals (runs every 10 minutes)
+        this.scheduleJob('notify-admins-pending-approvals', '*/10 * * * *', this.handleNotifyAdminsPendingApprovals);
+
         console.log(`Initialized ${this.jobs.size} scheduled jobs`);
     }
 
@@ -305,6 +308,20 @@ export class JobService {
     }
 
     /**
+     * Handle notifying admins of pending approvals
+     */
+    private static async handleNotifyAdminsPendingApprovals(): Promise<void> {
+        try {
+            // Dynamically import NotificationService to avoid circular dependency
+            const { NotificationService } = await import('./notificationService');
+            await NotificationService.notifyAdminsOfPendingApprovals();
+        } catch (error) {
+            console.error('Error notifying admins of pending approvals:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Stop a specific job
      */
     static stopJob(name: string): void {
@@ -385,6 +402,9 @@ export class JobService {
                 break;
             case 'health-check':
                 await this.handleHealthCheck();
+                break;
+            case 'notify-admins-pending-approvals':
+                await this.handleNotifyAdminsPendingApprovals();
                 break;
             default:
                 throw new Error(`Unknown job: ${name}`);
