@@ -40,6 +40,9 @@ export class JobService {
         // System health check job (runs every 30 minutes)
         this.scheduleJob('health-check', '*/30 * * * *', this.handleHealthCheck);
 
+        // Notify admins of pending approvals (runs every 10 minutes)
+        this.scheduleJob('notify-admins-pending-approvals', '*/10 * * * *', this.handleNotifyAdminsPendingApprovals);
+
         console.log(`Initialized ${this.jobs.size} scheduled jobs`);
     }
 
@@ -300,6 +303,20 @@ export class JobService {
             console.log('Health check completed successfully');
         } catch (error) {
             console.error('Health check failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Handle notifying admins of pending approvals
+     */
+    private static async handleNotifyAdminsPendingApprovals(): Promise<void> {
+        try {
+            // Dynamically import NotificationService to avoid circular dependency
+            const { NotificationService } = await import('./notificationService');
+            await NotificationService.notifyAdminsOfPendingApprovals();
+        } catch (error) {
+            console.error('Error notifying admins of pending approvals:', error);
             throw error;
         }
     }
