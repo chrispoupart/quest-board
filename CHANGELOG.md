@@ -1,3 +1,10 @@
+## [2.23.0](https://github.com/chrispoupart/quest-board/compare/v2.22.0...v2.23.0) (2025-07-10)
+
+### Features
+
+* **controllers:** 🚸 add user profile fields to API responses ([6bf4b8a](https://github.com/chrispoupart/quest-board/commit/6bf4b8ae3d1c484be940f0d97bdf907cbbcf0f8f))
+* **quest-board:** 💄 add quest age visualization with dots ([942a897](https://github.com/chrispoupart/quest-board/commit/942a8978e6d6c097d504a7fcf1698265a18128c2))
+
 ## [2.22.0](https://github.com/chrispoupart/quest-board/compare/v2.21.0...v2.22.0) (2025-07-09)
 
 ### Features
