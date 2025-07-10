@@ -1,6 +1,5 @@
 import { getQuestAgeReference, getQuestAgeDots } from './questAgeUtils'
 import { Quest } from '../types'
-import { jest } from '@jest/globals'
 
 describe('getQuestAgeReference', () => {
   it('returns createdAt for non-repeatable quests', () => {
@@ -26,10 +25,10 @@ describe('getQuestAgeDots', () => {
   } as any)
 
   beforeAll(() => {
-    jest.useFakeTimers().setSystemTime(now)
+    vi.useFakeTimers().setSystemTime(now)
   })
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   it('returns 0 dots for 0-3 days', () => {

@@ -213,7 +213,7 @@ const QuestCard: React.FC<{
   };
 
   // Assigned user display logic
-  const assignedUser = (quest as any).user || (quest as any).assignedUser;
+  const assignedUser = (quest as any).personalizedFor;
   const assignedUserId = (quest as any).userId;
 
   // Claimer display logic

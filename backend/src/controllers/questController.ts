@@ -79,6 +79,14 @@ export class QuestController {
                                 characterName: true,
                                 avatarUrl: true,
                             }
+                        },
+                        personalizedFor: { // Assigned user
+                            select: {
+                                id: true,
+                                name: true,
+                                characterName: true,
+                                avatarUrl: true,
+                            }
                         }
                     },
                     // Sort by dueDate ascending, nulls last
@@ -711,6 +719,14 @@ export class QuestController {
                                 characterName: true,
                                 avatarUrl: true,
                             }
+                        },
+                        personalizedFor: { // Assigned user
+                            select: {
+                                id: true,
+                                name: true,
+                                characterName: true,
+                                avatarUrl: true,
+                            }
                         }
                     },
                     orderBy: { createdAt: 'desc' },
@@ -814,6 +830,14 @@ export class QuestController {
                                 name: true,
                                 email: true,
                                 role: true,
+                                characterName: true,
+                                avatarUrl: true,
+                            }
+                        },
+                        personalizedFor: { // Assigned user
+                            select: {
+                                id: true,
+                                name: true,
                                 characterName: true,
                                 avatarUrl: true,
                             }
@@ -1329,6 +1353,14 @@ export class QuestController {
                                         characterName: true,
                                         avatarUrl: true,
                                     }
+                                },
+                                personalizedFor: { // Assigned user
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        characterName: true,
+                                        avatarUrl: true,
+                                    }
                                 }
                             }
                         }
@@ -1414,6 +1446,14 @@ export class QuestController {
                                 name: true,
                                 email: true,
                                 role: true,
+                                characterName: true,
+                                avatarUrl: true,
+                            }
+                        },
+                        personalizedFor: { // Assigned user
+                            select: {
+                                id: true,
+                                name: true,
                                 characterName: true,
                                 avatarUrl: true,
                             }
