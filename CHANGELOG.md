@@ -1,3 +1,9 @@
+## [2.26.0](https://github.com/chrispoupart/quest-board/compare/v2.25.0...v2.26.0) (2025-07-12)
+
+### Features
+
+* **authorization:** 🛂 add role-based quest filtering ([a081738](https://github.com/chrispoupart/quest-board/commit/a081738932c1d824fb905c6017adb523a4547d97))
+
 ## [2.25.0](https://github.com/chrispoupart/quest-board/compare/v2.24.0...v2.25.0) (2025-07-10)
 
 ### Features
