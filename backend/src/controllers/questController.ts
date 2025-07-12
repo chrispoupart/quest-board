@@ -899,6 +899,7 @@ export class QuestController {
     static async getRepeatableQuests(req: Request, res: Response): Promise<void> {
         try {
             const userId = (req as any).user?.userId;
+            const userRole = (req as any).user?.role;
             if (!userId) {
                 res.status(401).json({ success: false, error: { message: 'User not authenticated' } });
                 return;
@@ -908,12 +909,32 @@ export class QuestController {
             const limit = parseInt(req.query['limit'] as string) || 10;
             const skip = (page - 1) * limit;
 
-            // Get ALL repeatable quests (both available and on cooldown)
+            // Build where conditions
+            const whereConditions: any[] = [
+                { isRepeatable: true },
+                { status: { in: ['AVAILABLE', 'COOLDOWN'] } }
+            ];
+
+            // Filter quests based on user role and assignment
+            if (userRole !== 'ADMIN') {
+                whereConditions.push({
+                    OR: [{ userId: null }, { userId: userId }],
+                });
+            }
+
+            // Exclude expired quests (dueDate in the past)
+            whereConditions.push({
+                OR: [
+                    { dueDate: null },
+                    { dueDate: { gte: new Date() } }
+                ]
+            });
+
+            const where = { AND: whereConditions };
+
+            // Get repeatable quests with proper filtering
             const repeatableQuests = await prisma.quest.findMany({
-                where: {
-                    isRepeatable: true,
-                    status: { in: ['AVAILABLE', 'COOLDOWN'] },
-                },
+                where,
                 include: {
                     creator: {
                         select: {
@@ -921,6 +942,14 @@ export class QuestController {
                             name: true,
                             email: true,
                             role: true,
+                            characterName: true,
+                            avatarUrl: true,
+                        }
+                    },
+                    personalizedFor: { // Assigned user
+                        select: {
+                            id: true,
+                            name: true,
                             characterName: true,
                             avatarUrl: true,
                         }
