@@ -180,6 +180,7 @@ export class DashboardController {
     static async getQuestListing(req: Request, res: Response): Promise<void> {
         try {
             const userId = (req as any).user?.userId;
+            const userRole = (req as any).user?.role;
             if (!userId) {
                 res.status(401).json({
                     success: false,
@@ -192,20 +193,39 @@ export class DashboardController {
             const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
 
             // Build where clause
-            const whereClause: any = {};
+            const whereConditions: any[] = [];
 
             // Filter by status
             if (status && status !== 'all') {
-                whereClause.status = status;
+                whereConditions.push({ status: status });
             }
 
             // Search functionality
             if (search && typeof search === 'string') {
-                whereClause.OR = [
-                    { title: { contains: search, mode: 'insensitive' } },
-                    { description: { contains: search, mode: 'insensitive' } }
-                ];
+                whereConditions.push({
+                    OR: [
+                        { title: { contains: search, mode: 'insensitive' } },
+                        { description: { contains: search, mode: 'insensitive' } }
+                    ]
+                });
             }
+
+            // Filter quests based on user role and assignment
+            if (userRole !== 'ADMIN') {
+                whereConditions.push({
+                    OR: [{ userId: null }, { userId: userId }],
+                });
+            }
+
+            // Exclude expired quests (dueDate in the past)
+            whereConditions.push({
+                OR: [
+                    { dueDate: null },
+                    { dueDate: { gte: new Date() } }
+                ]
+            });
+
+            const whereClause = whereConditions.length > 0 ? { AND: whereConditions } : {};
 
             // Get quests with pagination
             const [quests, totalCount] = await Promise.all([
@@ -231,6 +251,14 @@ export class DashboardController {
                                 name: true,
                                 email: true,
                                 role: true,
+                                characterName: true,
+                                avatarUrl: true,
+                            }
+                        },
+                        personalizedFor: { // Assigned user
+                            select: {
+                                id: true,
+                                name: true,
                                 characterName: true,
                                 avatarUrl: true,
                             }
