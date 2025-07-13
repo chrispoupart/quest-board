@@ -692,7 +692,7 @@ describe('GET /dashboard/quests', () => {
 
         // Test search by title
         const response = await request(app)
-            .get('/dashboard/quests?search=Dragon') // Using uppercase 'D' to test case-sensitivity
+            .get('/dashboard/quests?search=dragon') // Using lowercase 'd' to test case-insensitivity
             .set('Authorization', `Bearer ${token}`);
 
         expect(response.status).toBe(200);
