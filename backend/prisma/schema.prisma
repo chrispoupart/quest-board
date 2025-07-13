@@ -121,7 +121,7 @@ model Quest {
   QuestCompletion QuestCompletion[]
 
   @@index([userId])
-  @@map("new_quests")
+  @@map("quests")
 }
 
 model QuestRequiredSkill {
