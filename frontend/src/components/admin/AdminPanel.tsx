@@ -11,13 +11,15 @@ import {
     Star,
     Trophy,
     Store,
-    Target
+    Target,
+    Gift
 } from 'lucide-react';
 import QuestManagement from './QuestManagement';
 import UserManagement from './UserManagement';
 import ApprovalWorkflow from './ApprovalWorkflow';
 import { StoreManagement } from './StoreManagement';
 import SkillManagement from './SkillManagement';
+import RewardManagement from './RewardManagement';
 
 interface AdminPanelProps { }
 
@@ -73,11 +75,12 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                         <option value="approvals">Approvals</option>
                         <option value="store">Store Management</option>
                         <option value="skills">Skills</option>
+                        {isAdmin && <option value="rewards">Reward Management</option>}
                         {isAdmin && <option value="users">User Management</option>}
                     </select>
                 </div>
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                    <TabsList className="hidden md:grid w-full grid-cols-5 bg-muted border border-border max-w-4xl mx-auto">
+                    <TabsList className={`hidden md:grid w-full ${isAdmin ? 'grid-cols-6' : 'grid-cols-4'} bg-muted border border-border max-w-4xl mx-auto`}>
                         <TabsTrigger
                             value="quests"
                             className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium flex items-center gap-2"
@@ -106,6 +109,15 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                             <Target className="w-4 h-4" />
                             Skills
                         </TabsTrigger>
+                        {isAdmin && (
+                            <TabsTrigger
+                                value="rewards"
+                                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium flex items-center gap-2"
+                            >
+                                <Gift className="w-4 h-4" />
+                                Reward Management
+                            </TabsTrigger>
+                        )}
                         {isAdmin && (
                             <TabsTrigger
                                 value="users"
@@ -148,6 +160,17 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                     <TabsContent value="skills" className="space-y-6">
                         <SkillManagement />
                     </TabsContent>
+
+                    {/* Reward Management Tab (Admin Only) */}
+                    {isAdmin && (
+                        <TabsContent value="rewards" className="space-y-6">
+                            <div className="text-center mb-6">
+                                <h2 className="text-2xl font-bold text-foreground mb-2">Reward Management</h2>
+                                <p className="text-muted-foreground">Configure collective rewards and monthly prizes</p>
+                            </div>
+                            <RewardManagement />
+                        </TabsContent>
+                    )}
 
                     {/* User Management Tab (Admin Only) */}
                     {isAdmin && (

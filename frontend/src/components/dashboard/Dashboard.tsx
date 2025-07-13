@@ -22,6 +22,7 @@ import {
     Eye
 } from 'lucide-react';
 import Leaderboard from '../Leaderboard';
+import CollectiveRewards from '../CollectiveRewards';
 
 interface DashboardProps { }
 
@@ -191,6 +192,11 @@ const Dashboard: React.FC<DashboardProps> = () => {
                             <div className="text-xs text-muted-foreground mt-1">Leadership</div>
                         </CardContent>
                     </Card>
+                </div>
+
+                {/* Collective Rewards */}
+                <div className="mb-8">
+                    <CollectiveRewards />
                 </div>
 
                 <div className="grid lg:grid-cols-2 gap-8">
