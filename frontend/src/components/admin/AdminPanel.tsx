@@ -80,7 +80,7 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                     </select>
                 </div>
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                    <TabsList className="hidden md:grid w-full grid-cols-6 bg-muted border border-border max-w-4xl mx-auto">
+                    <TabsList className={`hidden md:grid w-full ${isAdmin ? 'grid-cols-6' : 'grid-cols-4'} bg-muted border border-border max-w-4xl mx-auto`}>
                         <TabsTrigger
                             value="quests"
                             className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium flex items-center gap-2"
