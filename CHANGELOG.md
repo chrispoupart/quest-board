@@ -1,3 +1,9 @@
+## [2.29.1](https://github.com/chrispoupart/quest-board/compare/v2.29.0...v2.29.1) (2025-07-13)
+
+### Bug Fixes
+
+* **scripts:** don't depend on bash ([8668203](https://github.com/chrispoupart/quest-board/commit/8668203768395bd590c1ca4bcac584121adb2c35))
+
 ## [2.29.0](https://github.com/chrispoupart/quest-board/compare/v2.28.0...v2.29.0) (2025-07-13)
 
 ### Features
