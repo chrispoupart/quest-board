@@ -1,3 +1,10 @@
+## [2.28.0](https://github.com/chrispoupart/quest-board/compare/v2.27.0...v2.28.0) (2025-07-13)
+
+### Features
+
+* **admin:** 💄 update tab layout for admin panel ([a626c61](https://github.com/chrispoupart/quest-board/commit/a626c6108b5d943df551847601f0baff775310fe))
+* **rewards:** 💄 add collective rewards and management UI ([4710206](https://github.com/chrispoupart/quest-board/commit/4710206389b7431423095a4b2a9ef5d2b0af2dcd))
+
 ## [2.27.0](https://github.com/chrispoupart/quest-board/compare/v2.26.0...v2.27.0) (2025-07-13)
 
 ### Features
