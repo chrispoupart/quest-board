@@ -59,6 +59,9 @@ COPY --from=builder /app/dist ./dist
 RUN ls -la scripts/ || echo "Scripts directory not found in production stage"
 RUN ls -la dist/scripts/ || echo "Compiled scripts directory not found in production stage"
 
+# Make all shell scripts executable
+RUN chmod +x /app/scripts/*.sh
+
 # Change ownership of the app directory to the nodejs user
 RUN chown -R nodejs:nodejs /app
 
