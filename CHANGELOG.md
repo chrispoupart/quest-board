@@ -5,6 +5,13 @@
 * **prisma:** add error handling for quest table deletion ([6d4982a](https://github.com/chrispoupart/quest-board/commit/6d4982afd8fcdf55772c100b01250a73605596de))
 * **scripts:** 🗃️ add production migration script ([221a568](https://github.com/chrispoupart/quest-board/commit/221a568f3266cf3673be66390aaf14dfba2d5125))
 
+## [2.29.0](https://github.com/chrispoupart/quest-board/compare/v2.28.0...v2.29.0) (2025-07-13)
+
+### Features
+
+* **prisma:** add error handling for quest table deletion ([6d4982a](https://github.com/chrispoupart/quest-board/commit/6d4982afd8fcdf55772c100b01250a73605596de))
+* **scripts:** 🗃️ add production migration script ([221a568](https://github.com/chrispoupart/quest-board/commit/221a568f3266cf3673be66390aaf14dfba2d5125))
+
 ## [2.28.0](https://github.com/chrispoupart/quest-board/compare/v2.27.0...v2.28.0) (2025-07-13)
 
 ### Features
