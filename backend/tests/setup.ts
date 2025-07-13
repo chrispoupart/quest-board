@@ -62,6 +62,10 @@ export const setupTestDatabase = async (): Promise<void> => {
         debugLog('🔄 Running database migrations...');
         await execAsync(`npx prisma migrate deploy`);
 
+        // Generate Prisma client to ensure it's up to date
+        debugLog('🔧 Generating Prisma client...');
+        await execAsync(`npx prisma generate`);
+
         // Wait for the test DB file to appear
         debugLog('⏳ Waiting for test database file...');
         await waitForFile(dbPath, 20000);
@@ -120,7 +124,14 @@ export const clearTestData = async (): Promise<void> => {
         await prisma.notification.deleteMany();
         await prisma.approval.deleteMany();
         await prisma.skill.deleteMany();
-        await prisma.quest.deleteMany();
+
+        // Handle quest table deletion with error handling
+        try {
+            await prisma.quest.deleteMany();
+        } catch (error) {
+            debugLog('⚠️  Could not delete quests (table may not exist):', error);
+        }
+
         await prisma.user.deleteMany();
         await prisma.rewardConfig.deleteMany();
 

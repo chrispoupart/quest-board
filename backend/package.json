@@ -16,12 +16,15 @@
     "db:generate": "prisma generate",
     "db:backup": "ts-node src/utils/backupDb.ts",
     "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
     "db:seed": "ts-node prisma/seed.ts",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
     "promote-admin": "node dist/scripts/promote-to-admin.js",
     "db:migrate:backup": "node dist/scripts/db-migrate-with-backup.js",
-    "db:migrate:backup:dev": "ts-node scripts/db-migrate-with-backup.ts"
+    "db:migrate:backup:dev": "ts-node scripts/db-migrate-with-backup.ts",
+    "db:migrate:production": "node dist/scripts/db-migrate-production.js",
+    "db:migrate:production:dev": "ts-node scripts/db-migrate-production.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

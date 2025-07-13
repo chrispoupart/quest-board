@@ -103,7 +103,7 @@ model Quest {
   dueDate     DateTime? @map("due_date")
 
   // Personalized quest: only visible to this user if set
-  userId      Int?      @map("user_id")
+  userId Int? @map("user_id")
 
   // Repeat functionality
   isRepeatable    Boolean   @default(false) @map("is_repeatable")
@@ -195,12 +195,12 @@ model StoreTransaction {
 }
 
 model QuestCompletion {
-  id          Int       @id @default(autoincrement())
-  questId     Int
-  userId      Int
-  completedAt DateTime
-  approvedAt  DateTime?
-  status      String // APPROVED, REJECTED
+  id              Int       @id @default(autoincrement())
+  questId         Int
+  userId          Int
+  completedAt     DateTime
+  approvedAt      DateTime?
+  status          String // APPROVED, REJECTED
   rejectionReason String? // Reason for rejection, if any
 
   quest Quest @relation(fields: [questId], references: [id])
@@ -224,17 +224,17 @@ model Notification {
 }
 
 model RewardConfig {
-  id                      Int      @id @default(autoincrement())
-  monthlyBountyReward     Float    @default(0)
-  monthlyQuestReward      Float    @default(0)
-  quarterlyCollectiveGoal Float    @default(0)
-  quarterlyCollectiveReward String  // Description or prize for the collective reward
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
+  id                        Int      @id @default(autoincrement())
+  monthlyBountyReward       Float    @default(0)
+  monthlyQuestReward        Float    @default(0)
+  quarterlyCollectiveGoal   Float    @default(0)
+  quarterlyCollectiveReward String // Description or prize for the collective reward
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
 }
 
 model GroupPool {
-  id    Int    @id @default(autoincrement())
-  pool  Float  @default(0)
+  id   Int   @id @default(autoincrement())
+  pool Float @default(0)
   // Only one row should exist for global pool
 }

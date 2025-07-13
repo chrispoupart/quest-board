@@ -67,5 +67,5 @@ USER nodejs
 
 EXPOSE 8000
 
-# Run migrations and then start the application
-CMD npm run db:migrate:backup && npm start
+# Use the production startup script
+CMD ["/app/scripts/start-production.sh"]

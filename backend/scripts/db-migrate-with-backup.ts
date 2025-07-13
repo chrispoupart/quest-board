@@ -37,8 +37,8 @@ async function main() {
     process.exit(1);
   }
 
-  console.log('Running prisma migrate dev...');
-  execSync('npx prisma migrate dev', { stdio: 'inherit' });
+  console.log('Running prisma migrate deploy...');
+  execSync('npx prisma migrate deploy', { stdio: 'inherit' });
 }
 
 main().catch((error) => {
