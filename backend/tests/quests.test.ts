@@ -524,4 +524,139 @@ describe('Quest Endpoints', () => {
             expect(claimRes2.status).toBe(403);
         });
     });
+
+    describe('GET /quests/repeatable', () => {
+        it('should only show personalized repeatable quests to the assigned user', async () => {
+            const questGiver = await createTestUser({ role: 'EDITOR' });
+            const assignedPlayer = await createTestUser({ role: 'PLAYER', email: 'assigned@test.com' });
+            const otherPlayer = await createTestUser({ role: 'PLAYER', email: 'other@test.com' });
+
+            // Create a global repeatable quest
+            await createTestQuest(questGiver.id, {
+                title: 'Global Repeatable Quest',
+                status: 'AVAILABLE',
+                bounty: 100,
+                isRepeatable: true,
+                cooldownDays: 7
+            });
+
+            // Create a personalized repeatable quest for assignedPlayer
+            await createTestQuest(questGiver.id, {
+                title: 'Personalized Repeatable Quest',
+                status: 'AVAILABLE',
+                bounty: 150,
+                isRepeatable: true,
+                cooldownDays: 7,
+                userId: assignedPlayer.id
+            });
+
+            // Create a personalized repeatable quest for otherPlayer
+            await createTestQuest(questGiver.id, {
+                title: 'Other Player Repeatable Quest',
+                status: 'AVAILABLE',
+                bounty: 200,
+                isRepeatable: true,
+                cooldownDays: 7,
+                userId: otherPlayer.id
+            });
+
+            // Assigned player should see global quest and their personalized quest
+            const assignedPlayerToken = createTestToken(assignedPlayer.id, assignedPlayer.email, assignedPlayer.role);
+            let response = await request(app)
+                .get('/quests/repeatable')
+                .set('Authorization', `Bearer ${assignedPlayerToken}`);
+
+            expect(response.status).toBe(200);
+            expect(response.body.data.quests).toHaveLength(2);
+            const assignedPlayerTitles = response.body.data.quests.map((q: any) => q.title);
+            expect(assignedPlayerTitles).toContain('Global Repeatable Quest');
+            expect(assignedPlayerTitles).toContain('Personalized Repeatable Quest');
+            expect(assignedPlayerTitles).not.toContain('Other Player Repeatable Quest');
+
+            // Other player should only see global quest and their own personalized quest
+            const otherPlayerToken = createTestToken(otherPlayer.id, otherPlayer.email, otherPlayer.role);
+            response = await request(app)
+                .get('/quests/repeatable')
+                .set('Authorization', `Bearer ${otherPlayerToken}`);
+
+            expect(response.status).toBe(200);
+            expect(response.body.data.quests).toHaveLength(2);
+            const otherPlayerTitles = response.body.data.quests.map((q: any) => q.title);
+            expect(otherPlayerTitles).toContain('Global Repeatable Quest');
+            expect(otherPlayerTitles).toContain('Other Player Repeatable Quest');
+            expect(otherPlayerTitles).not.toContain('Personalized Repeatable Quest');
+        });
+
+        it('admin should see all repeatable quests including personalized ones', async () => {
+            const questGiver = await createTestUser({ role: 'EDITOR' });
+            const assignedPlayer = await createTestUser({ role: 'PLAYER', email: 'assigned@test.com' });
+            const admin = await createTestUser({ role: 'ADMIN', email: 'admin@test.com' });
+
+            // Create a global repeatable quest
+            await createTestQuest(questGiver.id, {
+                title: 'Global Repeatable Quest',
+                status: 'AVAILABLE',
+                bounty: 100,
+                isRepeatable: true,
+                cooldownDays: 7
+            });
+
+            // Create a personalized repeatable quest
+            await createTestQuest(questGiver.id, {
+                title: 'Personalized Repeatable Quest',
+                status: 'AVAILABLE',
+                bounty: 150,
+                isRepeatable: true,
+                cooldownDays: 7,
+                userId: assignedPlayer.id
+            });
+
+            const adminToken = createTestToken(admin.id, admin.email, admin.role);
+            const response = await request(app)
+                .get('/quests/repeatable')
+                .set('Authorization', `Bearer ${adminToken}`);
+
+            expect(response.status).toBe(200);
+            expect(response.body.data.quests).toHaveLength(2);
+            const titles = response.body.data.quests.map((q: any) => q.title);
+            expect(titles).toContain('Global Repeatable Quest');
+            expect(titles).toContain('Personalized Repeatable Quest');
+        });
+
+        it('should exclude expired repeatable quests', async () => {
+            const questGiver = await createTestUser({ role: 'EDITOR' });
+            const player = await createTestUser({ role: 'PLAYER' });
+            const token = createTestToken(player.id, player.email, player.role);
+
+            // Create a repeatable quest with past due date
+            const pastDate = new Date();
+            pastDate.setDate(pastDate.getDate() - 1); // Yesterday
+
+            await createTestQuest(questGiver.id, {
+                title: 'Expired Repeatable Quest',
+                status: 'AVAILABLE',
+                bounty: 100,
+                isRepeatable: true,
+                cooldownDays: 7,
+                dueDate: pastDate
+            });
+
+            // Create a valid repeatable quest
+            await createTestQuest(questGiver.id, {
+                title: 'Valid Repeatable Quest',
+                status: 'AVAILABLE',
+                bounty: 100,
+                isRepeatable: true,
+                cooldownDays: 7
+            });
+
+            const response = await request(app)
+                .get('/quests/repeatable')
+                .set('Authorization', `Bearer ${token}`);
+
+            expect(response.status).toBe(200);
+            expect(response.body.data.quests).toHaveLength(1);
+            expect(response.body.data.quests[0].title).toBe('Valid Repeatable Quest');
+        });
+    });
 });

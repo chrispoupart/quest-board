@@ -501,6 +501,211 @@ describe('Leaderboard API', () => {
     });
 });
 
+describe('GET /dashboard/quests', () => {
+    beforeAll(async () => {
+        await setupTestDatabase();
+    });
+
+    afterAll(async () => {
+        await teardownTestDatabase();
+    });
+
+    beforeEach(async () => {
+        await clearTestData();
+        resetUserCounter();
+    });
+
+    it('should only show personalized quests to the assigned user', async () => {
+        const questGiver = await createTestUser({ role: 'EDITOR' });
+        const assignedPlayer = await createTestUser({ role: 'PLAYER', email: 'assigned@test.com' });
+        const otherPlayer = await createTestUser({ role: 'PLAYER', email: 'other@test.com' });
+
+        // Create a global quest
+        await createTestQuest(questGiver.id, {
+            title: 'Global Quest',
+            status: 'AVAILABLE',
+            bounty: 100
+        });
+
+        // Create a personalized quest for assignedPlayer
+        await createTestQuest(questGiver.id, {
+            title: 'Personalized Quest',
+            status: 'AVAILABLE',
+            bounty: 150,
+            userId: assignedPlayer.id
+        });
+
+        // Create a personalized quest for otherPlayer
+        await createTestQuest(questGiver.id, {
+            title: 'Other Player Quest',
+            status: 'AVAILABLE',
+            bounty: 200,
+            userId: otherPlayer.id
+        });
+
+        // Assigned player should see global quest and their personalized quest
+        const assignedPlayerToken = createTestToken(assignedPlayer.id, assignedPlayer.email, assignedPlayer.role);
+        let response = await request(app)
+            .get('/dashboard/quests')
+            .set('Authorization', `Bearer ${assignedPlayerToken}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body.data.quests).toHaveLength(2);
+        const assignedPlayerTitles = response.body.data.quests.map((q: any) => q.title);
+        expect(assignedPlayerTitles).toContain('Global Quest');
+        expect(assignedPlayerTitles).toContain('Personalized Quest');
+        expect(assignedPlayerTitles).not.toContain('Other Player Quest');
+
+        // Other player should only see global quest and their own personalized quest
+        const otherPlayerToken = createTestToken(otherPlayer.id, otherPlayer.email, otherPlayer.role);
+        response = await request(app)
+            .get('/dashboard/quests')
+            .set('Authorization', `Bearer ${otherPlayerToken}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body.data.quests).toHaveLength(2);
+        const otherPlayerTitles = response.body.data.quests.map((q: any) => q.title);
+        expect(otherPlayerTitles).toContain('Global Quest');
+        expect(otherPlayerTitles).toContain('Other Player Quest');
+        expect(otherPlayerTitles).not.toContain('Personalized Quest');
+    });
+
+    it('admin should see all quests including personalized ones', async () => {
+        const questGiver = await createTestUser({ role: 'EDITOR' });
+        const assignedPlayer = await createTestUser({ role: 'PLAYER', email: 'assigned@test.com' });
+        const admin = await createTestUser({ role: 'ADMIN', email: 'admin@test.com' });
+
+        // Create a global quest
+        await createTestQuest(questGiver.id, {
+            title: 'Global Quest',
+            status: 'AVAILABLE',
+            bounty: 100
+        });
+
+        // Create a personalized quest
+        await createTestQuest(questGiver.id, {
+            title: 'Personalized Quest',
+            status: 'AVAILABLE',
+            bounty: 150,
+            userId: assignedPlayer.id
+        });
+
+        const adminToken = createTestToken(admin.id, admin.email, admin.role);
+        const response = await request(app)
+            .get('/dashboard/quests')
+            .set('Authorization', `Bearer ${adminToken}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body.data.quests).toHaveLength(2);
+        const titles = response.body.data.quests.map((q: any) => q.title);
+        expect(titles).toContain('Global Quest');
+        expect(titles).toContain('Personalized Quest');
+    });
+
+    it('should exclude expired quests', async () => {
+        const questGiver = await createTestUser({ role: 'EDITOR' });
+        const player = await createTestUser({ role: 'PLAYER' });
+        const token = createTestToken(player.id, player.email, player.role);
+
+        // Create a quest with past due date
+        const pastDate = new Date();
+        pastDate.setDate(pastDate.getDate() - 1); // Yesterday
+
+        await createTestQuest(questGiver.id, {
+            title: 'Expired Quest',
+            status: 'AVAILABLE',
+            bounty: 100,
+            dueDate: pastDate
+        });
+
+        // Create a valid quest
+        await createTestQuest(questGiver.id, {
+            title: 'Valid Quest',
+            status: 'AVAILABLE',
+            bounty: 100
+        });
+
+        const response = await request(app)
+            .get('/dashboard/quests')
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body.data.quests).toHaveLength(1);
+        expect(response.body.data.quests[0].title).toBe('Valid Quest');
+    });
+
+    it('should support status filtering', async () => {
+        const questGiver = await createTestUser({ role: 'EDITOR' });
+        const player = await createTestUser({ role: 'PLAYER' });
+        const token = createTestToken(player.id, player.email, player.role);
+
+        // Create quests with different statuses
+        await createTestQuest(questGiver.id, {
+            title: 'Available Quest',
+            status: 'AVAILABLE',
+            bounty: 100
+        });
+
+        await createTestQuest(questGiver.id, {
+            title: 'Claimed Quest',
+            status: 'CLAIMED',
+            claimedBy: player.id,
+            bounty: 200
+        });
+
+        // Test filtering by AVAILABLE status
+        let response = await request(app)
+            .get('/dashboard/quests?status=AVAILABLE')
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body.data.quests).toHaveLength(1);
+        expect(response.body.data.quests[0].title).toBe('Available Quest');
+
+        // Test filtering by CLAIMED status
+        response = await request(app)
+            .get('/dashboard/quests?status=CLAIMED')
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body.data.quests).toHaveLength(1);
+        expect(response.body.data.quests[0].title).toBe('Claimed Quest');
+    });
+
+    it('should support search functionality', async () => {
+        const questGiver = await createTestUser({ role: 'EDITOR' });
+        const player = await createTestUser({ role: 'PLAYER' });
+        const token = createTestToken(player.id, player.email, player.role);
+
+        // Create quests with different titles
+        await createTestQuest(questGiver.id, {
+            title: 'Dragon Slayer Quest',
+            status: 'AVAILABLE',
+            bounty: 100
+        });
+
+        await createTestQuest(questGiver.id, {
+            title: 'Treasure Hunt Quest',
+            status: 'AVAILABLE',
+            bounty: 200
+        });
+
+        // Test search by title
+        const response = await request(app)
+            .get('/dashboard/quests?search=Dragon') // Using uppercase 'D' to test case-sensitivity
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body.data.quests).toHaveLength(1);
+        expect(response.body.data.quests[0].title).toBe('Dragon Slayer Quest');
+    });
+
+    it('should require authentication', async () => {
+        const response = await request(app).get('/dashboard/quests');
+        expect(response.status).toBe(401);
+    });
+});
+
 describe('Reward Config API', () => {
     let adminUser: any;
     let regularUser: any;

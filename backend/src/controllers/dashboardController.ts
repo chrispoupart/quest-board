@@ -204,8 +204,8 @@ export class DashboardController {
             if (search && typeof search === 'string') {
                 whereConditions.push({
                     OR: [
-                        { title: { contains: search, mode: 'insensitive' } },
-                        { description: { contains: search, mode: 'insensitive' } }
+                        { title: { contains: search } },
+                        { description: { contains: search } }
                     ]
                 });
             }
