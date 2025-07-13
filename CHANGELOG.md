@@ -1,3 +1,9 @@
+## [2.27.0](https://github.com/chrispoupart/quest-board/compare/v2.26.0...v2.27.0) (2025-07-13)
+
+### Features
+
+* **db:** introduce case-insensitive search for quests ([3c1fd5c](https://github.com/chrispoupart/quest-board/commit/3c1fd5ce99c2ed2c301db92cbe7d8a044596007b))
+
 ## [2.26.0](https://github.com/chrispoupart/quest-board/compare/v2.25.0...v2.26.0) (2025-07-12)
 
 ### Features
