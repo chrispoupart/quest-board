@@ -38,7 +38,7 @@ export class RewardsController {
             ) {
                 res.status(400).json({
                     success: false,
-                    error: 'All fields are required and must be of the correct type.'
+                    error: { message: 'All fields are required and must be of the correct type.' }
                 });
                 return;
             }
@@ -67,7 +67,7 @@ export class RewardsController {
             res.status(200).json({ success: true });
         } catch (error) {
             console.error('Error updating reward config:', error);
-            res.status(500).json({ success: false, error: 'Internal server error' });
+            res.status(500).json({ success: false, error: { message: 'Internal server error' } });
         }
     }
 

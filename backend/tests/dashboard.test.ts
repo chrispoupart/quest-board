@@ -714,10 +714,6 @@ describe('Reward Config API', () => {
 
     beforeAll(async () => {
         await setupTestDatabase();
-        adminUser = await createTestUser({ role: 'ADMIN', email: 'admin@example.com' });
-        regularUser = await createTestUser({ role: 'PLAYER', email: 'user@example.com' });
-        adminToken = createTestToken(adminUser.id, adminUser.email, adminUser.role);
-        userToken = createTestToken(regularUser.id, regularUser.email, regularUser.role);
     });
 
     afterAll(async () => {
@@ -727,6 +723,10 @@ describe('Reward Config API', () => {
     beforeEach(async () => {
         await clearTestData();
         resetUserCounter();
+        adminUser = await createTestUser({ role: 'ADMIN', email: 'admin@example.com' });
+        regularUser = await createTestUser({ role: 'PLAYER', email: 'user@example.com' });
+        adminToken = createTestToken(adminUser.id, adminUser.email, adminUser.role);
+        userToken = createTestToken(regularUser.id, regularUser.email, regularUser.role);
     });
 
     it('should allow admin to get and update reward config', async () => {
@@ -735,10 +735,11 @@ describe('Reward Config API', () => {
             .get('/rewards/config')
             .set('Authorization', `Bearer ${adminToken}`)
             .expect(200);
-        expect(res.body).toHaveProperty('monthlyBountyReward');
-        expect(res.body).toHaveProperty('monthlyQuestReward');
-        expect(res.body).toHaveProperty('quarterlyCollectiveGoal');
-        expect(res.body).toHaveProperty('quarterlyCollectiveReward');
+        expect(res.body.success).toBe(true);
+        expect(res.body.data).toHaveProperty('monthlyBountyReward');
+        expect(res.body.data).toHaveProperty('monthlyQuestReward');
+        expect(res.body.data).toHaveProperty('quarterlyCollectiveGoal');
+        expect(res.body.data).toHaveProperty('quarterlyCollectiveReward');
 
         // Admin can update config
         const newConfig = {
@@ -759,10 +760,11 @@ describe('Reward Config API', () => {
             .get('/rewards/config')
             .set('Authorization', `Bearer ${adminToken}`)
             .expect(200);
-        expect(res.body.monthlyBountyReward).toBe(100);
-        expect(res.body.monthlyQuestReward).toBe(50);
-        expect(res.body.quarterlyCollectiveGoal).toBe(1000);
-        expect(res.body.quarterlyCollectiveReward).toBe('Pizza Party!');
+        expect(res.body.success).toBe(true);
+        expect(res.body.data.monthlyBountyReward).toBe(100);
+        expect(res.body.data.monthlyQuestReward).toBe(50);
+        expect(res.body.data.quarterlyCollectiveGoal).toBe(1000);
+        expect(res.body.data.quarterlyCollectiveReward).toBe('Pizza Party!');
     });
 
     it('should not allow non-admins to update reward config', async () => {
