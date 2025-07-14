@@ -189,7 +189,16 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = () => {
                                                         {quest.claimedBy && (
                                                             <div className="flex items-center gap-2 text-foreground">
                                                                 <User className="w-4 h-4" />
-                                                                <span>Claimed by User #{quest.claimedBy}</span>
+                                                                {quest.claimer ? (
+                                                                    <>
+                                                                        {quest.claimer.avatarUrl && (
+                                                                            <img src={quest.claimer.avatarUrl} alt={quest.claimer.characterName || quest.claimer.name} className="w-5 h-5 rounded-full inline-block mr-1" />
+                                                                        )}
+                                                                        <span>{quest.claimer.characterName || quest.claimer.name || `User #${quest.claimer.id}`}</span>
+                                                                    </>
+                                                                ) : (
+                                                                    <span>User #{quest.claimedBy}</span>
+                                                                )}
                                                             </div>
                                                         )}
 
