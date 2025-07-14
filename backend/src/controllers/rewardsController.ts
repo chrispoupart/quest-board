@@ -74,14 +74,14 @@ export class RewardsController {
         try {
             const { quarter } = req.query;
             if (!quarter || typeof quarter !== 'string' || !/^\d{4}-Q[1-4]$/.test(quarter)) {
-                res.status(400).json({ error: 'Invalid or missing quarter parameter (expected YYYY-QN)' });
+                res.status(400).json({ success: false, error: { message: 'Invalid or missing quarter parameter (expected YYYY-QN)' } });
                 return;
             }
             const [yearStr, qStr] = quarter.split('-Q');
             const year = parseInt(yearStr, 10);
             const q = parseInt(qStr, 10);
             if (isNaN(year) || isNaN(q) || q < 1 || q > 4) {
-                res.status(400).json({ error: 'Invalid quarter parameter' });
+                res.status(400).json({ success: false, error: { message: 'Invalid quarter parameter' } });
                 return;
             }
             // Calculate start and end of the quarter
@@ -116,10 +116,10 @@ export class RewardsController {
                 }
             }
             const percent = goal > 0 ? (progress / goal) * 100 : 0;
-            res.status(200).json({ goal, reward, progress, percent });
+            res.status(200).json({ success: true, data: { goal, reward, progress, percent } });
         } catch (error) {
             console.error('Error getting collective reward progress:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            res.status(500).json({ success: false, error: { message: 'Internal server error' } });
         }
     }
 }
