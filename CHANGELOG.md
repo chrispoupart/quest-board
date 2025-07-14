@@ -1,3 +1,9 @@
+## [2.30.1](https://github.com/chrispoupart/quest-board/compare/v2.30.0...v2.30.1) (2025-07-14)
+
+### Bug Fixes
+
+* **dashboard:** 👔 Change totalBounty calculation to use user.bountyBalance ([d955025](https://github.com/chrispoupart/quest-board/commit/d95502534c9d436d178fb1d39ecb848c1d32d7fe))
+
 ## [2.30.0](https://github.com/chrispoupart/quest-board/compare/v2.29.1...v2.30.0) (2025-07-14)
 
 ### Features
