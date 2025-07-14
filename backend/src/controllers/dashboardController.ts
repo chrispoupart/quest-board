@@ -33,7 +33,12 @@ export class DashboardController {
             });
 
             const completedQuests = completions.length;
-            const totalBounty = completions.reduce((sum, c) => sum + c.quest.bounty, 0);
+            // Get user's bounty balance from the User table
+            const user = await prisma.user.findUnique({
+                where: { id: userId },
+                select: { bountyBalance: true }
+            });
+            const totalBounty = user?.bountyBalance || 0;
 
             const [totalQuests, currentQuests] = await Promise.all([
                 // Total quests created by user
