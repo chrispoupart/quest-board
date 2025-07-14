@@ -7,20 +7,21 @@ export class RewardsController {
             const config = await prisma.rewardConfig.findFirst();
             if (!config) {
                 // Return default config if none exists.
-                // This object is a template for a new config, so it shouldn't have an id
-                // or other DB-generated fields.
                 res.status(200).json({
-                    monthlyBountyReward: 0,
-                    monthlyQuestReward: 0,
-                    quarterlyCollectiveGoal: 0,
-                    quarterlyCollectiveReward: '',
+                    success: true,
+                    data: {
+                        monthlyBountyReward: 0,
+                        monthlyQuestReward: 0,
+                        quarterlyCollectiveGoal: 0,
+                        quarterlyCollectiveReward: '',
+                    }
                 });
             } else {
-                res.status(200).json(config);
+                res.status(200).json({ success: true, data: config });
             }
         } catch (error) {
             console.error('Error getting reward config:', error);
-            res.status(500).json({ success: false, error: 'Internal server error' });
+            res.status(500).json({ success: false, error: { message: 'Internal server error' } });
         }
     }
 
@@ -37,7 +38,7 @@ export class RewardsController {
             ) {
                 res.status(400).json({
                     success: false,
-                    error: 'All fields are required and must be of the correct type.'
+                    error: { message: 'All fields are required and must be of the correct type.' }
                 });
                 return;
             }
@@ -66,7 +67,7 @@ export class RewardsController {
             res.status(200).json({ success: true });
         } catch (error) {
             console.error('Error updating reward config:', error);
-            res.status(500).json({ success: false, error: 'Internal server error' });
+            res.status(500).json({ success: false, error: { message: 'Internal server error' } });
         }
     }
 
@@ -74,14 +75,14 @@ export class RewardsController {
         try {
             const { quarter } = req.query;
             if (!quarter || typeof quarter !== 'string' || !/^\d{4}-Q[1-4]$/.test(quarter)) {
-                res.status(400).json({ error: 'Invalid or missing quarter parameter (expected YYYY-QN)' });
+                res.status(400).json({ success: false, error: { message: 'Invalid or missing quarter parameter (expected YYYY-QN)' } });
                 return;
             }
             const [yearStr, qStr] = quarter.split('-Q');
             const year = parseInt(yearStr, 10);
             const q = parseInt(qStr, 10);
             if (isNaN(year) || isNaN(q) || q < 1 || q > 4) {
-                res.status(400).json({ error: 'Invalid quarter parameter' });
+                res.status(400).json({ success: false, error: { message: 'Invalid quarter parameter' } });
                 return;
             }
             // Calculate start and end of the quarter
@@ -116,10 +117,10 @@ export class RewardsController {
                 }
             }
             const percent = goal > 0 ? (progress / goal) * 100 : 0;
-            res.status(200).json({ goal, reward, progress, percent });
+            res.status(200).json({ success: true, data: { goal, reward, progress, percent } });
         } catch (error) {
             console.error('Error getting collective reward progress:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            res.status(500).json({ success: false, error: { message: 'Internal server error' } });
         }
     }
 }
