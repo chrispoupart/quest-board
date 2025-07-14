@@ -1,3 +1,9 @@
+## [2.30.0](https://github.com/chrispoupart/quest-board/compare/v2.29.1...v2.30.0) (2025-07-14)
+
+### Features
+
+* **ui:** 💄 enhance claimer display with avatar and user information ([5b65464](https://github.com/chrispoupart/quest-board/commit/5b65464758ad2ee070152dfbd98c578e2c2c5d97))
+
 ## [2.29.1](https://github.com/chrispoupart/quest-board/compare/v2.29.0...v2.29.1) (2025-07-13)
 
 ### Bug Fixes
