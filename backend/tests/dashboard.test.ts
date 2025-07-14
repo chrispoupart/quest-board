@@ -860,12 +860,14 @@ describe('Collective Reward Progress API', () => {
             .set('Authorization', `Bearer ${token}`)
             .expect(200);
 
-        expect(res.body).toHaveProperty('goal', 1000);
-        expect(res.body).toHaveProperty('reward', 'Team Pizza Party!');
-        expect(res.body).toHaveProperty('progress', totalBounty);
-        expect(res.body).toHaveProperty('percent');
-        expect(typeof res.body.percent).toBe('number');
-        expect(res.body.percent).toBeCloseTo((totalBounty / 1000) * 100, 1);
+        expect(res.body).toHaveProperty('success', true);
+        expect(res.body).toHaveProperty('data');
+        expect(res.body.data).toHaveProperty('goal', 1000);
+        expect(res.body.data).toHaveProperty('reward', 'Team Pizza Party!');
+        expect(res.body.data).toHaveProperty('progress', totalBounty);
+        expect(res.body.data).toHaveProperty('percent');
+        expect(typeof res.body.data.percent).toBe('number');
+        expect(res.body.data.percent).toBeCloseTo((totalBounty / 1000) * 100, 1);
     });
 
     it('should require authentication', async () => {
