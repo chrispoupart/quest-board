@@ -123,7 +123,7 @@ describe('Repeatable Quest Functionality', () => {
 
             expect(response.status).toBe(403);
             expect(response.body.success).toBe(false);
-            expect(response.body.error.message).toBe('Only admins can reset repeatable quests');
+            expect(response.body.error.message).toBe('Access denied. Admin role required.');
         });
 
         it('should not allow resetting non-repeatable quests', async () => {

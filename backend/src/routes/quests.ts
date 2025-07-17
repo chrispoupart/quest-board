@@ -52,7 +52,7 @@ router.put('/:id/claim', validateQuestId, QuestController.claimQuest);
 router.put('/:id/complete', validateQuestId, QuestController.completeQuest);
 router.put('/:id/approve', validateQuestId, QuestController.approveQuest);
 router.put('/:id/reject', validateQuestId, QuestController.rejectQuest);
-router.put('/:id/reset', validateQuestId, QuestController.resetRepeatableQuest);
+router.put('/:id/reset', validateQuestId, isAdmin, QuestController.resetRepeatableQuest);
 router.post('/:id/claim', validateQuestId, QuestController.claimQuest);  // Keep POST for backward compatibility
 router.post('/:id/complete', validateQuestId, QuestController.completeQuest);  // Keep POST for backward compatibility
 
