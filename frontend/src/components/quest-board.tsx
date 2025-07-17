@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react"
 import { useSearchParams } from "react-router-dom"
-import { Search, Sword, Shield, Coins, Clock, Scroll, Trophy, Check, X, Eye, Target, RefreshCw } from "lucide-react"
+import { Search, Sword, Shield, Coins, Clock, Scroll, Trophy, Check, X, Eye, Target } from "lucide-react"
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { Badge } from "../components/ui/badge"
