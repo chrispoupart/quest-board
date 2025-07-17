@@ -505,14 +505,28 @@ const QuestCard: React.FC<{
           )}
 
           {quest.status === "COOLDOWN" && (
-            <Button
-              disabled={true}
-              className="flex-1 bg-muted text-muted-foreground font-medium cursor-not-allowed"
-              size="sm"
-            >
-              <Clock className="w-4 h-4 mr-1" />
-              On Cooldown
-            </Button>
+            <div className="flex gap-1 flex-1">
+              <Button
+                disabled={true}
+                className="flex-1 bg-muted text-muted-foreground font-medium cursor-not-allowed"
+                size="sm"
+              >
+                <Clock className="w-4 h-4 mr-1" />
+                On Cooldown
+              </Button>
+              {currentUser.role === "ADMIN" && (
+                <Button
+                  onClick={() => handleAction("reset")}
+                  disabled={actionLoading === "reset"}
+                  className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white dark:text-blue-100 font-medium"
+                  size="sm"
+                  title="Reset quest to available immediately"
+                >
+                  <Clock className="w-4 h-4" />
+                  {actionLoading === "reset" ? "Resetting..." : "Reset"}
+                </Button>
+              )}
+            </div>
           )}
 
           {quest.status === "CLAIMED" && currentUser.id === quest.claimedBy && (
@@ -880,6 +894,9 @@ const QuestBoard: React.FC = () => {
           break
         case "reject":
           await questService.rejectQuest(questId)
+          break
+        case "reset":
+          await questService.resetRepeatableQuest(questId)
           break
         case "view":
           // Open quest details modal
