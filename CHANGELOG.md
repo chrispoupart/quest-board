@@ -1,3 +1,13 @@
+## [2.32.0](https://github.com/chrispoupart/quest-board/compare/v2.31.0...v2.32.0) (2025-07-17)
+
+### Features
+
+* **quest-board:** 🚸 improve pagination handling ([2c10d65](https://github.com/chrispoupart/quest-board/commit/2c10d6511d108889a539ce98cb378e8496d718e9))
+
+### Bug Fixes
+
+* **quest-board:** 🩹 ensure page sync on tab and search changes ([a65939b](https://github.com/chrispoupart/quest-board/commit/a65939b09649cde2ebc149f9899f8eddb81c4972))
+
 ## [2.31.0](https://github.com/chrispoupart/quest-board/compare/v2.30.1...v2.31.0) (2025-07-17)
 
 ### Features
