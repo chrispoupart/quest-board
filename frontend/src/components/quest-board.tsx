@@ -837,6 +837,7 @@ const QuestBoard: React.FC = () => {
 
       // Update pagination state
       if (questData.pagination) {
+        setCurrentPage(questData.pagination.page)
         setTotalPages(questData.pagination.totalPages)
         setTotalQuests(questData.pagination.total)
       }
@@ -848,17 +849,20 @@ const QuestBoard: React.FC = () => {
     }
   }
 
+  useEffect(() => {
+    fetchQuests(currentPage);
+  }, [currentPage, activeTab, searchTerm]);
+
+
   // Fetch quests on component mount and tab change
   useEffect(() => {
     setCurrentPage(1) // Reset to first page when tab changes
-    fetchQuests(1)
   }, [activeTab])
 
   // Debounced search effect
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setCurrentPage(1) // Reset to first page when searching
-      fetchQuests(1)
 
       // Update URL with search term
       if (searchTerm) {
@@ -874,7 +878,6 @@ const QuestBoard: React.FC = () => {
   // Handle page changes
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
-    fetchQuests(page)
   }
 
   const handleQuestAction = async (questId: number, action: string) => {
