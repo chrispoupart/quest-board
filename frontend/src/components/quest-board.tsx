@@ -837,7 +837,10 @@ const QuestBoard: React.FC = () => {
 
       // Update pagination state
       if (questData.pagination) {
-        setCurrentPage(questData.pagination.page)
+        // This is important to sync with server-side state, e.g., if requested page is out of bounds
+        if (questData.pagination.page !== currentPage) {
+            setCurrentPage(questData.pagination.page)
+        }
         setTotalPages(questData.pagination.totalPages)
         setTotalQuests(questData.pagination.total)
       }
@@ -849,33 +852,49 @@ const QuestBoard: React.FC = () => {
     }
   }
 
-  // Fetch quests on component mount and tab change
+  // Fetch quests when currentPage or activeTab changes.
+  // The logic inside handles resetting page for tab changes.
   useEffect(() => {
-    setCurrentPage(1) // Reset to first page when tab changes
-    fetchQuests(1)
+    fetchQuests(currentPage)
+  }, [currentPage])
+
+  // Reset to page 1 when active tab changes
+  useEffect(() => {
+    if (currentPage !== 1) {
+      setCurrentPage(1)
+    } else {
+      // If already on page 1, the currentPage effect won't run, so we need to fetch manually
+      fetchQuests(1)
+    }
   }, [activeTab])
 
   // Debounced search effect
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setCurrentPage(1) // Reset to first page when searching
-      fetchQuests(1)
-
+    const handler = setTimeout(() => {
+      if (currentPage !== 1) {
+        setCurrentPage(1)
+      } else {
+        fetchQuests(1)
+      }
       // Update URL with search term
       if (searchTerm) {
         setSearchParams({ search: searchTerm });
       } else {
         setSearchParams({});
       }
-    }, 500) // 500ms delay
+    }, 500)
 
-    return () => clearTimeout(timeoutId)
+    return () => {
+      clearTimeout(handler)
+    }
   }, [searchTerm, setSearchParams])
+
 
   // Handle page changes
   const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-    fetchQuests(page)
+    if (page !== currentPage) {
+      setCurrentPage(page)
+    }
   }
 
   const handleQuestAction = async (questId: number, action: string) => {
