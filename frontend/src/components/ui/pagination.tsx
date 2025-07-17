@@ -21,36 +21,32 @@ export const Pagination: React.FC<PaginationProps> = ({
 
   const getVisiblePages = () => {
     if (totalPages <= 5) {
-      // Show all pages if there are 5 or fewer
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
-    const delta = 2;
-    const range = [];
-    const rangeWithDots = [];
-
-    for (
-      let i = Math.max(2, currentPage - delta);
-      i <= Math.min(totalPages - 1, currentPage + delta);
-      i++
-    ) {
-      range.push(i);
+      return Array.from({ length: totalPages }, (_, i) => i + 1)
     }
 
-    if (currentPage - delta > 2) {
-      rangeWithDots.push(1, "...");
-    } else {
-      rangeWithDots.push(1);
+    const pageNumbers = new Set<number | string>()
+    pageNumbers.add(1)
+
+    // Add pages around current page
+    for (let i = -1; i <= 1; i++) {
+      const page = currentPage + i
+      if (page > 1 && page < totalPages) {
+        pageNumbers.add(page)
+      }
     }
 
-    rangeWithDots.push(...range);
+    pageNumbers.add(totalPages)
 
-    if (currentPage + delta < totalPages - 1) {
-      rangeWithDots.push("...", totalPages);
-    } else {
-      rangeWithDots.push(totalPages);
+    const result: (number | string)[] = []
+    let lastPage: number | string = 0
+    for (const page of Array.from(pageNumbers).sort((a, b) => (a as number) - (b as number))) {
+      if (lastPage !== 0 && (page as number) - (lastPage as number) > 1) {
+        result.push("...")
+      }
+      result.push(page)
+      lastPage = page
     }
-
-    return rangeWithDots;
+    return result
   }
 
   const visiblePages = getVisiblePages()
