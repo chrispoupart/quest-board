@@ -1,3 +1,13 @@
+## [2.31.0](https://github.com/chrispoupart/quest-board/compare/v2.30.1...v2.31.0) (2025-07-17)
+
+### Features
+
+* **quests:** 💄 add admin reset for repeatable quests ([ece3905](https://github.com/chrispoupart/quest-board/commit/ece3905272e41043d9d21f4c299e21a1ba15bc8d))
+
+### Bug Fixes
+
+* **quests:** require admin role to reset repeatable quests ([753502b](https://github.com/chrispoupart/quest-board/commit/753502b36f5eb4533dff8257b2a5d5a985f5631b))
+
 ## [2.30.1](https://github.com/chrispoupart/quest-board/compare/v2.30.0...v2.30.1) (2025-07-14)
 
 ### Bug Fixes
