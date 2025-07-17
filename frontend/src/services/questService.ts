@@ -184,6 +184,23 @@ export const questService = {
     },
 
     /**
+     * Reset a repeatable quest from cooldown to available (admin only)
+     */
+    async resetRepeatableQuest(id: number): Promise<Quest> {
+        const response = await api.put<ApiResponse<{ quest: Quest }>>(`/api/quests/${id}/reset`);
+
+        if (!response.data.success) {
+            throw new Error(response.data.error?.message || 'Failed to reset quest');
+        }
+
+        const quest = response.data.data?.quest;
+        if (!quest) {
+            throw new Error('No quest data returned from reset quest API');
+        }
+        return quest;
+    },
+
+    /**
      * Get quests created by current user
      */
     async getMyCreatedQuests(params?: {

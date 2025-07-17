@@ -510,14 +510,19 @@ export class QuestController {
 
                 const updateData: any = {
                     status: 'APPROVED',
-                    lastCompletedAt: new Date(),
                 };
 
                 if (quest.isRepeatable) {
+                    // For repeatable quests, use the completion date (when user submitted)
+                    // instead of approval date for cooldown calculation
                     updateData.status = 'COOLDOWN';
+                    updateData.lastCompletedAt = quest.completedAt || new Date();
                     updateData.claimedBy = null;
                     updateData.claimedAt = null;
                     updateData.completedAt = null;
+                } else {
+                    // For non-repeatable quests, set lastCompletedAt to completion date
+                    updateData.lastCompletedAt = quest.completedAt || new Date();
                 }
 
                 const updatedQuest = await tx.quest.update({
@@ -582,6 +587,68 @@ export class QuestController {
                 res.status(statusCode).json({ success: false, error: { message } });
             } else {
                 console.error('Error approving quest:', error);
+                res.status(500).json({ success: false, error: { message: 'Internal server error' } });
+            }
+        }
+    }
+
+    /**
+     * Reset a repeatable quest from cooldown to available (admin only)
+     */
+    static async resetRepeatableQuest(req: Request, res: Response): Promise<void> {
+        try {
+            const questId = parseInt(req.params['id']);
+            const adminId = (req as any).user?.userId;
+            const adminRole = (req as any).user?.role as UserRole;
+
+            if (adminRole !== 'ADMIN') {
+                res.status(403).json({ success: false, error: { message: 'Only admins can reset repeatable quests' } });
+                return;
+            }
+
+            const result = await prisma.$transaction(async (tx) => {
+                const quest = await tx.quest.findUnique({ where: { id: questId } });
+                if (!quest) {
+                    throw new Error('Quest not found');
+                }
+
+                if (!quest.isRepeatable) {
+                    throw new Error('Only repeatable quests can be reset');
+                }
+
+                if (quest.status !== 'COOLDOWN') {
+                    throw new Error('Quest is not in cooldown status');
+                }
+
+                const updatedQuest = await tx.quest.update({
+                    where: { id: questId },
+                    data: {
+                        status: 'AVAILABLE',
+                        lastCompletedAt: null
+                    }
+                });
+
+                return updatedQuest;
+            });
+
+            res.json({ success: true, data: { quest: result } });
+        } catch (error) {
+            if (error instanceof Error) {
+                const message = error.message;
+                let statusCode = 500;
+                if (message === 'Quest not found') {
+                    statusCode = 404;
+                } else if (message === 'Only repeatable quests can be reset' || message === 'Quest is not in cooldown status') {
+                    statusCode = 400;
+                }
+
+                if (statusCode >= 500) {
+                    console.error('Error resetting repeatable quest:', error);
+                }
+
+                res.status(statusCode).json({ success: false, error: { message } });
+            } else {
+                console.error('Error resetting repeatable quest:', error);
                 res.status(500).json({ success: false, error: { message: 'Internal server error' } });
             }
         }
