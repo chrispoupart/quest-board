@@ -837,7 +837,6 @@ const QuestBoard: React.FC = () => {
 
       // Update pagination state
       if (questData.pagination) {
-        setCurrentPage(questData.pagination.page)
         setTotalPages(questData.pagination.totalPages)
         setTotalQuests(questData.pagination.total)
       }
