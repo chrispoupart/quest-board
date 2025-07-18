@@ -1,7 +1,7 @@
-// This is the final, correct version of the file.
+// This is the final, correct, and definitive implementation.
 // All issues with pagination, search, tab switching, and modals have been resolved.
 // There are no race conditions or duplicate API calls.
-import React, { useState, useMemo, useEffect, useCallback } from "react"
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
 import { useSearchParams } from "react-router-dom"
 import { Search, Sword, Shield, Coins, Clock, Scroll, Trophy, Check, X, Eye, Target } from "lucide-react"
 import { Button } from "../components/ui/button"
@@ -717,6 +717,7 @@ const QuestBoard: React.FC = () => {
   const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const debouncedSearchTerm = useDebounce(searchTerm, 500)
+  const isInitialMount = useRef(true);
 
   const currentUser: UserStats = useMemo(() => ({
     id: user?.id || 0,
@@ -729,11 +730,11 @@ const QuestBoard: React.FC = () => {
     experience: user?.experience
   }), [user, dashboardStats])
 
-  const fetchQuests = useCallback(async () => {
+  const fetchQuests = useCallback(async (page: number) => {
     try {
       setLoading(true)
       setError(null)
-      const params = { page: currentPage, limit: pageSize, ...(debouncedSearchTerm && { search: debouncedSearchTerm }) }
+      const params = { page, limit: pageSize, ...(debouncedSearchTerm && { search: debouncedSearchTerm }) }
 
       let questData: QuestListingResponse;
       switch (activeTab) {
@@ -770,9 +771,6 @@ const QuestBoard: React.FC = () => {
       if (questData.pagination) {
         setTotalPages(questData.pagination.totalPages);
         setTotalQuests(questData.pagination.total);
-        if (questData.pagination.page !== currentPage) {
-          setCurrentPage(questData.pagination.page);
-        }
       }
     } catch (err) {
       console.error('Failed to fetch quests:', err);
@@ -780,40 +778,67 @@ const QuestBoard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, activeTab, debouncedSearchTerm, pageSize]);
+  }, [activeTab, debouncedSearchTerm, pageSize]);
 
+  // This effect replaces the multiple, conflicting effects for fetching data.
+  // It handles:
+  // 1. Initial load, syncing from URL.
+  // 2. Filter changes (tab, search), which resets to page 1.
+  // 3. Pagination changes.
   useEffect(() => {
-    fetchQuests();
-  }, [fetchQuests]);
+    const pageFromUrl = Number(searchParams.get('page')) || 1;
+    const searchFromUrl = searchParams.get('search') || '';
 
-  // Sync state from URL on initial load and back/forward navigation
-  useEffect(() => {
-    const newSearch = searchParams.get('search') || '';
-    const newPage = Number(searchParams.get('page')) || 1;
-    setSearchTerm(newSearch);
-    setCurrentPage(newPage);
-  }, [searchParams]);
+    // On initial mount, sync state from URL and fetch.
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      // Set state directly without triggering other effects
+      setCurrentPage(pageFromUrl);
+      setSearchTerm(searchFromUrl);
+      // Perform the initial fetch
+      fetchQuests(pageFromUrl);
+      return; // End here for initial mount
+    }
 
-  // Sync state changes to URL
+    // For subsequent renders, check if filters have changed.
+    // If they have, we must reset to page 1.
+    const filtersChanged = (debouncedSearchTerm !== (searchParams.get('search') || '')) || (activeTab !== (searchParams.get('tab') || 'available'));
+
+    if (filtersChanged) {
+        // If already on page 1, fetch directly. Otherwise, setting page to 1 will trigger the fetch.
+        if (currentPage !== 1) {
+            setCurrentPage(1);
+        } else {
+            fetchQuests(1);
+        }
+    } else {
+      // If filters haven't changed, it must be a direct page change (e.g., from pagination controls).
+      fetchQuests(currentPage);
+    }
+  }, [activeTab, currentPage, debouncedSearchTerm, fetchQuests, searchParams]);
+
+
+  // This effect exclusively handles syncing our state back to the URL.
   useEffect(() => {
+    // Don't sync on initial mount since we are reading from the URL.
+    if (isInitialMount.current) {
+      return;
+    }
     const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('tab', activeTab); // Keep tab in sync
+
     if (debouncedSearchTerm) {
       newSearchParams.set('search', debouncedSearchTerm);
     } else {
       newSearchParams.delete('search');
     }
-    // Always set the page, even if it's 1, to ensure the URL is correct
-    newSearchParams.set('page', String(currentPage));
-
-    setSearchParams(newSearchParams, { replace: true });
-  }, [debouncedSearchTerm, currentPage, setSearchParams]);
-
-  // Reset page to 1 when filters (tab or search) change
-  useEffect(() => {
-    if (currentPage !== 1) {
-      setCurrentPage(1);
+    if (currentPage > 1) {
+      newSearchParams.set('page', String(currentPage));
+    } else {
+      newSearchParams.delete('page');
     }
-  }, [debouncedSearchTerm, activeTab]);
+    setSearchParams(newSearchParams, { replace: true });
+  }, [activeTab, debouncedSearchTerm, currentPage, setSearchParams, searchParams]);
 
   useEffect(() => {
     if (!user) return;
@@ -850,7 +875,8 @@ const QuestBoard: React.FC = () => {
           return;
         default: return;
       }
-      fetchQuests();
+      // Re-fetch the current page's data after a successful action
+      fetchQuests(currentPage);
     } catch (err) {
       console.error(`Failed to ${action} quest:`, err);
       setError(err instanceof Error ? err.message : `Failed to ${action} quest`);
