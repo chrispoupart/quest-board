@@ -849,9 +849,9 @@ const QuestBoard: React.FC = () => {
   // Single effect to handle all data fetching scenarios
   useEffect(() => {
     fetchQuests(currentPage)
-  }, [currentPage, activeTab])
+  }, [currentPage])
 
-  // Reset to page 1 when active tab changes
+  // Handle tab changes and search with proper page reset
   useEffect(() => {
     setCurrentPage(1)
   }, [activeTab])
