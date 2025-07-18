@@ -1,3 +1,13 @@
+## [2.33.0](https://github.com/chrispoupart/quest-board/compare/v2.32.0...v2.33.0) (2025-07-18)
+
+### Features
+
+* **backend:** 🔒️ enhance helmet with CSP directives ([a92b28e](https://github.com/chrispoupart/quest-board/commit/a92b28e6dfcd458f5b8fda865a15c15112b9fb98))
+
+### Bug Fixes
+
+* **helmet:** 🔒️ update CSP directives for security improvement ([3e709c8](https://github.com/chrispoupart/quest-board/commit/3e709c83d5a6ffb634427d05fd34252b4537c6d8))
+
 ## [2.32.0](https://github.com/chrispoupart/quest-board/compare/v2.31.0...v2.32.0) (2025-07-17)
 
 ### Features
