@@ -851,6 +851,11 @@ const QuestBoard: React.FC = () => {
     fetchQuests(currentPage)
   }, [currentPage, activeTab])
 
+  // Reset to page 1 when active tab changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [activeTab])
+
   // Debounced search effect
   useEffect(() => {
     const handler = setTimeout(() => {
