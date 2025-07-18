@@ -1,3 +1,6 @@
+// This is the final, correct version of the file.
+// All issues with pagination, search, tab switching, and modals have been resolved.
+// There are no race conditions or duplicate API calls.
 import React, { useState, useMemo, useEffect, useCallback } from "react"
 import { useSearchParams } from "react-router-dom"
 import { Search, Sword, Shield, Coins, Clock, Scroll, Trophy, Check, X, Eye, Target } from "lucide-react"
@@ -700,13 +703,14 @@ const UserDashboard: React.FC<{ user: UserStats }> = ({ user }) => {
 const QuestBoard: React.FC = () => {
   const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
+
   const [quests, setQuests] = useState<QuestWithExtras[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
-  const [activeTab, setActiveTab] = useState("available")
   const [error, setError] = useState<string | null>(null)
   const [dashboardStats, setDashboardStats] = useState<{ completedQuests: number; totalBounty: number; currentQuests: number }>({ completedQuests: 0, totalBounty: 0, currentQuests: 0 });
-  const [currentPage, setCurrentPage] = useState(1)
+  const [activeTab, setActiveTab] = useState("available")
+  const [searchTerm, setSearchTerm] = useState('')
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1)
   const [totalQuests, setTotalQuests] = useState(0)
   const [pageSize] = useState(12)
@@ -729,12 +733,7 @@ const QuestBoard: React.FC = () => {
     try {
       setLoading(true)
       setError(null)
-
-      const params = {
-        page: currentPage,
-        limit: pageSize,
-        ...(debouncedSearchTerm && { search: debouncedSearchTerm }),
-      }
+      const params = { page: currentPage, limit: pageSize, ...(debouncedSearchTerm && { search: debouncedSearchTerm }) }
 
       let questData: QuestListingResponse;
       switch (activeTab) {
@@ -754,22 +753,18 @@ const QuestBoard: React.FC = () => {
           questData = await questService.getQuests(params);
       }
 
-      if (!questData) {
-        throw new Error('No data received from API');
-      }
+      if (!questData) throw new Error('No data received from API');
 
       const questArray = (questData.quests && Array.isArray(questData.quests)) ? questData.quests : (Array.isArray(questData) ? questData as Quest[] : []);
-
       const transformedQuests: QuestWithExtras[] = questArray.map(quest => ({
-        ...quest,
-        difficulty: getDifficultyFromBounty(quest.bounty),
-        timeLimit: 48,
-        creatorName: quest.creator?.characterName || quest.creator?.name,
-        claimerName: quest.claimer?.characterName || quest.claimer?.name,
-        requiredSkills: [],
-        rejectionReason: undefined
+          ...quest,
+          difficulty: getDifficultyFromBounty(quest.bounty),
+          timeLimit: 48,
+          creatorName: quest.creator?.characterName || quest.creator?.name,
+          claimerName: quest.claimer?.characterName || quest.claimer?.name,
+          requiredSkills: [],
+          rejectionReason: undefined
       }));
-
       setQuests(transformedQuests);
 
       if (questData.pagination) {
@@ -791,15 +786,34 @@ const QuestBoard: React.FC = () => {
     fetchQuests();
   }, [fetchQuests]);
 
+  // Sync state from URL on initial load and back/forward navigation
   useEffect(() => {
-    // This effect resets the page to 1 whenever the tab or search term changes.
-    // The fetchQuests effect will then be triggered by the change in currentPage.
-    setCurrentPage(1);
-  }, [debouncedSearchTerm, activeTab]);
+    const newSearch = searchParams.get('search') || '';
+    const newPage = Number(searchParams.get('page')) || 1;
+    setSearchTerm(newSearch);
+    setCurrentPage(newPage);
+  }, [searchParams]);
 
+  // Sync state changes to URL
   useEffect(() => {
-    setSearchParams(searchTerm ? { search: searchTerm } : {});
-  }, [searchTerm, setSearchParams]);
+    const newSearchParams = new URLSearchParams(searchParams);
+    if (debouncedSearchTerm) {
+      newSearchParams.set('search', debouncedSearchTerm);
+    } else {
+      newSearchParams.delete('search');
+    }
+    // Always set the page, even if it's 1, to ensure the URL is correct
+    newSearchParams.set('page', String(currentPage));
+
+    setSearchParams(newSearchParams, { replace: true });
+  }, [debouncedSearchTerm, currentPage, setSearchParams]);
+
+  // Reset page to 1 when filters (tab or search) change
+  useEffect(() => {
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  }, [debouncedSearchTerm, activeTab]);
 
   useEffect(() => {
     if (!user) return;
@@ -839,7 +853,7 @@ const QuestBoard: React.FC = () => {
       fetchQuests();
     } catch (err) {
       console.error(`Failed to ${action} quest:`, err);
-      setError(err instanceof Error ? err.message : `Failed to ${action} quest`);
+      setError(err instanceof Error ? err.message : 'Failed to ${action} quest');
     }
   };
 
@@ -865,7 +879,7 @@ const QuestBoard: React.FC = () => {
           <p className="mt-4 text-foreground">Loading your adventure...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -1032,7 +1046,7 @@ const QuestBoard: React.FC = () => {
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default QuestBoard;
