@@ -853,7 +853,7 @@ const QuestBoard: React.FC = () => {
       fetchQuests();
     } catch (err) {
       console.error(`Failed to ${action} quest:`, err);
-      setError(err instanceof Error ? err.message : 'Failed to ${action} quest');
+      setError(err instanceof Error ? err.message : `Failed to ${action} quest`);
     }
   };
 
