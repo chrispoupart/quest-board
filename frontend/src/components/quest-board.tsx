@@ -761,8 +761,6 @@ const QuestBoard: React.FC = () => {
 
       let questData: QuestListingResponse
 
-      // console.log('Fetching quests for tab:', activeTab, 'page:', page, 'search:', searchTerm)
-
       const params = {
         page,
         limit: pageSize,
@@ -801,8 +799,6 @@ const QuestBoard: React.FC = () => {
           questData = await questService.getQuests(params)
       }
 
-      // console.log('Received quest data:', questData)
-
       // Check if the response has the expected structure
       if (!questData) {
         throw new Error('No data received from API')
@@ -817,7 +813,6 @@ const QuestBoard: React.FC = () => {
         // In case the API returns an array directly
         questArray = questData as Quest[]
       } else {
-        // console.warn('Unexpected API response structure:', questData)
         throw new Error('Invalid quest data format received from API')
       }
 
@@ -832,7 +827,6 @@ const QuestBoard: React.FC = () => {
         rejectionReason: undefined // Initialize rejectionReason as undefined
       }));
 
-      // console.log('Transformed quests:', transformedQuests)
       setQuests(transformedQuests)
 
       // Update pagination state
@@ -852,30 +846,15 @@ const QuestBoard: React.FC = () => {
     }
   }
 
-  // Fetch quests when currentPage or activeTab changes.
-  // The logic inside handles resetting page for tab changes.
+  // Single effect to handle all data fetching scenarios
   useEffect(() => {
     fetchQuests(currentPage)
-  }, [currentPage])
-
-  // Reset to page 1 when active tab changes
-  useEffect(() => {
-    if (currentPage !== 1) {
-      setCurrentPage(1)
-    } else {
-      // If already on page 1, the currentPage effect won't run, so we need to fetch manually
-      fetchQuests(1)
-    }
-  }, [activeTab])
+  }, [currentPage, activeTab])
 
   // Debounced search effect
   useEffect(() => {
     const handler = setTimeout(() => {
-      if (currentPage !== 1) {
-        setCurrentPage(1)
-      } else {
-        fetchQuests(1)
-      }
+      setCurrentPage(1)
       // Update URL with search term
       if (searchTerm) {
         setSearchParams({ search: searchTerm });
@@ -888,7 +867,6 @@ const QuestBoard: React.FC = () => {
       clearTimeout(handler)
     }
   }, [searchTerm, setSearchParams])
-
 
   // Handle page changes
   const handlePageChange = (page: number) => {
