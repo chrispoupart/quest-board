@@ -792,9 +792,9 @@ const QuestBoard: React.FC = () => {
   }, [fetchQuests]);
 
   useEffect(() => {
-    if (debouncedSearchTerm || activeTab) {
-      setCurrentPage(1);
-    }
+    // This effect resets the page to 1 whenever the tab or search term changes.
+    // The fetchQuests effect will then be triggered by the change in currentPage.
+    setCurrentPage(1);
   }, [debouncedSearchTerm, activeTab]);
 
   useEffect(() => {
