@@ -29,7 +29,14 @@ const app = express();
 const PORT = process.env['PORT'] || 8000;
 
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'", 'blob:'],
+      imgSrc: ["'self'", 'blob:', 'data:'],
+    },
+  },
+}));
 app.use(cors({
   origin: process.env['ALLOWED_ORIGINS']?.split(',') || ['http://localhost:3000'],
   credentials: true,
