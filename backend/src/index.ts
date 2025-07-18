@@ -32,9 +32,8 @@ const PORT = process.env['PORT'] || 8000;
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
-      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      'img-src': ["'self'", 'blob:', 'data:'],
-      'default-src': ["'self'", 'blob:'],
+      defaultSrc: ["'self'", 'blob:'],
+      imgSrc: ["'self'", 'blob:', 'data:'],
     },
   },
 }));
