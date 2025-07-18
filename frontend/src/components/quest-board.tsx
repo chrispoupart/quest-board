@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from "react"
+import React, { useState, useMemo, useEffect, useCallback } from "react"
 import { useSearchParams } from "react-router-dom"
 import { Search, Sword, Shield, Coins, Clock, Scroll, Trophy, Check, X, Eye, Target } from "lucide-react"
 import { Button } from "../components/ui/button"
@@ -11,13 +11,13 @@ import { Pagination } from "../components/ui/pagination"
 import QuestDetailsModal from "./QuestDetailsModal"
 import { getLevelInfo } from "../utils/leveling"
 import { skillService } from "../services/skillService"
-
 import { useAuth } from "../contexts/AuthContext"
 import { questService } from "../services/questService"
 import { Quest, QuestListingResponse, QuestRequiredSkill } from "../types"
 import QuestEditModal from "./QuestEditModal"
 import { dashboardService } from "../services/dashboardService"
 import { getQuestAgeReference, getQuestAgeDots, formatTimeAgo } from "../utils/questAgeUtils"
+import { useDebounce } from "../hooks/useDebounce"
 
 // TypeScript Interfaces (extended from the API types)
 interface QuestWithExtras extends Quest {
@@ -702,27 +702,18 @@ const QuestBoard: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const [quests, setQuests] = useState<QuestWithExtras[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
   const [activeTab, setActiveTab] = useState("available")
   const [error, setError] = useState<string | null>(null)
-
-  // Dashboard stats state
   const [dashboardStats, setDashboardStats] = useState<{ completedQuests: number; totalBounty: number; currentQuests: number }>({ completedQuests: 0, totalBounty: 0, currentQuests: 0 });
-
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalQuests, setTotalQuests] = useState(0)
-  const [pageSize] = useState(12) // Show 12 quests per page (3 columns x 4 rows)
-
-  // Track previous activeTab to detect changes
-  const prevActiveTabRef = useRef(activeTab)
-
-  // Modal state
+  const [pageSize] = useState(12)
   const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const debouncedSearchTerm = useDebounce(searchTerm, 500)
 
-  // Convert user to UserStats format, but use dashboardStats for completed/current/bounty
   const currentUser: UserStats = useMemo(() => ({
     id: user?.id || 0,
     completedQuests: dashboardStats.completedQuests,
@@ -734,15 +725,82 @@ const QuestBoard: React.FC = () => {
     experience: user?.experience
   }), [user, dashboardStats])
 
-  // Handle URL parameters on mount
-  useEffect(() => {
-    const searchFromUrl = searchParams.get('search');
-    if (searchFromUrl) {
-      setSearchTerm(searchFromUrl);
-    }
-  }, [searchParams]);
+  const fetchQuests = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
 
-  // Fetch dashboard stats on mount
+      const params = {
+        page: currentPage,
+        limit: pageSize,
+        ...(debouncedSearchTerm && { search: debouncedSearchTerm }),
+      }
+
+      let questData: QuestListingResponse;
+      switch (activeTab) {
+        case "available":
+          questData = await questService.getQuests({ status: "AVAILABLE,COOLDOWN", ...params });
+          break;
+        case "claimed":
+          questData = await questService.getMyClaimedQuests({ status: "CLAIMED,COMPLETED", ...params });
+          break;
+        case "pending":
+          questData = await questService.getQuests({ status: "PENDING_APPROVAL", ...params });
+          break;
+        case "completed":
+          questData = await questService.getMyCompletionHistory(params);
+          break;
+        default:
+          questData = await questService.getQuests(params);
+      }
+
+      if (!questData) {
+        throw new Error('No data received from API');
+      }
+
+      const questArray = (questData.quests && Array.isArray(questData.quests)) ? questData.quests : (Array.isArray(questData) ? questData as Quest[] : []);
+
+      const transformedQuests: QuestWithExtras[] = questArray.map(quest => ({
+        ...quest,
+        difficulty: getDifficultyFromBounty(quest.bounty),
+        timeLimit: 48,
+        creatorName: quest.creator?.characterName || quest.creator?.name,
+        claimerName: quest.claimer?.characterName || quest.claimer?.name,
+        requiredSkills: [],
+        rejectionReason: undefined
+      }));
+
+      setQuests(transformedQuests);
+
+      if (questData.pagination) {
+        setTotalPages(questData.pagination.totalPages);
+        setTotalQuests(questData.pagination.total);
+        if (questData.pagination.page !== currentPage) {
+          setCurrentPage(questData.pagination.page);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch quests:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch quests');
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, activeTab, debouncedSearchTerm, pageSize]);
+
+  useEffect(() => {
+    fetchQuests();
+  }, [fetchQuests]);
+
+  useEffect(() => {
+    if (debouncedSearchTerm || activeTab) {
+      setCurrentPage(1);
+    }
+  }, [debouncedSearchTerm, activeTab]);
+
+  useEffect(() => {
+    setSearchParams(searchTerm ? { search: searchTerm } : {});
+  }, [searchTerm, setSearchParams]);
+
   useEffect(() => {
     if (!user) return;
     dashboardService.getUserDashboard().then(data => {
@@ -756,190 +814,48 @@ const QuestBoard: React.FC = () => {
     });
   }, [user]);
 
-  // Fetch quests from API
-  const fetchQuests = async (page: number = 1) => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      let questData: QuestListingResponse
-
-      const params = {
-        page,
-        limit: pageSize,
-        ...(searchTerm && { search: searchTerm })
-      }
-
-      switch (activeTab) {
-        case "available":
-          // Get all available quests including repeatable ones
-          questData = await questService.getQuests({
-            status: "AVAILABLE,COOLDOWN",
-            ...params
-          })
-          break
-        case "claimed":
-          // Get claimed quests AND completed quests (pending approval) for current user
-          questData = await questService.getMyClaimedQuests({
-            status: "CLAIMED,COMPLETED",
-            ...params
-          })
-          break
-        case "pending":
-          // Get quests pending approval (for admins/editors)
-          questData = await questService.getQuests({
-            status: "PENDING_APPROVAL",
-            ...params
-          })
-          break
-        case "completed":
-          // Show user's own completed quests (approved/rejected) and repeatable quests that have been reset
-          questData = await questService.getMyCompletionHistory({
-            ...params
-          })
-          break
-        default:
-          questData = await questService.getQuests(params)
-      }
-
-      // Check if the response has the expected structure
-      if (!questData) {
-        throw new Error('No data received from API')
-      }
-
-      // Handle different possible response structures
-      let questArray: Quest[] = []
-
-      if (questData.quests && Array.isArray(questData.quests)) {
-        questArray = questData.quests
-      } else if (Array.isArray(questData)) {
-        // In case the API returns an array directly
-        questArray = questData as Quest[]
-      } else {
-        throw new Error('Invalid quest data format received from API')
-      }
-
-      // Transform API data to include extra fields
-      const transformedQuests: QuestWithExtras[] = questArray.map(quest => ({
-        ...quest,
-        difficulty: getDifficultyFromBounty(quest.bounty),
-        timeLimit: 48, // Default 48 hours
-        creatorName: quest.creator?.characterName || quest.creator?.name,
-        claimerName: quest.claimer?.characterName || quest.claimer?.name,
-        requiredSkills: [], // Initialize empty, will be loaded on demand
-        rejectionReason: undefined // Initialize rejectionReason as undefined
-      }));
-
-      setQuests(transformedQuests)
-
-      // Update pagination state
-      if (questData.pagination) {
-        // This is important to sync with server-side state, e.g., if requested page is out of bounds
-        if (questData.pagination.page !== currentPage) {
-            setCurrentPage(questData.pagination.page)
-        }
-        setTotalPages(questData.pagination.totalPages)
-        setTotalQuests(questData.pagination.total)
-      }
-    } catch (err) {
-      console.error('Failed to fetch quests:', err)
-      setError(err instanceof Error ? err.message : 'Failed to fetch quests')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Single effect to handle all data fetching scenarios
-  useEffect(() => {
-    // Reset to page 1 when tab changes
-    if (prevActiveTabRef.current !== activeTab) {
-      setCurrentPage(1)
-      prevActiveTabRef.current = activeTab
-    } else {
-      // Only fetch if not a tab change (i.e., page change or search change)
-      fetchQuests(currentPage)
-    }
-  }, [currentPage, activeTab])
-
-  // Debounced search effect
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setCurrentPage(1)
-      // Update URL with search term
-      if (searchTerm) {
-        setSearchParams({ search: searchTerm });
-      } else {
-        setSearchParams({});
-      }
-    }, 500)
-
-    return () => {
-      clearTimeout(handler)
-    }
-  }, [searchTerm, setSearchParams])
-
-  // Handle page changes
   const handlePageChange = (page: number) => {
-    if (page !== currentPage) {
-      setCurrentPage(page)
-    }
-  }
+    setCurrentPage(page);
+  };
 
   const handleQuestAction = async (questId: number, action: string) => {
     try {
-      setError(null)
-
+      setError(null);
       switch (action) {
-        case "claim":
-          await questService.claimQuest(questId)
-          break
-        case "complete":
-          await questService.completeQuest(questId)
-          break
-        case "approve":
-          await questService.approveQuest(questId)
-          break
-        case "reject":
-          await questService.rejectQuest(questId)
-          break
-        case "reset":
-          await questService.resetRepeatableQuest(questId)
-          break
+        case "claim": await questService.claimQuest(questId); break;
+        case "complete": await questService.completeQuest(questId); break;
+        case "approve": await questService.approveQuest(questId); break;
+        case "reject": await questService.rejectQuest(questId); break;
+        case "reset": await questService.resetRepeatableQuest(questId); break;
         case "view":
-          // Open quest details modal
-          const questToView = quests.find(q => q.id === questId)
+          const questToView = quests.find(q => q.id === questId);
           if (questToView) {
-            setSelectedQuest(questToView)
-            setIsModalOpen(true)
+            setSelectedQuest(questToView);
+            setIsModalOpen(true);
           }
-          return
-        default:
-          return
+          return;
+        default: return;
       }
-
-      // Refresh quests after action
-      await fetchQuests(currentPage)
+      fetchQuests();
     } catch (err) {
-      console.error(`Failed to ${action} quest:`, err)
-      setError(err instanceof Error ? err.message : `Failed to ${action} quest`)
+      console.error(`Failed to ${action} quest:`, err);
+      setError(err instanceof Error ? err.message : `Failed to ${action} quest`);
     }
-  }
+  };
 
   const handleModalClose = () => {
-    setIsModalOpen(false)
-    setSelectedQuest(null)
-  }
+    setIsModalOpen(false);
+    setSelectedQuest(null);
+  };
 
   const handleModalAction = async (questId: number, action: string) => {
     try {
-      await handleQuestAction(questId, action)
-      // Close modal after successful action
-      handleModalClose()
+      await handleQuestAction(questId, action);
+      handleModalClose();
     } catch (err) {
-      // Keep modal open if action fails
-      console.error('Modal action failed:', err)
+      console.error('Modal action failed:', err);
     }
-  }
+  };
 
   if (!user) {
     return (
@@ -1110,7 +1026,7 @@ const QuestBoard: React.FC = () => {
         <QuestDetailsModal
           quest={selectedQuest}
           isOpen={isModalOpen}
-          onClose={handleModalClose}
+          onClose={() => setIsModalOpen(false)}
           onAction={handleModalAction}
           currentUser={currentUser}
         />
@@ -1119,4 +1035,4 @@ const QuestBoard: React.FC = () => {
   )
 }
 
-export default QuestBoard
+export default QuestBoard;
