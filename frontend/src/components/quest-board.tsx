@@ -756,6 +756,7 @@ const QuestBoard: React.FC = () => {
   // Fetch quests from API
   const fetchQuests = async (page: number = 1) => {
     try {
+      console.log('Starting fetchQuests for page:', page, 'activeTab:', activeTab, 'searchTerm:', searchTerm)
       setLoading(true)
       setError(null)
 
@@ -768,6 +769,8 @@ const QuestBoard: React.FC = () => {
         limit: pageSize,
         ...(searchTerm && { search: searchTerm })
       }
+
+      console.log('API params:', params)
 
       switch (activeTab) {
         case "available":
@@ -801,7 +804,7 @@ const QuestBoard: React.FC = () => {
           questData = await questService.getQuests(params)
       }
 
-      // console.log('Received quest data:', questData)
+      console.log('API response:', questData)
 
       // Check if the response has the expected structure
       if (!questData) {
@@ -832,13 +835,15 @@ const QuestBoard: React.FC = () => {
         rejectionReason: undefined // Initialize rejectionReason as undefined
       }));
 
-      // console.log('Transformed quests:', transformedQuests)
+      console.log('Transformed quests count:', transformedQuests.length)
       setQuests(transformedQuests)
 
       // Update pagination state
       if (questData.pagination) {
+        console.log('Pagination data:', questData.pagination)
         // This is important to sync with server-side state, e.g., if requested page is out of bounds
         if (questData.pagination.page !== currentPage) {
+            console.log('Server returned different page than requested. Server:', questData.pagination.page, 'Requested:', currentPage)
             setCurrentPage(questData.pagination.page)
         }
         setTotalPages(questData.pagination.totalPages)
@@ -855,27 +860,19 @@ const QuestBoard: React.FC = () => {
   // Fetch quests when currentPage or activeTab changes.
   // The logic inside handles resetting page for tab changes.
   useEffect(() => {
+    console.log('Fetching quests for page:', currentPage, 'tab:', activeTab, 'search:', searchTerm)
     fetchQuests(currentPage)
-  }, [currentPage])
+  }, [currentPage, activeTab, searchTerm])
 
   // Reset to page 1 when active tab changes
   useEffect(() => {
-    if (currentPage !== 1) {
-      setCurrentPage(1)
-    } else {
-      // If already on page 1, the currentPage effect won't run, so we need to fetch manually
-      fetchQuests(1)
-    }
+    setCurrentPage(1)
   }, [activeTab])
 
   // Debounced search effect
   useEffect(() => {
     const handler = setTimeout(() => {
-      if (currentPage !== 1) {
-        setCurrentPage(1)
-      } else {
-        fetchQuests(1)
-      }
+      setCurrentPage(1)
       // Update URL with search term
       if (searchTerm) {
         setSearchParams({ search: searchTerm });
@@ -892,6 +889,7 @@ const QuestBoard: React.FC = () => {
 
   // Handle page changes
   const handlePageChange = (page: number) => {
+    console.log('Page change requested:', page, 'current page:', currentPage)
     if (page !== currentPage) {
       setCurrentPage(page)
     }
