@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react"
+import React, { useState, useMemo, useEffect, useRef } from "react"
 import { useSearchParams } from "react-router-dom"
 import { Search, Sword, Shield, Coins, Clock, Scroll, Trophy, Check, X, Eye, Target } from "lucide-react"
 import { Button } from "../components/ui/button"
@@ -715,6 +715,9 @@ const QuestBoard: React.FC = () => {
   const [totalQuests, setTotalQuests] = useState(0)
   const [pageSize] = useState(12) // Show 12 quests per page (3 columns x 4 rows)
 
+  // Track previous activeTab to detect changes
+  const prevActiveTabRef = useRef(activeTab)
+
   // Modal state
   const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -848,13 +851,15 @@ const QuestBoard: React.FC = () => {
 
   // Single effect to handle all data fetching scenarios
   useEffect(() => {
-    fetchQuests(currentPage)
-  }, [currentPage])
-
-  // Handle tab changes and search with proper page reset
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [activeTab])
+    // Reset to page 1 when tab changes
+    if (prevActiveTabRef.current !== activeTab) {
+      setCurrentPage(1)
+      prevActiveTabRef.current = activeTab
+    } else {
+      // Only fetch if not a tab change (i.e., page change or search change)
+      fetchQuests(currentPage)
+    }
+  }, [currentPage, activeTab])
 
   // Debounced search effect
   useEffect(() => {
