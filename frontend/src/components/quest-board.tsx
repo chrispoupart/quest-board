@@ -1026,7 +1026,7 @@ const QuestBoard: React.FC = () => {
         <QuestDetailsModal
           quest={selectedQuest}
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={handleModalClose}
           onAction={handleModalAction}
           currentUser={currentUser}
         />
