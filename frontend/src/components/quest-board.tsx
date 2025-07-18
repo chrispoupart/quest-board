@@ -756,21 +756,16 @@ const QuestBoard: React.FC = () => {
   // Fetch quests from API
   const fetchQuests = async (page: number = 1) => {
     try {
-      console.log('Starting fetchQuests for page:', page, 'activeTab:', activeTab, 'searchTerm:', searchTerm)
       setLoading(true)
       setError(null)
 
       let questData: QuestListingResponse
-
-      // console.log('Fetching quests for tab:', activeTab, 'page:', page, 'search:', searchTerm)
 
       const params = {
         page,
         limit: pageSize,
         ...(searchTerm && { search: searchTerm })
       }
-
-      console.log('API params:', params)
 
       switch (activeTab) {
         case "available":
@@ -804,8 +799,6 @@ const QuestBoard: React.FC = () => {
           questData = await questService.getQuests(params)
       }
 
-      console.log('API response:', questData)
-
       // Check if the response has the expected structure
       if (!questData) {
         throw new Error('No data received from API')
@@ -820,7 +813,6 @@ const QuestBoard: React.FC = () => {
         // In case the API returns an array directly
         questArray = questData as Quest[]
       } else {
-        // console.warn('Unexpected API response structure:', questData)
         throw new Error('Invalid quest data format received from API')
       }
 
@@ -835,15 +827,12 @@ const QuestBoard: React.FC = () => {
         rejectionReason: undefined // Initialize rejectionReason as undefined
       }));
 
-      console.log('Transformed quests count:', transformedQuests.length)
       setQuests(transformedQuests)
 
       // Update pagination state
       if (questData.pagination) {
-        console.log('Pagination data:', questData.pagination)
         // This is important to sync with server-side state, e.g., if requested page is out of bounds
         if (questData.pagination.page !== currentPage) {
-            console.log('Server returned different page than requested. Server:', questData.pagination.page, 'Requested:', currentPage)
             setCurrentPage(questData.pagination.page)
         }
         setTotalPages(questData.pagination.totalPages)
@@ -857,17 +846,10 @@ const QuestBoard: React.FC = () => {
     }
   }
 
-  // Fetch quests when currentPage or activeTab changes.
-  // The logic inside handles resetting page for tab changes.
+  // Single effect to handle all data fetching scenarios
   useEffect(() => {
-    console.log('Fetching quests for page:', currentPage, 'tab:', activeTab, 'search:', searchTerm)
     fetchQuests(currentPage)
-  }, [currentPage, activeTab, searchTerm])
-
-  // Reset to page 1 when active tab changes
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [activeTab])
+  }, [currentPage, activeTab])
 
   // Debounced search effect
   useEffect(() => {
@@ -886,10 +868,8 @@ const QuestBoard: React.FC = () => {
     }
   }, [searchTerm, setSearchParams])
 
-
   // Handle page changes
   const handlePageChange = (page: number) => {
-    console.log('Page change requested:', page, 'current page:', currentPage)
     if (page !== currentPage) {
       setCurrentPage(page)
     }
