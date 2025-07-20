@@ -112,7 +112,15 @@ export interface DashboardData {
 export interface QuestListingResponse {
     quests: Quest[];
     pagination: {
-        page: number;
+        /**
+         * Current page index (1-based) returned by the backend.
+         * Renamed from `page` to `currentPage` for clarity.
+         */
+        currentPage?: number;
+        /**
+         * (Deprecated) Kept for backward compatibility with older responses.
+         */
+        page?: number;
         limit: number;
         total: number;
         totalPages: number;

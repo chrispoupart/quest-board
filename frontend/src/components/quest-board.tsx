@@ -831,9 +831,12 @@ const QuestBoard: React.FC = () => {
 
       // Update pagination state
       if (questData.pagination) {
-        // This is important to sync with server-side state, e.g., if requested page is out of bounds
-        if (questData.pagination.page !== currentPage) {
-            setCurrentPage(questData.pagination.page)
+        const serverPage =
+          questData.pagination.currentPage ?? questData.pagination.page
+
+        // Fallback for older backend responses where `currentPage` is absent
+        if (serverPage !== undefined && serverPage !== currentPage) {
+          setCurrentPage(serverPage)
         }
         setTotalPages(questData.pagination.totalPages)
         setTotalQuests(questData.pagination.total)
