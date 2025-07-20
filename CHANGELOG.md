@@ -1,3 +1,11 @@
+## [2.33.1](https://github.com/chrispoupart/quest-board/compare/v2.33.0...v2.33.1) (2025-07-20)
+
+### Bug Fixes
+
+* **quest-board:** 🩹 handle missing currentPage in pagination ([8f8b8a8](https://github.com/chrispoupart/quest-board/commit/8f8b8a8fdebc6e31fde65ad7a050823463b3da43))
+* **quest-board:** rename pagination field ([946c396](https://github.com/chrispoupart/quest-board/commit/946c396c0afe5f99bb6e663040530ae5e4a899bb))
+* **types:** 🏷️ make currentPage optional in QuestListingResponse ([3d172e4](https://github.com/chrispoupart/quest-board/commit/3d172e496aaaa6457618387a0f77efed8b5fd31e))
+
 ## [2.33.0](https://github.com/chrispoupart/quest-board/compare/v2.32.0...v2.33.0) (2025-07-18)
 
 ### Features
