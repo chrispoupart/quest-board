@@ -116,7 +116,7 @@ export interface QuestListingResponse {
          * Current page index (1-based) returned by the backend.
          * Renamed from `page` to `currentPage` for clarity.
          */
-        currentPage: number;
+        currentPage?: number;
         /**
          * (Deprecated) Kept for backward compatibility with older responses.
          */
