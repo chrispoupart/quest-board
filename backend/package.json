@@ -64,7 +64,7 @@
     "eslint": "^9.32.0",
     "jest": "^30.0.5",
     "supertest": "^7.1.4",
-    "ts-jest": "^29.4.0",
+    "ts-jest": "^29.4.1",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.8.3"
   },
