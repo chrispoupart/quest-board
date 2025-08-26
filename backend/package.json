@@ -60,7 +60,7 @@
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
     "@typescript-eslint/eslint-plugin": "^8.40.0",
-    "@typescript-eslint/parser": "^8.39.1",
+    "@typescript-eslint/parser": "^8.41.0",
     "eslint": "^9.34.0",
     "jest": "^30.0.5",
     "supertest": "^7.1.4",
