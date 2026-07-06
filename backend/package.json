@@ -40,7 +40,7 @@
     "helmet": "^8.2.0",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.11.0",
-    "node-cron": "^4.5.0",
+    "node-cron": "^4.6.0",
     "prisma": "^6.19.0",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1",
